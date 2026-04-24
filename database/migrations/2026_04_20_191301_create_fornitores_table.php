@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('fornitori', function (Blueprint $table) {
+            $table->id();
+            $table->string('ragione_sociale');
+            $table->string('referente')->nullable();
+            $table->string('telefono')->nullable();
+            $table->string('email')->nullable();
+
+            $table->decimal('sconto_standard_1', 5, 2)->default(0);
+            $table->decimal('sconto_standard_2', 5, 2)->default(0);
+            $table->decimal('sconto_standard_3', 5, 2)->default(0);
+
+            $table->text('note')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('fornitori');
+    }
+};
