@@ -26,17 +26,19 @@ class PreventivoController extends Controller
     {
         $request->validate([
             'commessa_id' => 'required|exists:commesse,id',
-            'numero' => 'nullable|string|max:255',
-            'versione' => 'nullable|integer|min:1',
-            'stato' => 'nullable|string|max:255',
+            'descrizione' => 'nullable|string|max:255',
             'note' => 'nullable|string',
         ]);
 
+        $prossimoNumero = Preventivo::max('id') + 1;
+        $numeroAutomatico = 'PREV-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT);
+
         Preventivo::create([
             'commessa_id' => $request->commessa_id,
-            'numero' => $request->numero,
-            'versione' => $request->versione ?? 1,
-            'stato' => $request->stato ?? 'bozza',
+            'numero' => $numeroAutomatico,
+            'descrizione' => $request->descrizione,
+            'versione' => 1,
+            'stato' => 'bozza',
             'totale_listino_prodotti' => 0,
             'totale_netto_prodotti' => 0,
             'totale_servizi_cliente' => 0,
@@ -52,7 +54,12 @@ class PreventivoController extends Controller
 
     public function show($id)
     {
-        $preventivo = Preventivo::with('commessa.cliente', 'righeProdotti.fornitore')->findOrFail($id);
+        $preventivo = Preventivo::with(
+            'commessa.cliente',
+            'righeProdotti.fornitore',
+            'righeProdotti.servizi'
+        )->findOrFail($id);
+
         $fornitori = Fornitore::all();
 
         return view('preventivi.show', compact('preventivo', 'fornitori'));
@@ -142,15 +149,22 @@ class PreventivoController extends Controller
 
     private function aggiornaTotaliPreventivo($preventivoId)
     {
-        $preventivo = Preventivo::with('righeProdotti')->findOrFail($preventivoId);
+        $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($preventivoId);
 
         $totaleListinoProdotti = $preventivo->righeProdotti->sum('totale_listino');
         $totaleNettoProdotti = $preventivo->righeProdotti->sum('totale_cliente');
-        $totaleCostoBrc = $preventivo->righeProdotti->sum('totale_costo');
+        $totaleCostoProdotti = $preventivo->righeProdotti->sum('totale_costo');
 
         $totaleServiziCliente = 0;
+        $totaleCostoServizi = 0;
+
+        foreach ($preventivo->righeProdotti as $riga) {
+            $totaleServiziCliente += $riga->servizi->sum('prezzo_cliente');
+            $totaleCostoServizi += $riga->servizi->sum('costo_brc');
+        }
 
         $totaleClienteFinale = $totaleNettoProdotti + $totaleServiziCliente;
+        $totaleCostoBrc = $totaleCostoProdotti + $totaleCostoServizi;
         $utileTotale = $totaleClienteFinale - $totaleCostoBrc;
 
         $scontoMedioCliente = 0;

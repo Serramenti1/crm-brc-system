@@ -28,23 +28,8 @@
     </p>
 
     <p>
-        Numero preventivo:<br>
-        <input type="text" name="numero">
-    </p>
-
-    <p>
-        Versione:<br>
-        <input type="number" name="versione" min="1" value="1">
-    </p>
-
-    <p>
-        Stato:<br>
-        <select name="stato">
-            <option value="bozza">Bozza</option>
-            <option value="inviato">Inviato</option>
-            <option value="accettato">Accettato</option>
-            <option value="rifiutato">Rifiutato</option>
-        </select>
+        Descrizione preventivo:<br>
+        <input type="text" name="descrizione">
     </p>
 
     <p>
@@ -52,7 +37,7 @@
         <textarea name="note"></textarea>
     </p>
 
-    <button type="submit">Salva Preventivo</button>
+    <button type="submit">Crea Preventivo</button>
 </form>
 
 <br>

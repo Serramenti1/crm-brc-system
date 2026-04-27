@@ -2,15 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class RigaPreventivoServizio extends Model
 {
-    use HasFactory;
+    protected $table = 'riga_preventivo_servizios';
 
-    protected $table = 'righe_preventivo_servizi';
+    protected $fillable = [
+        'riga_prodotto_id',
+        'tipo_servizio',
+        'descrizione',
+        'costo_brc',
+        'ricarico_percentuale',
+        'prezzo_cliente',
+        'note'
+    ];
 
+    // relazione con riga prodotto
     public function rigaProdotto()
     {
         return $this->belongsTo(RigaPreventivoProdotto::class, 'riga_prodotto_id');

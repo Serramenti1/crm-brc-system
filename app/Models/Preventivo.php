@@ -14,6 +14,7 @@ class Preventivo extends Model
     protected $fillable = [
         'commessa_id',
         'numero',
+        'descrizione',
         'versione',
         'stato',
         'totale_listino_prodotti',
