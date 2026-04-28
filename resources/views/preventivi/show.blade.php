@@ -1,179 +1,214 @@
 @include('partials.menu')
 
-<h1>Dettaglio Preventivo</h1>
-
-<p><strong>Numero:</strong> {{ $preventivo->numero }}</p>
-<p><strong>Descrizione:</strong> {{ $preventivo->descrizione }}</p>
-
-<p>
-    <strong>Cliente:</strong>
-    {{ $preventivo->commessa && $preventivo->commessa->cliente ? $preventivo->commessa->cliente->nome . ' ' . $preventivo->commessa->cliente->cognome : '' }}
-</p>
-
-<p>
-    <strong>Commessa:</strong>
-    {{ $preventivo->commessa ? $preventivo->commessa->titolo : '' }}
-</p>
-
-<hr>
-
-<h2>Riepilogo Preventivo</h2>
-
-<table border="1" cellpadding="5">
-<tr>
-    <th>Listino</th>
-    <th>Prodotti</th>
-    <th>Servizi</th>
-    <th>Totale</th>
-    <th>Sconto</th>
-    <th>Costo</th>
-    <th>Utile</th>
-</tr>
-<tr>
-    <td>{{ number_format($preventivo->totale_listino_prodotti, 2, ',', '.') }} €</td>
-    <td>{{ number_format($preventivo->totale_netto_prodotti, 2, ',', '.') }} €</td>
-    <td>{{ number_format($preventivo->totale_servizi_cliente, 2, ',', '.') }} €</td>
-    <td>{{ number_format($preventivo->totale_cliente_finale, 2, ',', '.') }} €</td>
-    <td>{{ number_format($preventivo->sconto_medio_cliente, 2, ',', '.') }}%</td>
-    <td>{{ number_format($preventivo->totale_costo_brc, 2, ',', '.') }} €</td>
-    <td>{{ number_format($preventivo->utile_totale, 2, ',', '.') }} €</td>
-</tr>
-</table>
-
-<hr>
-
 <h2>Prodotti</h2>
 
 <!-- AGGIUNTA PRODOTTO -->
 <details>
-    <summary><strong>+ Aggiungi riga prodotto</strong></summary>
+<summary><strong>+ Aggiungi prodotto</strong></summary>
 
-    <form method="POST" action="/preventivi/{{ $preventivo->id }}/aggiungi-riga-prodotto">
-        @csrf
+<form method="POST" action="/preventivi/{{ $preventivo->id }}/aggiungi-riga-prodotto">
+@csrf
 
-        <p>Descrizione:<br><input type="text" name="descrizione"></p>
-        <p>Quantità:<br><input type="number" name="quantita" step="0.01" value="1"></p>
-        <p>Prezzo listino:<br><input type="number" name="prezzo_listino" step="0.01"></p>
-        <p>Costo netto:<br><input type="number" name="costo_netto" step="0.01"></p>
+<p>Descrizione<br>
+<input type="text" name="descrizione" required>
+</p>
 
-        <p>Sconto 1:<br><input type="number" name="sconto_fornitore_1"></p>
-        <p>Sconto 2:<br><input type="number" name="sconto_fornitore_2"></p>
-        <p>Sconto 3:<br><input type="number" name="sconto_fornitore_3"></p>
+<p>Quantità<br>
+<input type="number" name="quantita" value="1" step="0.01">
+</p>
 
-        <p>Ricarico %:<br><input type="number" name="ricarico_percentuale"></p>
+<p>Tipo prezzo<br>
+<label>
+<input type="radio" name="modalita_calcolo" value="da_listino" checked onclick="cambiaPrezzo()"> Listino
+</label>
 
-        <input type="hidden" name="modalita_calcolo" value="da_listino">
+<label>
+<input type="radio" name="modalita_calcolo" value="da_costo_netto" onclick="cambiaPrezzo()"> Scontato
+</label>
+</p>
 
-        <button type="submit">Salva</button>
-    </form>
+<p id="label_prezzo">Prezzo listino</p>
+<input type="number" id="input_prezzo" step="0.01" name="prezzo_listino">
+
+<p>Sconto 1 %<br>
+<input type="number" name="sconto_fornitore_1" value="0">
+</p>
+
+<p>Sconto 2 %<br>
+<input type="number" name="sconto_fornitore_2" value="0">
+</p>
+
+<p>Sconto 3 %<br>
+<input type="number" name="sconto_fornitore_3" value="0">
+</p>
+
+<p>Ricarico cliente %<br>
+<input type="number" name="ricarico_percentuale" value="0">
+</p>
+
+<button>Salva</button>
+
+</form>
 </details>
 
 <br>
 
-<table border="1" cellpadding="5">
+<table border="1" cellpadding="5" width="100%">
+
 <tr>
-    <th>Prodotto</th>
-    <th>Prezzo</th>
-    <th>Totale</th>
-    <th>Dettagli</th>
-    <th>Azioni</th>
+<th>Prodotto</th>
+<th>Prezzi</th>
+<th>Servizi</th>
+<th>Azioni</th>
 </tr>
 
 @foreach($preventivo->righeProdotti as $riga)
 
 <tr>
-    <td>
-        <strong>{{ $riga->descrizione }}</strong><br>
-        Qta: {{ $riga->quantita }}
-    </td>
 
-    <td>
-        {{ number_format($riga->prezzo_cliente_unitario, 2, ',', '.') }} €
-    </td>
+<td>
+<strong>{{ $riga->descrizione }}</strong><br>
+Qta: {{ $riga->quantita }}
+</td>
 
-    <td>
-        {{ number_format($riga->totale_cliente, 2, ',', '.') }} €
-    </td>
+<td>
+Listino: {{ number_format($riga->prezzo_listino,2,',','.') }} €<br>
+Scontato: {{ number_format($riga->costo_netto,2,',','.') }} €<br>
+Cliente: {{ number_format($riga->prezzo_cliente_unitario,2,',','.') }} €<br>
+Sconto applicato: {{ number_format($riga->sconto_cliente_percentuale,2,',','.') }}%
+</td>
 
-    <td>
-        <details>
-            <summary>Apri dettagli</summary>
+<td>
 
-            <p><strong>Listino:</strong> {{ $riga->prezzo_listino }}</p>
-            <p><strong>Sconto 1:</strong> {{ $riga->sconto_fornitore_1 }}%</p>
-            <p><strong>Sconto 2:</strong> {{ $riga->sconto_fornitore_2 }}%</p>
-            <p><strong>Sconto 3:</strong> {{ $riga->sconto_fornitore_3 }}%</p>
-            <p><strong>Costo netto:</strong> {{ $riga->costo_netto }}</p>
-            <p><strong>Ricarico:</strong> {{ $riga->ricarico_percentuale }}%</p>
-            <p><strong>Sconto cliente:</strong> {{ $riga->sconto_cliente_percentuale }}%</p>
-        </details>
-    </td>
+@foreach($riga->servizi as $servizio)
 
-    <td>
-        <form action="/righe-preventivo-prodotti/{{ $riga->id }}" method="POST">
-            @csrf
-            @method('DELETE')
-            <button>Elimina</button>
-        </form>
-    </td>
-</tr>
+<div>
+{{ $servizio->tipo_servizio }}
 
-<!-- SERVIZI -->
-<tr>
-<td colspan="5" style="background:#f5f5f5; padding:10px;">
+- € {{ number_format($servizio->prezzo_cliente,2,',','.') }}
 
-    <details {{ $riga->servizi->count() > 0 ? 'open' : '' }}>
-        <summary>
-            <strong>Servizi ({{ $riga->servizi->count() }})</strong>
-        </summary>
+( x {{ $riga->quantita }} )
 
-        @if($riga->servizi->count() > 0)
-            <ul>
-                @foreach($riga->servizi as $servizio)
-                    <li>
-                        {{ $servizio->tipo_servizio }} -
-                        {{ number_format($servizio->prezzo_cliente, 2, ',', '.') }} €
+= € {{ number_format($servizio->prezzo_cliente * $riga->quantita,2,',','.') }}
 
-                        <form action="/servizi-riga/{{ $servizio->id }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button>X</button>
-                        </form>
-                    </li>
-                @endforeach
-            </ul>
-        @else
-            <p>Nessun servizio</p>
-        @endif
+<form action="/servizi-riga/{{ $servizio->id }}" method="POST" style="display:inline;">
+@csrf
+@method('DELETE')
+<button>X</button>
+</form>
 
-        <details>
-            <summary><strong>+ Aggiungi servizio</strong></summary>
+</div>
 
-            <form method="POST" action="/righe-prodotti/{{ $riga->id }}/servizi">
-                @csrf
+@endforeach
 
-                <select name="tipo_servizio">
-                    <option value="posa">Posa</option>
-                    <option value="trasporto">Trasporto</option>
-                    <option value="smaltimento">Smaltimento</option>
-                </select>
+<details>
+<summary>+ Servizio</summary>
 
-                <input type="number" name="costo_brc" step="0.01" placeholder="Costo">
-                <input type="number" name="ricarico_percentuale" step="0.01" placeholder="Ricarico %">
+<form method="POST" action="/righe-prodotti/{{ $riga->id }}/servizi">
+@csrf
 
-                <button type="submit">OK</button>
-            </form>
-        </details>
+<select name="tipo_servizio">
+<option value="posa">Posa</option>
+<option value="trasporto">Trasporto</option>
+<option value="smaltimento">Smaltimento</option>
+</select>
 
-    </details>
+<input type="number" name="costo_brc" placeholder="Costo">
+<input type="number" name="ricarico_percentuale" placeholder="Ricarico %">
+
+<button>OK</button>
+
+</form>
+</details>
 
 </td>
+
+<td>
+
+<button type="button" onclick="apriModificaRiga({{ $riga->id }})">Modifica</button>
+
+<form action="/righe-preventivo-prodotti/{{ $riga->id }}" method="POST" style="display:inline;">
+@csrf
+@method('DELETE')
+<button>Elimina</button>
+</form>
+
+<div id="edit_riga_{{ $riga->id }}" style="display:none; margin-top:10px; border:1px solid #ccc; padding:10px;">
+
+<form method="POST" action="/righe-preventivo-prodotti/{{ $riga->id }}">
+@csrf
+@method('PUT')
+
+<p>Descrizione<br>
+<input type="text" name="descrizione" value="{{ $riga->descrizione }}" required>
+</p>
+
+<p>Quantità<br>
+<input type="number" name="quantita" value="{{ $riga->quantita }}" step="0.01">
+</p>
+
+<input type="hidden" name="modalita_calcolo" value="{{ $riga->modalita_calcolo }}">
+
+<p>Prezzo listino<br>
+<input type="number" name="prezzo_listino" value="{{ $riga->prezzo_listino }}" step="0.01">
+</p>
+
+<p>Prezzo scontato / costo netto<br>
+<input type="number" name="costo_netto" value="{{ $riga->costo_netto }}" step="0.01">
+</p>
+
+<p>Sconto 1 %<br>
+<input type="number" name="sconto_fornitore_1" value="{{ $riga->sconto_fornitore_1 }}" step="0.01">
+</p>
+
+<p>Sconto 2 %<br>
+<input type="number" name="sconto_fornitore_2" value="{{ $riga->sconto_fornitore_2 }}" step="0.01">
+</p>
+
+<p>Sconto 3 %<br>
+<input type="number" name="sconto_fornitore_3" value="{{ $riga->sconto_fornitore_3 }}" step="0.01">
+</p>
+
+<p>Ricarico cliente %<br>
+<input type="number" name="ricarico_percentuale" value="{{ $riga->ricarico_percentuale }}" step="0.01">
+</p>
+
+<button>Salva modifica</button>
+<button type="button" onclick="chiudiModificaRiga({{ $riga->id }})">Annulla</button>
+
+</form>
+
+</div>
+
+</td>
+
 </tr>
 
 @endforeach
 
 </table>
 
-<br>
+<script>
+function cambiaPrezzo(){
+    let tipo = document.querySelector('input[name="modalita_calcolo"]:checked').value;
 
-<a href="/preventivi">← Torna alla lista</a>
+    let input = document.getElementById('input_prezzo');
+    let label = document.getElementById('label_prezzo');
+
+    if(tipo === 'da_listino'){
+        input.name = 'prezzo_listino';
+        label.innerHTML = 'Prezzo listino';
+    } else {
+        input.name = 'costo_netto';
+        label.innerHTML = 'Prezzo scontato';
+    }
+}
+
+function apriModificaRiga(id){
+    document.getElementById('edit_riga_' + id).style.display = 'block';
+}
+
+function chiudiModificaRiga(id){
+    document.getElementById('edit_riga_' + id).style.display = 'none';
+}
+</script>

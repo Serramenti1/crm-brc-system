@@ -53,6 +53,14 @@
 
         <td>
             <a href="/preventivi/{{ $preventivo->id }}">Apri</a>
+
+            <form action="/preventivi/{{ $preventivo->id }}" method="POST" style="display:inline;">
+                @csrf
+                @method('DELETE')
+                <button onclick="return confirm('Sicuro di eliminare questo preventivo?')">
+                    Elimina
+                </button>
+            </form>
         </td>
     </tr>
     @endforeach

@@ -41,60 +41,25 @@ class RigaPreventivoProdottoController extends Controller
             'note' => 'nullable|string',
         ]);
 
-        $modalita = $request->modalita_calcolo ?? 'da_listino';
-        $quantita = (float) ($request->quantita ?? 1);
-
-        $s1 = (float) ($request->sconto_fornitore_1 ?? 0);
-        $s2 = (float) ($request->sconto_fornitore_2 ?? 0);
-        $s3 = (float) ($request->sconto_fornitore_3 ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-
-        $fattoreSconto = (1 - ($s1 / 100)) * (1 - ($s2 / 100)) * (1 - ($s3 / 100));
-
-        $prezzoListino = 0;
-        $costoNetto = 0;
-
-        if ($modalita === 'da_listino') {
-            $prezzoListino = (float) ($request->prezzo_listino ?? 0);
-            $costoNetto = $prezzoListino * $fattoreSconto;
-        } else {
-            $costoNetto = (float) ($request->costo_netto ?? 0);
-
-            if ($fattoreSconto > 0) {
-                $prezzoListino = $costoNetto / $fattoreSconto;
-            } else {
-                $prezzoListino = 0;
-            }
-        }
-
-        $prezzoClienteUnitario = $costoNetto * (1 + ($ricarico / 100));
-
-        $scontoClientePercentuale = 0;
-        if ($prezzoListino > 0) {
-            $scontoClientePercentuale = (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100;
-        }
-
-        $totaleListino = $prezzoListino * $quantita;
-        $totaleCosto = $costoNetto * $quantita;
-        $totaleCliente = $prezzoClienteUnitario * $quantita;
+        $dati = $this->calcolaRiga($request);
 
         $riga = RigaPreventivoProdotto::create([
             'preventivo_id' => $request->preventivo_id,
             'fornitore_id' => $request->fornitore_id,
             'descrizione' => $request->descrizione,
-            'modalita_calcolo' => $modalita,
-            'quantita' => $quantita,
-            'prezzo_listino' => $prezzoListino,
-            'sconto_fornitore_1' => $s1,
-            'sconto_fornitore_2' => $s2,
-            'sconto_fornitore_3' => $s3,
-            'costo_netto' => $costoNetto,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente_unitario' => $prezzoClienteUnitario,
-            'sconto_cliente_percentuale' => $scontoClientePercentuale,
-            'totale_listino' => $totaleListino,
-            'totale_costo' => $totaleCosto,
-            'totale_cliente' => $totaleCliente,
+            'modalita_calcolo' => $dati['modalita'],
+            'quantita' => $dati['quantita'],
+            'prezzo_listino' => $dati['prezzoListino'],
+            'sconto_fornitore_1' => $dati['s1'],
+            'sconto_fornitore_2' => $dati['s2'],
+            'sconto_fornitore_3' => $dati['s3'],
+            'costo_netto' => $dati['costoNetto'],
+            'ricarico_percentuale' => $dati['ricarico'],
+            'prezzo_cliente_unitario' => $dati['prezzoClienteUnitario'],
+            'sconto_cliente_percentuale' => $dati['scontoClientePercentuale'],
+            'totale_listino' => $dati['totaleListino'],
+            'totale_costo' => $dati['totaleCosto'],
+            'totale_cliente' => $dati['totaleCliente'],
             'ordine_visualizzazione' => $request->ordine_visualizzazione ?? 0,
             'note' => $request->note,
         ]);
@@ -131,59 +96,24 @@ class RigaPreventivoProdottoController extends Controller
 
         $riga = RigaPreventivoProdotto::findOrFail($id);
 
-        $modalita = $request->modalita_calcolo ?? 'da_listino';
-        $quantita = (float) ($request->quantita ?? 1);
-
-        $s1 = (float) ($request->sconto_fornitore_1 ?? 0);
-        $s2 = (float) ($request->sconto_fornitore_2 ?? 0);
-        $s3 = (float) ($request->sconto_fornitore_3 ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-
-        $fattoreSconto = (1 - ($s1 / 100)) * (1 - ($s2 / 100)) * (1 - ($s3 / 100));
-
-        $prezzoListino = 0;
-        $costoNetto = 0;
-
-        if ($modalita === 'da_listino') {
-            $prezzoListino = (float) ($request->prezzo_listino ?? 0);
-            $costoNetto = $prezzoListino * $fattoreSconto;
-        } else {
-            $costoNetto = (float) ($request->costo_netto ?? 0);
-
-            if ($fattoreSconto > 0) {
-                $prezzoListino = $costoNetto / $fattoreSconto;
-            } else {
-                $prezzoListino = 0;
-            }
-        }
-
-        $prezzoClienteUnitario = $costoNetto * (1 + ($ricarico / 100));
-
-        $scontoClientePercentuale = 0;
-        if ($prezzoListino > 0) {
-            $scontoClientePercentuale = (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100;
-        }
-
-        $totaleListino = $prezzoListino * $quantita;
-        $totaleCosto = $costoNetto * $quantita;
-        $totaleCliente = $prezzoClienteUnitario * $quantita;
+        $dati = $this->calcolaRiga($request);
 
         $riga->update([
             'fornitore_id' => $request->fornitore_id,
             'descrizione' => $request->descrizione,
-            'modalita_calcolo' => $modalita,
-            'quantita' => $quantita,
-            'prezzo_listino' => $prezzoListino,
-            'sconto_fornitore_1' => $s1,
-            'sconto_fornitore_2' => $s2,
-            'sconto_fornitore_3' => $s3,
-            'costo_netto' => $costoNetto,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente_unitario' => $prezzoClienteUnitario,
-            'sconto_cliente_percentuale' => $scontoClientePercentuale,
-            'totale_listino' => $totaleListino,
-            'totale_costo' => $totaleCosto,
-            'totale_cliente' => $totaleCliente,
+            'modalita_calcolo' => $dati['modalita'],
+            'quantita' => $dati['quantita'],
+            'prezzo_listino' => $dati['prezzoListino'],
+            'sconto_fornitore_1' => $dati['s1'],
+            'sconto_fornitore_2' => $dati['s2'],
+            'sconto_fornitore_3' => $dati['s3'],
+            'costo_netto' => $dati['costoNetto'],
+            'ricarico_percentuale' => $dati['ricarico'],
+            'prezzo_cliente_unitario' => $dati['prezzoClienteUnitario'],
+            'sconto_cliente_percentuale' => $dati['scontoClientePercentuale'],
+            'totale_listino' => $dati['totaleListino'],
+            'totale_costo' => $dati['totaleCosto'],
+            'totale_cliente' => $dati['totaleCliente'],
             'ordine_visualizzazione' => $request->ordine_visualizzazione ?? 0,
             'note' => $request->note,
         ]);
@@ -198,6 +128,7 @@ class RigaPreventivoProdottoController extends Controller
         $riga = RigaPreventivoProdotto::findOrFail($id);
         $preventivoId = $riga->preventivo_id;
 
+        $riga->servizi()->delete();
         $riga->delete();
 
         $this->aggiornaTotaliPreventivo($preventivoId);
@@ -205,17 +136,70 @@ class RigaPreventivoProdottoController extends Controller
         return redirect('/preventivi/' . $preventivoId);
     }
 
+    private function calcolaRiga(Request $request)
+    {
+        $modalita = $request->modalita_calcolo ?? 'da_listino';
+        $quantita = (float) ($request->quantita ?? 1);
+
+        $s1 = (float) ($request->sconto_fornitore_1 ?? 0);
+        $s2 = (float) ($request->sconto_fornitore_2 ?? 0);
+        $s3 = (float) ($request->sconto_fornitore_3 ?? 0);
+        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+
+        $fattoreSconto = (1 - ($s1 / 100)) * (1 - ($s2 / 100)) * (1 - ($s3 / 100));
+
+        if ($modalita === 'da_listino') {
+            $prezzoListino = (float) ($request->prezzo_listino ?? 0);
+            $costoNetto = $prezzoListino * $fattoreSconto;
+        } else {
+            $costoNetto = (float) ($request->costo_netto ?? 0);
+            $prezzoListino = $fattoreSconto > 0 ? $costoNetto / $fattoreSconto : 0;
+        }
+
+        $prezzoClienteUnitario = $costoNetto * (1 + ($ricarico / 100));
+
+        $scontoClientePercentuale = 0;
+        if ($prezzoListino > 0) {
+            $scontoClientePercentuale = (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100;
+        }
+
+        return [
+            'modalita' => $modalita,
+            'quantita' => $quantita,
+            's1' => $s1,
+            's2' => $s2,
+            's3' => $s3,
+            'ricarico' => $ricarico,
+            'prezzoListino' => $prezzoListino,
+            'costoNetto' => $costoNetto,
+            'prezzoClienteUnitario' => $prezzoClienteUnitario,
+            'scontoClientePercentuale' => $scontoClientePercentuale,
+            'totaleListino' => $prezzoListino * $quantita,
+            'totaleCosto' => $costoNetto * $quantita,
+            'totaleCliente' => $prezzoClienteUnitario * $quantita,
+        ];
+    }
+
     private function aggiornaTotaliPreventivo($preventivoId)
     {
-        $preventivo = Preventivo::with('righeProdotti')->findOrFail($preventivoId);
+        $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($preventivoId);
 
         $totaleListinoProdotti = $preventivo->righeProdotti->sum('totale_listino');
         $totaleNettoProdotti = $preventivo->righeProdotti->sum('totale_cliente');
-        $totaleCostoBrc = $preventivo->righeProdotti->sum('totale_costo');
+        $totaleCostoProdotti = $preventivo->righeProdotti->sum('totale_costo');
 
         $totaleServiziCliente = 0;
+        $totaleCostoServizi = 0;
+
+        foreach ($preventivo->righeProdotti as $riga) {
+            $quantita = (float) ($riga->quantita ?? 1);
+
+            $totaleServiziCliente += $riga->servizi->sum('prezzo_cliente') * $quantita;
+            $totaleCostoServizi += $riga->servizi->sum('costo_brc') * $quantita;
+        }
 
         $totaleClienteFinale = $totaleNettoProdotti + $totaleServiziCliente;
+        $totaleCostoBrc = $totaleCostoProdotti + $totaleCostoServizi;
         $utileTotale = $totaleClienteFinale - $totaleCostoBrc;
 
         $scontoMedioCliente = 0;
