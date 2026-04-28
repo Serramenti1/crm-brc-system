@@ -1,19 +1,48 @@
-<div style="margin-bottom:20px; padding:10px; border:1px solid #ccc;">
+<div class="navbar">
 
-    <b>Clienti</b>:
-    <a href="/clienti">Lista</a> |
-    <a href="/clienti/create">Nuovo</a>
+<a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">Home</a>
 
-    &nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="/clienti" class="btn {{ request()->is('clienti*') ? 'active' : '' }}">Clienti</a>
 
-    <b>Commesse</b>:
-    <a href="/commesse">Lista</a> |
-    <a href="/commesse/create">Nuova</a>
+<a href="/commesse" class="btn {{ request()->is('commesse*') ? 'active' : '' }}">Commesse</a>
 
-    &nbsp;&nbsp;|&nbsp;&nbsp;
-
-    <b>Preventivi</b>:
-    <a href="/preventivi">Lista</a> |
-    <a href="/preventivi/create">Nuovo</a>
+<a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">Preventivi</a>
 
 </div>
+
+<style>
+
+.navbar {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    background:#2d3748;
+    padding:10px;
+    z-index:1000;
+}
+
+.btn {
+    display:inline-block;
+    padding:8px 12px;
+    margin-right:5px;
+    background:#4a5568;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+}
+
+.btn:hover {
+    background:#2b6cb0;
+}
+
+.active {
+    background:#1c3d5a;
+}
+
+/* Spazio sotto menu */
+body {
+    margin-top:60px;
+}
+
+</style>

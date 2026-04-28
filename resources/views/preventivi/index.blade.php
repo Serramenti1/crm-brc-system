@@ -6,6 +6,10 @@
 
 <br><br>
 
+@if(session('success'))
+    <p style="color:green;">{{ session('success') }}</p>
+@endif
+
 <table border="1" cellpadding="5">
     <tr>
         <th>ID</th>
@@ -57,7 +61,8 @@
             <form action="/preventivi/{{ $preventivo->id }}" method="POST" style="display:inline;">
                 @csrf
                 @method('DELETE')
-                <button onclick="return confirm('Sicuro di eliminare questo preventivo?')">
+
+                <button type="submit" onclick="return confirm('Sicuro di voler eliminare questo preventivo? Verranno eliminati anche prodotti e servizi collegati.')">
                     Elimina
                 </button>
             </form>

@@ -24,12 +24,29 @@ class PreventivoController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'commessa_id' => 'required|exists:commesse,id',
+            'descrizione' => 'nullable|string|max:255',
+            'note' => 'nullable|string',
+        ]);
+
         $prossimoNumero = Preventivo::max('id') + 1;
+        $numeroAutomatico = 'PREV-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT);
 
         Preventivo::create([
             'commessa_id' => $request->commessa_id,
-            'numero' => 'PREV-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT),
-            'descrizione' => $request->descrizione
+            'numero' => $numeroAutomatico,
+            'descrizione' => $request->descrizione,
+            'versione' => 1,
+            'stato' => 'bozza',
+            'totale_listino_prodotti' => 0,
+            'totale_netto_prodotti' => 0,
+            'totale_servizi_cliente' => 0,
+            'totale_cliente_finale' => 0,
+            'sconto_medio_cliente' => 0,
+            'totale_costo_brc' => 0,
+            'utile_totale' => 0,
+            'note' => $request->note,
         ]);
 
         return redirect('/preventivi');
@@ -39,14 +56,49 @@ class PreventivoController extends Controller
     {
         $preventivo = Preventivo::with(
             'commessa.cliente',
+            'righeProdotti.fornitore',
             'righeProdotti.servizi'
         )->findOrFail($id);
 
-        return view('preventivi.show', compact('preventivo'));
+        $fornitori = Fornitore::all();
+
+        return view('preventivi.show', compact('preventivo', 'fornitori'));
     }
 
+    // 🔥 ELIMINAZIONE PREVENTIVO
+    public function destroy($id)
+    {
+        $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($id);
+
+        foreach ($preventivo->righeProdotti as $riga) {
+            $riga->servizi()->delete();
+            $riga->delete();
+        }
+
+        $preventivo->delete();
+
+        return redirect('/preventivi')->with('success', 'Preventivo eliminato');
+    }
+
+    // 🔥 AGGIUNTA PRODOTTO
     public function aggiungiRigaProdotto(Request $request, $id)
     {
+        $request->validate([
+            'fornitore_id' => 'nullable|exists:fornitori,id',
+            'descrizione' => 'required|string|max:255',
+            'modalita_calcolo' => 'required|in:da_listino,da_costo_netto',
+            'quantita' => 'nullable|numeric|min:0',
+            'prezzo_listino' => 'nullable|numeric|min:0',
+            'costo_netto' => 'nullable|numeric|min:0',
+            'sconto_fornitore_1' => 'nullable|numeric|min:0|max:100',
+            'sconto_fornitore_2' => 'nullable|numeric|min:0|max:100',
+            'sconto_fornitore_3' => 'nullable|numeric|min:0|max:100',
+            'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string',
+        ]);
+
+        $preventivo = Preventivo::findOrFail($id);
+
         $modalita = $request->modalita_calcolo;
         $quantita = (float) ($request->quantita ?? 1);
 
@@ -55,81 +107,85 @@ class PreventivoController extends Controller
         $s3 = (float) ($request->sconto_fornitore_3 ?? 0);
         $ricarico = (float) ($request->ricarico_percentuale ?? 0);
 
-        $fattoreSconto = (1 - $s1/100) * (1 - $s2/100) * (1 - $s3/100);
+        $fattoreSconto = (1 - ($s1 / 100)) * (1 - ($s2 / 100)) * (1 - ($s3 / 100));
 
         if ($modalita === 'da_listino') {
-            $prezzoListino = (float) $request->prezzo_listino;
+            $prezzoListino = (float) ($request->prezzo_listino ?? 0);
             $costoNetto = $prezzoListino * $fattoreSconto;
         } else {
-            $costoNetto = (float) $request->costo_netto;
+            $costoNetto = (float) ($request->costo_netto ?? 0);
             $prezzoListino = $fattoreSconto > 0 ? $costoNetto / $fattoreSconto : 0;
         }
 
-        $prezzoClienteUnitario = $costoNetto * (1 + $ricarico/100);
+        $prezzoClienteUnitario = $costoNetto * (1 + ($ricarico / 100));
 
-        // 👉 QUI ERA GIÀ GIUSTO (manteniamo)
-        $totaleCliente = $prezzoClienteUnitario * $quantita;
-        $totaleListino = $prezzoListino * $quantita;
-        $totaleCosto = $costoNetto * $quantita;
-
-        $scontoCliente = $prezzoListino > 0
-            ? (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100
-            : 0;
+        $scontoClientePercentuale = 0;
+        if ($prezzoListino > 0) {
+            $scontoClientePercentuale = (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100;
+        }
 
         RigaPreventivoProdotto::create([
-            'preventivo_id' => $id,
+            'preventivo_id' => $preventivo->id,
+            'fornitore_id' => $request->fornitore_id,
             'descrizione' => $request->descrizione,
             'modalita_calcolo' => $modalita,
             'quantita' => $quantita,
             'prezzo_listino' => $prezzoListino,
             'costo_netto' => $costoNetto,
-            'prezzo_cliente_unitario' => $prezzoClienteUnitario,
-            'totale_cliente' => $totaleCliente,
-            'totale_listino' => $totaleListino,
-            'totale_costo' => $totaleCosto,
-            'sconto_cliente_percentuale' => $scontoCliente,
             'sconto_fornitore_1' => $s1,
             'sconto_fornitore_2' => $s2,
             'sconto_fornitore_3' => $s3,
-            'ricarico_percentuale' => $ricarico
+            'ricarico_percentuale' => $ricarico,
+            'prezzo_cliente_unitario' => $prezzoClienteUnitario,
+            'sconto_cliente_percentuale' => $scontoClientePercentuale,
+            'totale_listino' => $prezzoListino * $quantita,
+            'totale_costo' => $costoNetto * $quantita,
+            'totale_cliente' => $prezzoClienteUnitario * $quantita,
+            'ordine_visualizzazione' => 0,
+            'note' => $request->note,
         ]);
 
-        $this->aggiornaTotaliPreventivo($id);
+        $this->aggiornaTotaliPreventivo($preventivo->id);
 
-        return redirect('/preventivi/'.$id);
+        return redirect('/preventivi/' . $preventivo->id);
     }
 
-    private function aggiornaTotaliPreventivo($id)
+    // 🔥 AGGIORNA TOTALI
+    private function aggiornaTotaliPreventivo($preventivoId)
     {
-        $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($id);
+        $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($preventivoId);
 
-        // ✅ QUI ERA IL PROBLEMA
-        // usare direttamente i totali già calcolati per riga
-
-        $totaleProdotti = $preventivo->righeProdotti->sum('totale_cliente');
-        $totaleListino = $preventivo->righeProdotti->sum('totale_listino');
+        $totaleListinoProdotti = $preventivo->righeProdotti->sum('totale_listino');
+        $totaleNettoProdotti = $preventivo->righeProdotti->sum('totale_cliente');
         $totaleCostoProdotti = $preventivo->righeProdotti->sum('totale_costo');
 
-        $totaleServizi = 0;
+        $totaleServiziCliente = 0;
         $totaleCostoServizi = 0;
 
         foreach ($preventivo->righeProdotti as $riga) {
-            $q = $riga->quantita ?? 1;
+            $quantita = (float) ($riga->quantita ?? 1);
 
-            $totaleServizi += $riga->servizi->sum('prezzo_cliente') * $q;
-            $totaleCostoServizi += $riga->servizi->sum('costo_brc') * $q;
+            $totaleServiziCliente += $riga->servizi->sum('prezzo_cliente') * $quantita;
+            $totaleCostoServizi += $riga->servizi->sum('costo_brc') * $quantita;
         }
 
-        $totaleFinale = $totaleProdotti + $totaleServizi;
-        $totaleCosto = $totaleCostoProdotti + $totaleCostoServizi;
+        $totaleClienteFinale = $totaleNettoProdotti + $totaleServiziCliente;
+        $totaleCostoBrc = $totaleCostoProdotti + $totaleCostoServizi;
+        $utileTotale = $totaleClienteFinale - $totaleCostoBrc;
+
+        $scontoMedioCliente = 0;
+        if ($totaleListinoProdotti > 0) {
+            $scontoMedioCliente = (($totaleListinoProdotti - $totaleNettoProdotti) / $totaleListinoProdotti) * 100;
+        }
 
         $preventivo->update([
-            'totale_netto_prodotti' => $totaleProdotti,
-            'totale_listino_prodotti' => $totaleListino,
-            'totale_servizi_cliente' => $totaleServizi,
-            'totale_cliente_finale' => $totaleFinale,
-            'totale_costo_brc' => $totaleCosto,
-            'utile_totale' => $totaleFinale - $totaleCosto
+            'totale_listino_prodotti' => $totaleListinoProdotti,
+            'totale_netto_prodotti' => $totaleNettoProdotti,
+            'totale_servizi_cliente' => $totaleServiziCliente,
+            'totale_cliente_finale' => $totaleClienteFinale,
+            'sconto_medio_cliente' => $scontoMedioCliente,
+            'totale_costo_brc' => $totaleCostoBrc,
+            'utile_totale' => $utileTotale,
         ]);
     }
 }
