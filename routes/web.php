@@ -6,6 +6,8 @@ use App\Http\Controllers\CommessaController;
 use App\Http\Controllers\PreventivoController;
 use App\Http\Controllers\RigaPreventivoProdottoController;
 use App\Http\Controllers\RigaPreventivoServizioController;
+use App\Http\Controllers\ProdottoFornitoreController;
+use App\Http\Controllers\FornitoreController;
 
 Route::get('/', function () {
     return view('dashboard');
@@ -15,6 +17,8 @@ Route::resource('clienti', ClienteController::class);
 Route::resource('commesse', CommessaController::class);
 Route::resource('preventivi', PreventivoController::class);
 Route::resource('righe-preventivo-prodotti', RigaPreventivoProdottoController::class);
+Route::resource('prodotti-fornitore', ProdottoFornitoreController::class);
+Route::resource('fornitori', FornitoreController::class);
 
 Route::post('/preventivi/{id}/aggiungi-riga-prodotto', [PreventivoController::class, 'aggiungiRigaProdotto']);
 

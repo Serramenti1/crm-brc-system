@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Preventivo;
 use App\Models\Commessa;
 use App\Models\Fornitore;
+use App\Models\ProdottoFornitore;
 use App\Models\RigaPreventivoProdotto;
 
 class PreventivoController extends Controller
@@ -62,10 +63,11 @@ class PreventivoController extends Controller
 
         $fornitori = Fornitore::all();
 
-        return view('preventivi.show', compact('preventivo', 'fornitori'));
+        $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
+
+        return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore'));
     }
 
-    // 🔥 ELIMINAZIONE PREVENTIVO
     public function destroy($id)
     {
         $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($id);
@@ -80,7 +82,6 @@ class PreventivoController extends Controller
         return redirect('/preventivi')->with('success', 'Preventivo eliminato');
     }
 
-    // 🔥 AGGIUNTA PRODOTTO
     public function aggiungiRigaProdotto(Request $request, $id)
     {
         $request->validate([
@@ -150,7 +151,6 @@ class PreventivoController extends Controller
         return redirect('/preventivi/' . $preventivo->id);
     }
 
-    // 🔥 AGGIORNA TOTALI
     private function aggiornaTotaliPreventivo($preventivoId)
     {
         $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($preventivoId);

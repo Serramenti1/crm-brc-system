@@ -8,6 +8,10 @@
 
 <a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">Preventivi</a>
 
+<a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">Fornitori</a>
+
+<a href="/prodotti-fornitore" class="btn {{ request()->is('prodotti-fornitore*') ? 'active' : '' }}">Prodotti Fornitore</a>
+
 </div>
 
 <style>

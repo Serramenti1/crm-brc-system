@@ -9,8 +9,31 @@
 <form method="POST" action="/preventivi/{{ $preventivo->id }}/aggiungi-riga-prodotto">
 @csrf
 
+<p>Prodotto da listino fornitore<br>
+<select id="prodotto_fornitore_select" onchange="compilaProdottoFornitore()">
+<option value="">-- Seleziona prodotto fornitore --</option>
+
+@foreach($prodottiFornitore as $prodotto)
+<option
+    value="{{ $prodotto->id }}"
+    data-fornitore="{{ $prodotto->fornitore_id }}"
+    data-descrizione="{{ $prodotto->descrizione }}"
+    data-listino="{{ $prodotto->prezzo_listino }}"
+    data-sconto1="{{ $prodotto->sconto_1 }}"
+    data-sconto2="{{ $prodotto->sconto_2 }}"
+    data-sconto3="{{ $prodotto->sconto_3 }}"
+>
+    {{ $prodotto->fornitore->ragione_sociale }} - {{ $prodotto->descrizione }}
+</option>
+@endforeach
+
+</select>
+</p>
+
+<input type="hidden" id="fornitore_id" name="fornitore_id">
+
 <p>Descrizione<br>
-<input type="text" name="descrizione" required>
+<input type="text" id="descrizione" name="descrizione" required>
 </p>
 
 <p>Quantità<br>
@@ -31,15 +54,15 @@
 <input type="number" id="input_prezzo" step="0.01" name="prezzo_listino">
 
 <p>Sconto 1 %<br>
-<input type="number" name="sconto_fornitore_1" value="0">
+<input type="number" id="sconto_fornitore_1" name="sconto_fornitore_1" value="0">
 </p>
 
 <p>Sconto 2 %<br>
-<input type="number" name="sconto_fornitore_2" value="0">
+<input type="number" id="sconto_fornitore_2" name="sconto_fornitore_2" value="0">
 </p>
 
 <p>Sconto 3 %<br>
-<input type="number" name="sconto_fornitore_3" value="0">
+<input type="number" id="sconto_fornitore_3" name="sconto_fornitore_3" value="0">
 </p>
 
 <p>Ricarico cliente %<br>
@@ -202,6 +225,28 @@ function cambiaPrezzo(){
         input.name = 'costo_netto';
         label.innerHTML = 'Prezzo scontato';
     }
+}
+
+function compilaProdottoFornitore(){
+    let select = document.getElementById('prodotto_fornitore_select');
+    let option = select.options[select.selectedIndex];
+
+    if(option.value === ''){
+        return;
+    }
+
+    document.getElementById('fornitore_id').value = option.dataset.fornitore;
+    document.getElementById('descrizione').value = option.dataset.descrizione;
+
+    let radioListino = document.querySelector('input[name="modalita_calcolo"][value="da_listino"]');
+    radioListino.checked = true;
+
+    cambiaPrezzo();
+
+    document.getElementById('input_prezzo').value = option.dataset.listino;
+    document.getElementById('sconto_fornitore_1').value = option.dataset.sconto1;
+    document.getElementById('sconto_fornitore_2').value = option.dataset.sconto2;
+    document.getElementById('sconto_fornitore_3').value = option.dataset.sconto3;
 }
 
 function apriModificaRiga(id){

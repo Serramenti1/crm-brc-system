@@ -21,4 +21,9 @@ class Fornitore extends Model
         'sconto_standard_3',
         'note'
     ];
+
+    public function prodotti()
+    {
+        return $this->hasMany(ProdottoFornitore::class);
+    }
 }
