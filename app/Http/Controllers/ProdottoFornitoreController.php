@@ -25,13 +25,20 @@ class ProdottoFornitoreController extends Controller
         $request->validate([
             'fornitore_id' => 'required|exists:fornitori,id',
             'descrizione' => 'required|string|max:255',
-            'prezzo_listino' => 'required|numeric|min:0',
+            'prezzo_listino' => 'nullable|numeric|min:0',
             'sconto_1' => 'nullable|numeric|min:0|max:100',
             'sconto_2' => 'nullable|numeric|min:0|max:100',
             'sconto_3' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        ProdottoFornitore::create($request->all());
+        ProdottoFornitore::create([
+            'fornitore_id' => $request->fornitore_id,
+            'descrizione' => $request->descrizione,
+            'prezzo_listino' => $request->prezzo_listino ?? 0,
+            'sconto_1' => $request->sconto_1 ?? 0,
+            'sconto_2' => $request->sconto_2 ?? 0,
+            'sconto_3' => $request->sconto_3 ?? 0,
+        ]);
 
         return redirect('/prodotti-fornitore');
     }
@@ -46,9 +53,25 @@ class ProdottoFornitoreController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'fornitore_id' => 'required|exists:fornitori,id',
+            'descrizione' => 'required|string|max:255',
+            'prezzo_listino' => 'nullable|numeric|min:0',
+            'sconto_1' => 'nullable|numeric|min:0|max:100',
+            'sconto_2' => 'nullable|numeric|min:0|max:100',
+            'sconto_3' => 'nullable|numeric|min:0|max:100',
+        ]);
+
         $prodotto = ProdottoFornitore::findOrFail($id);
 
-        $prodotto->update($request->all());
+        $prodotto->update([
+            'fornitore_id' => $request->fornitore_id,
+            'descrizione' => $request->descrizione,
+            'prezzo_listino' => $request->prezzo_listino ?? 0,
+            'sconto_1' => $request->sconto_1 ?? 0,
+            'sconto_2' => $request->sconto_2 ?? 0,
+            'sconto_3' => $request->sconto_3 ?? 0,
+        ]);
 
         return redirect('/prodotti-fornitore');
     }
