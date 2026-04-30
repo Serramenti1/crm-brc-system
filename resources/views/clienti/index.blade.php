@@ -2,6 +2,12 @@
 
 <h1>Lista Clienti</h1>
 
+<form method="GET" action="/clienti" style="margin-bottom:15px;">
+    <input type="text" name="q" placeholder="Cerca cliente..." value="{{ request('q') }}">
+    <button type="submit">Cerca</button>
+    <a href="/clienti">Reset</a>
+</form>
+
 <a href="/clienti/create">+ Nuovo Cliente</a>
 
 <br><br>

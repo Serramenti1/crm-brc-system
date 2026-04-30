@@ -9,31 +9,8 @@
 <form method="POST" action="/preventivi/{{ $preventivo->id }}/aggiungi-riga-prodotto">
 @csrf
 
-<p>Prodotto da listino fornitore<br>
-<select id="prodotto_fornitore_select" onchange="compilaProdottoFornitore()">
-<option value="">-- Seleziona prodotto fornitore --</option>
-
-@foreach($prodottiFornitore as $prodotto)
-<option
-    value="{{ $prodotto->id }}"
-    data-fornitore="{{ $prodotto->fornitore_id }}"
-    data-descrizione="{{ $prodotto->descrizione }}"
-    data-listino="{{ $prodotto->prezzo_listino }}"
-    data-sconto1="{{ $prodotto->sconto_1 }}"
-    data-sconto2="{{ $prodotto->sconto_2 }}"
-    data-sconto3="{{ $prodotto->sconto_3 }}"
->
-    {{ $prodotto->fornitore->ragione_sociale }} - {{ $prodotto->descrizione }}
-</option>
-@endforeach
-
-</select>
-</p>
-
-<input type="hidden" id="fornitore_id" name="fornitore_id">
-
 <p>Descrizione<br>
-<input type="text" id="descrizione" name="descrizione" required>
+<input type="text" name="descrizione" required>
 </p>
 
 <p>Quantità<br>
@@ -54,15 +31,15 @@
 <input type="number" id="input_prezzo" step="0.01" name="prezzo_listino">
 
 <p>Sconto 1 %<br>
-<input type="number" id="sconto_fornitore_1" name="sconto_fornitore_1" value="0">
+<input type="number" name="sconto_fornitore_1" value="0">
 </p>
 
 <p>Sconto 2 %<br>
-<input type="number" id="sconto_fornitore_2" name="sconto_fornitore_2" value="0">
+<input type="number" name="sconto_fornitore_2" value="0">
 </p>
 
 <p>Sconto 3 %<br>
-<input type="number" id="sconto_fornitore_3" name="sconto_fornitore_3" value="0">
+<input type="number" name="sconto_fornitore_3" value="0">
 </p>
 
 <p>Ricarico cliente %<br>
@@ -105,8 +82,9 @@ Sconto applicato: {{ number_format($riga->sconto_cliente_percentuale,2,',','.') 
 
 @foreach($riga->servizi as $servizio)
 
-<div>
-{{ $servizio->tipo_servizio }}
+<div style="border-bottom:1px solid #ccc; margin-bottom:5px; padding-bottom:5px;">
+
+<strong>{{ $servizio->tipo_servizio }}</strong>
 
 - € {{ number_format($servizio->prezzo_cliente,2,',','.') }}
 
@@ -119,6 +97,38 @@ Sconto applicato: {{ number_format($riga->sconto_cliente_percentuale,2,',','.') 
 @method('DELETE')
 <button>X</button>
 </form>
+
+<!-- MODIFICA SERVIZIO -->
+<button type="button" onclick="apriModificaServizio({{ $servizio->id }})">Modifica</button>
+
+<div id="edit_servizio_{{ $servizio->id }}" style="display:none; margin-top:10px; border:1px solid #ccc; padding:10px;">
+
+<form method="POST" action="/servizi-riga/{{ $servizio->id }}">
+@csrf
+@method('PUT')
+
+<p>Tipo<br>
+<select name="tipo_servizio">
+<option value="posa" {{ $servizio->tipo_servizio=='posa'?'selected':'' }}>Posa</option>
+<option value="trasporto" {{ $servizio->tipo_servizio=='trasporto'?'selected':'' }}>Trasporto</option>
+<option value="smaltimento" {{ $servizio->tipo_servizio=='smaltimento'?'selected':'' }}>Smaltimento</option>
+</select>
+</p>
+
+<p>Costo<br>
+<input type="number" name="costo_brc" value="{{ $servizio->costo_brc }}" step="0.01">
+</p>
+
+<p>Ricarico %<br>
+<input type="number" name="ricarico_percentuale" value="{{ $servizio->ricarico_percentuale }}" step="0.01">
+</p>
+
+<button>Salva</button>
+<button type="button" onclick="chiudiModificaServizio({{ $servizio->id }})">Annulla</button>
+
+</form>
+
+</div>
 
 </div>
 
@@ -176,24 +186,24 @@ Sconto applicato: {{ number_format($riga->sconto_cliente_percentuale,2,',','.') 
 <input type="number" name="prezzo_listino" value="{{ $riga->prezzo_listino }}" step="0.01">
 </p>
 
-<p>Prezzo scontato / costo netto<br>
+<p>Prezzo scontato<br>
 <input type="number" name="costo_netto" value="{{ $riga->costo_netto }}" step="0.01">
 </p>
 
-<p>Sconto 1 %<br>
-<input type="number" name="sconto_fornitore_1" value="{{ $riga->sconto_fornitore_1 }}" step="0.01">
+<p>Sconto 1<br>
+<input type="number" name="sconto_fornitore_1" value="{{ $riga->sconto_fornitore_1 }}">
 </p>
 
-<p>Sconto 2 %<br>
-<input type="number" name="sconto_fornitore_2" value="{{ $riga->sconto_fornitore_2 }}" step="0.01">
+<p>Sconto 2<br>
+<input type="number" name="sconto_fornitore_2" value="{{ $riga->sconto_fornitore_2 }}">
 </p>
 
-<p>Sconto 3 %<br>
-<input type="number" name="sconto_fornitore_3" value="{{ $riga->sconto_fornitore_3 }}" step="0.01">
+<p>Sconto 3<br>
+<input type="number" name="sconto_fornitore_3" value="{{ $riga->sconto_fornitore_3 }}">
 </p>
 
-<p>Ricarico cliente %<br>
-<input type="number" name="ricarico_percentuale" value="{{ $riga->ricarico_percentuale }}" step="0.01">
+<p>Ricarico<br>
+<input type="number" name="ricarico_percentuale" value="{{ $riga->ricarico_percentuale }}">
 </p>
 
 <button>Salva modifica</button>
@@ -227,33 +237,19 @@ function cambiaPrezzo(){
     }
 }
 
-function compilaProdottoFornitore(){
-    let select = document.getElementById('prodotto_fornitore_select');
-    let option = select.options[select.selectedIndex];
-
-    if(option.value === ''){
-        return;
-    }
-
-    document.getElementById('fornitore_id').value = option.dataset.fornitore;
-    document.getElementById('descrizione').value = option.dataset.descrizione;
-
-    let radioListino = document.querySelector('input[name="modalita_calcolo"][value="da_listino"]');
-    radioListino.checked = true;
-
-    cambiaPrezzo();
-
-    document.getElementById('input_prezzo').value = option.dataset.listino;
-    document.getElementById('sconto_fornitore_1').value = option.dataset.sconto1;
-    document.getElementById('sconto_fornitore_2').value = option.dataset.sconto2;
-    document.getElementById('sconto_fornitore_3').value = option.dataset.sconto3;
-}
-
 function apriModificaRiga(id){
     document.getElementById('edit_riga_' + id).style.display = 'block';
 }
 
 function chiudiModificaRiga(id){
     document.getElementById('edit_riga_' + id).style.display = 'none';
+}
+
+function apriModificaServizio(id){
+    document.getElementById('edit_servizio_' + id).style.display = 'block';
+}
+
+function chiudiModificaServizio(id){
+    document.getElementById('edit_servizio_' + id).style.display = 'none';
 }
 </script>

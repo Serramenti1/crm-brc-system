@@ -4,12 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cliente;
+use App\Helpers\SearchHelper;
 
 class ClienteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clienti = Cliente::all();
+        $query = Cliente::query();
+
+        $query = SearchHelper::applyMultiWordSearch(
+            $query,
+            ['nome', 'cognome'],
+            $request->q
+        );
+
+        $clienti = $query->get();
+
         return view('clienti.index', compact('clienti'));
     }
 
@@ -20,19 +30,7 @@ class ClienteController extends Controller
 
     public function store(Request $request)
     {
-        Cliente::create([
-            'nome' => $request->nome,
-            'cognome' => $request->cognome,
-            'email' => $request->email,
-            'telefono' => $request->telefono,
-            'indirizzo' => $request->indirizzo,
-            'citta' => $request->citta,
-            'cap' => $request->cap,
-            'provincia' => $request->provincia,
-            'codice_fiscale' => $request->codice_fiscale,
-            'partita_iva' => $request->partita_iva,
-        ]);
-
+        Cliente::create($request->all());
         return redirect('/clienti');
     }
 
@@ -45,28 +43,13 @@ class ClienteController extends Controller
     public function update(Request $request, $id)
     {
         $cliente = Cliente::findOrFail($id);
-
-        $cliente->update([
-            'nome' => $request->nome,
-            'cognome' => $request->cognome,
-            'email' => $request->email,
-            'telefono' => $request->telefono,
-            'indirizzo' => $request->indirizzo,
-            'citta' => $request->citta,
-            'cap' => $request->cap,
-            'provincia' => $request->provincia,
-            'codice_fiscale' => $request->codice_fiscale,
-            'partita_iva' => $request->partita_iva,
-        ]);
-
+        $cliente->update($request->all());
         return redirect('/clienti');
     }
 
     public function destroy($id)
     {
-        $cliente = Cliente::findOrFail($id);
-        $cliente->delete();
-
+        Cliente::findOrFail($id)->delete();
         return redirect('/clienti');
     }
 }

@@ -2,6 +2,12 @@
 
 <h1>Prodotti Fornitore</h1>
 
+<form method="GET" action="/prodotti-fornitore" style="margin-bottom:15px;">
+    <input type="text" name="q" placeholder="Cerca prodotto o fornitore..." value="{{ request('q') }}">
+    <button type="submit">Cerca</button>
+    <a href="/prodotti-fornitore">Reset</a>
+</form>
+
 <a href="/prodotti-fornitore/create">+ Nuovo</a>
 
 <table border="1">

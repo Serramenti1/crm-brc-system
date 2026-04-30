@@ -2,6 +2,12 @@
 
 <h1>Lista Commesse</h1>
 
+<form method="GET" action="/commesse" style="margin-bottom:15px;">
+    <input type="text" name="q" placeholder="Cerca commessa o cliente..." value="{{ request('q') }}">
+    <button type="submit">Cerca</button>
+    <a href="/commesse">Reset</a>
+</form>
+
 <a href="/commesse/create">+ Nuova Commessa</a>
 
 <br><br>

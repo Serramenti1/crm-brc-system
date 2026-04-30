@@ -11,11 +11,28 @@ use App\Models\RigaPreventivoProdotto;
 
 class PreventivoController extends Controller
 {
-    public function index()
-    {
-        $preventivi = Preventivo::with('commessa.cliente')->get();
-        return view('preventivi.index', compact('preventivi'));
+
+public function index(Request $request)
+{
+    $query = Preventivo::with('commessa.cliente');
+
+    if ($request->filled('cliente')) {
+        $parole = explode(' ', trim($request->cliente));
+
+        $query->whereHas('commessa.cliente', function ($q) use ($parole) {
+            foreach ($parole as $parola) {
+                $q->where(function ($sub) use ($parola) {
+                    $sub->where('nome', 'like', $parola.'%')
+                        ->orWhere('cognome', 'like', $parola.'%');
+                });
+            }
+        });
     }
+
+    $preventivi = $query->get();
+
+    return view('preventivi.index', compact('preventivi'));
+}
 
     public function create()
     {

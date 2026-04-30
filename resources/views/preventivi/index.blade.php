@@ -6,9 +6,14 @@
 
 <br><br>
 
-@if(session('success'))
-    <p style="color:green;">{{ session('success') }}</p>
-@endif
+<!-- 🔍 RICERCA -->
+<form method="GET" action="/preventivi">
+    <input type="text" name="cliente" placeholder="Cerca cliente..." value="{{ request('cliente') }}">
+    <button type="submit">Cerca</button>
+    <a href="/preventivi">Reset</a>
+</form>
+
+<br>
 
 <table border="1" cellpadding="5">
     <tr>
@@ -61,10 +66,7 @@
             <form action="/preventivi/{{ $preventivo->id }}" method="POST" style="display:inline;">
                 @csrf
                 @method('DELETE')
-
-                <button type="submit" onclick="return confirm('Sicuro di voler eliminare questo preventivo? Verranno eliminati anche prodotti e servizi collegati.')">
-                    Elimina
-                </button>
+                <button>Elimina</button>
             </form>
         </td>
     </tr>

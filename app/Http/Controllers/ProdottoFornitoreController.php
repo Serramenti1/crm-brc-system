@@ -8,11 +8,29 @@ use App\Models\Fornitore;
 
 class ProdottoFornitoreController extends Controller
 {
-    public function index()
-    {
-        $prodotti = ProdottoFornitore::with('fornitore')->get();
-        return view('prodotti_fornitore.index', compact('prodotti'));
+    public function index(Request $request)
+{
+    $query = ProdottoFornitore::with('fornitore');
+
+    if ($request->filled('q')) {
+        $parole = explode(' ', trim($request->q));
+
+        $query->where(function ($q) use ($parole) {
+            foreach ($parole as $parola) {
+                $q->where(function ($sub) use ($parola) {
+                    $sub->where('descrizione', 'like', $parola.'%')
+                        ->orWhereHas('fornitore', function ($f) use ($parola) {
+                            $f->where('ragione_sociale', 'like', $parola.'%');
+                        });
+                });
+            }
+        });
     }
+
+    $prodotti = $query->get();
+
+    return view('prodotti_fornitore.index', compact('prodotti'));
+}
 
     public function create()
     {

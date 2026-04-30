@@ -4,12 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Fornitore;
+use App\Helpers\SearchHelper;
 
 class FornitoreController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $fornitori = Fornitore::all();
+        $query = Fornitore::query();
+
+        // 🔍 RICERCA MULTIPLA
+        $query = SearchHelper::applyMultiWordSearch(
+            $query,
+            ['ragione_sociale', 'referente'],
+            $request->q
+        );
+
+        $fornitori = $query->get();
+
         return view('fornitori.index', compact('fornitori'));
     }
 
@@ -22,6 +33,13 @@ class FornitoreController extends Controller
     {
         $request->validate([
             'ragione_sociale' => 'required|string|max:255',
+            'referente' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'sconto_standard_1' => 'nullable|numeric|min:0|max:100',
+            'sconto_standard_2' => 'nullable|numeric|min:0|max:100',
+            'sconto_standard_3' => 'nullable|numeric|min:0|max:100',
+            'note' => 'nullable|string',
         ]);
 
         Fornitore::create($request->all());
@@ -32,13 +50,24 @@ class FornitoreController extends Controller
     public function edit($id)
     {
         $fornitore = Fornitore::findOrFail($id);
+
         return view('fornitori.edit', compact('fornitore'));
     }
 
     public function update(Request $request, $id)
     {
-        $fornitore = Fornitore::findOrFail($id);
+        $request->validate([
+            'ragione_sociale' => 'required|string|max:255',
+            'referente' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'sconto_standard_1' => 'nullable|numeric|min:0|max:100',
+            'sconto_standard_2' => 'nullable|numeric|min:0|max:100',
+            'sconto_standard_3' => 'nullable|numeric|min:0|max:100',
+            'note' => 'nullable|string',
+        ]);
 
+        $fornitore = Fornitore::findOrFail($id);
         $fornitore->update($request->all());
 
         return redirect('/fornitori');
@@ -46,7 +75,8 @@ class FornitoreController extends Controller
 
     public function destroy($id)
     {
-        Fornitore::destroy($id);
+        $fornitore = Fornitore::findOrFail($id);
+        $fornitore->delete();
 
         return redirect('/fornitori');
     }
