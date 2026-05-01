@@ -16,8 +16,7 @@
     <tr>
         <th>ID</th>
         <th>Cliente</th>
-        <th>Titolo</th>
-        <th>Città lavoro</th>
+        <th>Indirizzo cantiere</th>
         <th>Tipologia abitazione</th>
         <th>Tipo lavoro</th>
         <th>Detrazione</th>
@@ -28,15 +27,18 @@
     @foreach($commesse as $commessa)
     <tr>
         <td>{{ $commessa->id }}</td>
+
         <td>
             {{ $commessa->cliente ? $commessa->cliente->nome . ' ' . $commessa->cliente->cognome : '' }}
         </td>
-        <td>{{ $commessa->titolo }}</td>
-        <td>{{ $commessa->citta_lavoro }}</td>
+
+        <td>{{ $commessa->indirizzo_lavoro }}</td>
+
         <td>{{ $commessa->tipologia_abitazione }}</td>
         <td>{{ $commessa->tipo_lavoro }}</td>
         <td>{{ $commessa->tipo_detrazione }}</td>
         <td>{{ $commessa->stato }}</td>
+
         <td>
             <a href="/commesse/{{ $commessa->id }}/edit">Modifica</a>
 

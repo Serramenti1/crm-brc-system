@@ -34,6 +34,12 @@ class ClienteController extends Controller
         return redirect('/clienti');
     }
 
+    public function show($id)
+    {
+        $cliente = Cliente::findOrFail($id);
+        return view('clienti.show', compact('cliente'));
+    }
+
     public function edit($id)
     {
         $cliente = Cliente::findOrFail($id);

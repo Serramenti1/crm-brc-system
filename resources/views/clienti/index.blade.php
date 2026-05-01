@@ -14,34 +14,28 @@
 
 <table border="1" cellpadding="5">
     <tr>
-        <th>ID</th>
         <th>Nome</th>
         <th>Cognome</th>
-        <th>Email</th>
-        <th>Telefono</th>
         <th>Indirizzo</th>
-        <th>Città</th>
-        <th>CAP</th>
-        <th>Provincia</th>
-        <th>Codice Fiscale</th>
-        <th>Partita IVA</th>
+        <th>Contatti</th>
         <th>Azioni</th>
     </tr>
 
     @foreach($clienti as $cliente)
     <tr>
-        <td>{{ $cliente->id }}</td>
         <td>{{ $cliente->nome }}</td>
         <td>{{ $cliente->cognome }}</td>
-        <td>{{ $cliente->email }}</td>
-        <td>{{ $cliente->telefono }}</td>
-        <td>{{ $cliente->indirizzo }}</td>
-        <td>{{ $cliente->citta }}</td>
-        <td>{{ $cliente->cap }}</td>
-        <td>{{ $cliente->provincia }}</td>
-        <td>{{ $cliente->codice_fiscale }}</td>
-        <td>{{ $cliente->partita_iva }}</td>
         <td>
+            {{ $cliente->indirizzo }}<br>
+            {{ $cliente->cap }} {{ $cliente->citta }} ({{ $cliente->provincia }})
+        </td>
+        <td>
+            {{ $cliente->telefono }}<br>
+            {{ $cliente->email }}
+        </td>
+        <td>
+            <a href="/clienti/{{ $cliente->id }}">Visualizza</a> |
+
             <a href="/clienti/{{ $cliente->id }}/edit">Modifica</a>
 
             <form action="/clienti/{{ $cliente->id }}" method="POST" style="display:inline;">

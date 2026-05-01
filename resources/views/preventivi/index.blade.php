@@ -19,8 +19,8 @@
     <tr>
         <th>ID</th>
         <th>Numero</th>
-        <th>Descrizione</th>
         <th>Cliente</th>
+        <th>Descrizione</th>
         <th>Commessa</th>
         <th>Totale Cliente</th>
         <th>Sconto Medio</th>
@@ -36,13 +36,13 @@
             <strong>{{ $preventivo->numero }}</strong>
         </td>
 
-        <td>{{ $preventivo->descrizione }}</td>
-
         <td>
             {{ $preventivo->commessa && $preventivo->commessa->cliente 
                 ? $preventivo->commessa->cliente->nome . ' ' . $preventivo->commessa->cliente->cognome 
                 : '' }}
         </td>
+        
+        <td>{{ $preventivo->descrizione }}</td>
 
         <td>
             {{ $preventivo->commessa ? $preventivo->commessa->titolo : '' }}
