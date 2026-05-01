@@ -1,52 +1,36 @@
-<div class="navbar">
+<!-- CSS -->
+<link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
-<a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">Home</a>
-
-<a href="/clienti" class="btn {{ request()->is('clienti*') ? 'active' : '' }}">Clienti</a>
-
-<a href="/commesse" class="btn {{ request()->is('commesse*') ? 'active' : '' }}">Commesse</a>
-
-<a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">Preventivi</a>
-
-<a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">Fornitori</a>
-
-<a href="/prodotti-fornitore" class="btn {{ request()->is('prodotti-fornitore*') ? 'active' : '' }}">Prodotti Fornitore</a>
-
+<!-- BARRA SUPERIORE -->
+<div class="topbar">
+    CRM BRC SYSTEM
 </div>
 
-<style>
+<!-- MENU -->
+<div class="navbar">
 
-.navbar {
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    background:#2d3748;
-    padding:10px;
-    z-index:1000;
-}
+    <a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">
+        Home
+    </a>
 
-.btn {
-    display:inline-block;
-    padding:8px 12px;
-    margin-right:5px;
-    background:#4a5568;
-    color:white;
-    text-decoration:none;
-    border-radius:5px;
-}
+    <a href="/clienti" class="btn {{ request()->is('clienti*') ? 'active' : '' }}">
+        Clienti
+    </a>
 
-.btn:hover {
-    background:#2b6cb0;
-}
+    <a href="/commesse" class="btn {{ request()->is('commesse*') ? 'active' : '' }}">
+        Commesse
+    </a>
 
-.active {
-    background:#1c3d5a;
-}
+    <a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">
+        Preventivi
+    </a>
 
-/* Spazio sotto menu */
-body {
-    margin-top:60px;
-}
+    <a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">
+        Fornitori
+    </a>
 
-</style>
+    <a href="/prodotti-fornitore" class="btn {{ request()->is('prodotti-fornitore*') ? 'active' : '' }}">
+        Prodotti Fornitore
+    </a>
+
+</div>

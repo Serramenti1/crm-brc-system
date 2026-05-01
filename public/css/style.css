@@ -1,0 +1,79 @@
+/* RESET BASE */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+}
+
+/* BARRA BLU SUPERIORE */
+.topbar {
+    background: linear-gradient(90deg, #0b3c88, #1e5bb8);
+    color: white;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* MENU */
+.navbar {
+    background: #1f2937;
+    padding: 10px 20px;
+}
+
+/* BOTTONI MENU */
+.btn {
+    display: inline-block;
+    padding: 8px 14px;
+    margin-right: 8px;
+    background: #374151;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn:hover {
+    background: #2563eb;
+}
+
+/* ATTIVO */
+.active {
+    background: #2563eb;
+}
+
+/* CONTENUTO */
+.container {
+    padding: 20px;
+}
+
+/* TABELLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+table th {
+    background: #e5e7eb;
+    padding: 10px;
+    text-align: left;
+}
+
+table td {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+/* BOTTONI GENERICI */
+button {
+    padding: 6px 10px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1e40af;
+}
