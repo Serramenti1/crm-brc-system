@@ -14,7 +14,8 @@ class ProdottoFornitore extends Model
         'prezzo_listino',
         'sconto_1',
         'sconto_2',
-        'sconto_3'
+        'sconto_3',
+        'bene_significativo'
     ];
 
     public function fornitore()

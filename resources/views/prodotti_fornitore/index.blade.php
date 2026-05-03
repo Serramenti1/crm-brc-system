@@ -10,12 +10,15 @@
 
 <a href="/prodotti-fornitore/create">+ Nuovo</a>
 
+<br><br>
+
 <table border="1">
 <tr>
 <th>Fornitore</th>
 <th>Descrizione</th>
 <th>Listino</th>
 <th>Sconti</th>
+<th>Bene significativo</th>
 <th>Azioni</th>
 </tr>
 
@@ -23,12 +26,13 @@
 <tr>
 <td>{{ $p->fornitore->ragione_sociale }}</td>
 <td>{{ $p->descrizione }}</td>
-<td>{{ $p->prezzo_listino }}</td>
+<td>{{ number_format($p->prezzo_listino, 2, ',', '.') }} €</td>
 <td>{{ $p->sconto_1 }} / {{ $p->sconto_2 }} / {{ $p->sconto_3 }}</td>
+<td>{{ $p->bene_significativo ? 'Sì' : 'No' }}</td>
 <td>
 <a href="/prodotti-fornitore/{{ $p->id }}/edit">Modifica</a>
 
-<form method="POST" action="/prodotti-fornitore/{{ $p->id }}">
+<form method="POST" action="/prodotti-fornitore/{{ $p->id }}" style="display:inline;">
 @csrf
 @method('DELETE')
 <button>Elimina</button>

@@ -2,7 +2,6 @@
 
 <h2>Prodotti</h2>
 
-<!-- AGGIUNTA PRODOTTO -->
 <details>
 <summary><strong>+ Aggiungi prodotto</strong></summary>
 
@@ -22,6 +21,7 @@
     data-sconto1="{{ $prodotto->sconto_1 }}"
     data-sconto2="{{ $prodotto->sconto_2 }}"
     data-sconto3="{{ $prodotto->sconto_3 }}"
+    data-bene-significativo="{{ $prodotto->bene_significativo ? 1 : 0 }}"
 >
     {{ $prodotto->fornitore->ragione_sociale }} - {{ $prodotto->descrizione }}
 </option>
@@ -69,6 +69,13 @@
 <input type="number" name="ricarico_percentuale" value="0">
 </p>
 
+<p>
+<label>
+<input type="checkbox" id="bene_significativo" name="bene_significativo" value="1">
+Bene significativo
+</label>
+</p>
+
 <button>Salva</button>
 
 </form>
@@ -77,7 +84,6 @@
 <br>
 
 <table border="1" cellpadding="5" width="100%">
-
 <tr>
 <th>Prodotto</th>
 <th>Prezzi</th>
@@ -86,12 +92,12 @@
 </tr>
 
 @foreach($preventivo->righeProdotti as $riga)
-
 <tr>
 
 <td>
 <strong>{{ $riga->descrizione }}</strong><br>
-Qta: {{ $riga->quantita }}
+Qta: {{ $riga->quantita }}<br>
+Bene significativo: {{ $riga->bene_significativo ? 'Sì' : 'No' }}
 </td>
 
 <td>
@@ -228,6 +234,13 @@ Sconto applicato: {{ number_format($riga->sconto_cliente_percentuale,2,',','.') 
 <input type="number" name="ricarico_percentuale" value="{{ $riga->ricarico_percentuale }}">
 </p>
 
+<p>
+<label>
+<input type="checkbox" name="bene_significativo" value="1" {{ $riga->bene_significativo ? 'checked' : '' }}>
+Bene significativo
+</label>
+</p>
+
 <button>Salva modifica</button>
 <button type="button" onclick="chiudiModificaRiga({{ $riga->id }})">Annulla</button>
 
@@ -238,9 +251,7 @@ Sconto applicato: {{ number_format($riga->sconto_cliente_percentuale,2,',','.') 
 </td>
 
 </tr>
-
 @endforeach
-
 </table>
 
 <script>
@@ -279,6 +290,8 @@ function compilaProdottoFornitore(){
     document.getElementById('sconto_fornitore_1').value = option.dataset.sconto1;
     document.getElementById('sconto_fornitore_2').value = option.dataset.sconto2;
     document.getElementById('sconto_fornitore_3').value = option.dataset.sconto3;
+
+    document.getElementById('bene_significativo').checked = option.dataset.beneSignificativo == 1;
 }
 
 function apriModificaRiga(id){

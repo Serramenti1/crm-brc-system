@@ -37,6 +37,7 @@ class RigaPreventivoProdottoController extends Controller
             'sconto_fornitore_3' => 'nullable|numeric|min:0|max:100',
             'costo_netto' => 'nullable|numeric|min:0',
             'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'bene_significativo' => 'nullable|boolean',
             'ordine_visualizzazione' => 'nullable|integer|min:0',
             'note' => 'nullable|string',
         ]);
@@ -55,6 +56,7 @@ class RigaPreventivoProdottoController extends Controller
             'sconto_fornitore_3' => $dati['s3'],
             'costo_netto' => $dati['costoNetto'],
             'ricarico_percentuale' => $dati['ricarico'],
+            'bene_significativo' => $request->has('bene_significativo') ? 1 : 0,
             'prezzo_cliente_unitario' => $dati['prezzoClienteUnitario'],
             'sconto_cliente_percentuale' => $dati['scontoClientePercentuale'],
             'totale_listino' => $dati['totaleListino'],
@@ -90,6 +92,7 @@ class RigaPreventivoProdottoController extends Controller
             'sconto_fornitore_3' => 'nullable|numeric|min:0|max:100',
             'costo_netto' => 'nullable|numeric|min:0',
             'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'bene_significativo' => 'nullable|boolean',
             'ordine_visualizzazione' => 'nullable|integer|min:0',
             'note' => 'nullable|string',
         ]);
@@ -109,6 +112,7 @@ class RigaPreventivoProdottoController extends Controller
             'sconto_fornitore_3' => $dati['s3'],
             'costo_netto' => $dati['costoNetto'],
             'ricarico_percentuale' => $dati['ricarico'],
+            'bene_significativo' => $request->has('bene_significativo') ? 1 : 0,
             'prezzo_cliente_unitario' => $dati['prezzoClienteUnitario'],
             'sconto_cliente_percentuale' => $dati['scontoClientePercentuale'],
             'totale_listino' => $dati['totaleListino'],

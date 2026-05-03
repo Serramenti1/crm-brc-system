@@ -11,28 +11,27 @@ use App\Models\RigaPreventivoProdotto;
 
 class PreventivoController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Preventivo::with('commessa.cliente');
 
-public function index(Request $request)
-{
-    $query = Preventivo::with('commessa.cliente');
+        if ($request->filled('cliente')) {
+            $parole = explode(' ', trim($request->cliente));
 
-    if ($request->filled('cliente')) {
-        $parole = explode(' ', trim($request->cliente));
+            $query->whereHas('commessa.cliente', function ($q) use ($parole) {
+                foreach ($parole as $parola) {
+                    $q->where(function ($sub) use ($parola) {
+                        $sub->where('nome', 'like', $parola.'%')
+                            ->orWhere('cognome', 'like', $parola.'%');
+                    });
+                }
+            });
+        }
 
-        $query->whereHas('commessa.cliente', function ($q) use ($parole) {
-            foreach ($parole as $parola) {
-                $q->where(function ($sub) use ($parola) {
-                    $sub->where('nome', 'like', $parola.'%')
-                        ->orWhere('cognome', 'like', $parola.'%');
-                });
-            }
-        });
+        $preventivi = $query->get();
+
+        return view('preventivi.index', compact('preventivi'));
     }
-
-    $preventivi = $query->get();
-
-    return view('preventivi.index', compact('preventivi'));
-}
 
     public function create()
     {
@@ -79,7 +78,6 @@ public function index(Request $request)
         )->findOrFail($id);
 
         $fornitori = Fornitore::all();
-
         $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
 
         return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore'));
@@ -112,6 +110,7 @@ public function index(Request $request)
             'sconto_fornitore_2' => 'nullable|numeric|min:0|max:100',
             'sconto_fornitore_3' => 'nullable|numeric|min:0|max:100',
             'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'bene_significativo' => 'nullable|boolean',
             'note' => 'nullable|string',
         ]);
 
@@ -154,6 +153,7 @@ public function index(Request $request)
             'sconto_fornitore_2' => $s2,
             'sconto_fornitore_3' => $s3,
             'ricarico_percentuale' => $ricarico,
+            'bene_significativo' => $request->has('bene_significativo') ? 1 : 0,
             'prezzo_cliente_unitario' => $prezzoClienteUnitario,
             'sconto_cliente_percentuale' => $scontoClientePercentuale,
             'totale_listino' => $prezzoListino * $quantita,

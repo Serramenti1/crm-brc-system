@@ -29,6 +29,7 @@ class RigaPreventivoProdotto extends Model
         'totale_costo',
         'totale_cliente',
         'ordine_visualizzazione',
+        'bene_significativo',
         'note'
     ];
 
