@@ -36,4 +36,9 @@ class Preventivo extends Model
     {
         return $this->hasMany(RigaPreventivoProdotto::class);
     }
+
+    public function ordine()
+    {
+        return $this->hasOne(Ordine::class);
+    }
 }

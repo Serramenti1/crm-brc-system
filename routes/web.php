@@ -8,6 +8,7 @@ use App\Http\Controllers\RigaPreventivoProdottoController;
 use App\Http\Controllers\RigaPreventivoServizioController;
 use App\Http\Controllers\ProdottoFornitoreController;
 use App\Http\Controllers\FornitoreController;
+use App\Http\Controllers\OrdineController;
 
 Route::get('/', function () {
     return view('dashboard');
@@ -19,6 +20,14 @@ Route::resource('preventivi', PreventivoController::class);
 Route::resource('righe-preventivo-prodotti', RigaPreventivoProdottoController::class);
 Route::resource('prodotti-fornitore', ProdottoFornitoreController::class);
 Route::resource('fornitori', FornitoreController::class);
+
+Route::get('/ordini', [OrdineController::class, 'index']);
+Route::get('/ordini-completi', [OrdineController::class, 'completi']);
+Route::get('/ordini/{id}', [OrdineController::class, 'show']);
+Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);
+
+Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPreventivo']);
+Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);
 
 Route::post('/preventivi/{id}/aggiungi-riga-prodotto', [PreventivoController::class, 'aggiungiRigaProdotto']);
 

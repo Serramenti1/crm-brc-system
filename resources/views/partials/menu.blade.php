@@ -1,12 +1,9 @@
-<!-- CSS -->
 <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
-<!-- BARRA SUPERIORE -->
 <div class="topbar">
     CRM BRC SYSTEM
 </div>
 
-<!-- MENU -->
 <div class="navbar">
 
     <a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">
@@ -23,6 +20,14 @@
 
     <a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">
         Preventivi
+    </a>
+
+    <a href="/ordini" class="btn {{ request()->is('ordini') || request()->is('ordini/*') ? 'active' : '' }}">
+        Ordini in lavorazione
+    </a>
+
+    <a href="/ordini-completi" class="btn {{ request()->is('ordini-completi*') ? 'active' : '' }}">
+        Ordini completi
     </a>
 
     <a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">

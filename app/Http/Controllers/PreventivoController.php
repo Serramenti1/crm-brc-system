@@ -13,7 +13,7 @@ class PreventivoController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Preventivo::with('commessa.cliente');
+        $query = Preventivo::with('commessa.cliente', 'ordine');
 
         if ($request->filled('cliente')) {
             $parole = explode(' ', trim($request->cliente));
