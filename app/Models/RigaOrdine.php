@@ -18,6 +18,7 @@ class RigaOrdine extends Model
         'inviato',
         'co_ricevuta',
         'in_produzione',
+        'merce_arrivata',
         'pdf_path',
     ];
 

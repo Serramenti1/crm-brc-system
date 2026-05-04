@@ -23,6 +23,7 @@ Route::resource('fornitori', FornitoreController::class);
 
 Route::get('/ordini', [OrdineController::class, 'index']);
 Route::get('/ordini-completi', [OrdineController::class, 'completi']);
+Route::get('/ordini/stato/{stato}', [OrdineController::class, 'perStato'])->name('ordini.perStato');
 Route::get('/ordini/{id}', [OrdineController::class, 'show']);
 Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);
 
@@ -32,6 +33,8 @@ Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRi
 Route::post('/preventivi/{id}/aggiungi-riga-prodotto', [PreventivoController::class, 'aggiungiRigaProdotto']);
 
 Route::post('/righe-prodotti/{riga_prodotto_id}/servizi', [RigaPreventivoServizioController::class, 'store']);
+Route::post('/ordini/{id}/aggiorna-stato-avanzato', [OrdineController::class, 'aggiornaStatoAvanzato'])
+    ->name('ordini.aggiornaStatoAvanzato');
 
 Route::put('/servizi-riga/{id}', [RigaPreventivoServizioController::class, 'update']);
 

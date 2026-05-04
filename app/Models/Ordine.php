@@ -17,6 +17,9 @@ class Ordine extends Model
         'iva_importo',
         'totale_con_iva',
         'stato',
+        'saldo_merce_ricevuto',
+        'posa_effettuata',
+        'fattura_saldo_posa_fatta',
     ];
 
     public function preventivo()

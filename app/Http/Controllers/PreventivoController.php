@@ -8,6 +8,7 @@ use App\Models\Commessa;
 use App\Models\Fornitore;
 use App\Models\ProdottoFornitore;
 use App\Models\RigaPreventivoProdotto;
+use App\Models\Ordine;
 
 class PreventivoController extends Controller
 {
@@ -86,6 +87,13 @@ class PreventivoController extends Controller
     public function destroy($id)
     {
         $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($id);
+
+        $ordineCollegato = Ordine::where('preventivo_id', $preventivo->id)->first();
+
+        if ($ordineCollegato) {
+            return redirect('/preventivi/' . $preventivo->id)
+                ->with('error', 'Non puoi eliminare questo preventivo perché ha già un ordine collegato.');
+        }
 
         foreach ($preventivo->righeProdotti as $riga) {
             $riga->servizi()->delete();

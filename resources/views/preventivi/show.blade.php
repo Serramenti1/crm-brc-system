@@ -1,5 +1,13 @@
 @include('partials.menu')
 
+@if(session('error'))
+    <p style="color:red;">{{ session('error') }}</p>
+@endif
+
+@if(session('success'))
+    <p style="color:green;">{{ session('success') }}</p>
+@endif
+
 <h2>Prodotti</h2>
 
 <details>
