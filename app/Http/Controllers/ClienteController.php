@@ -55,7 +55,34 @@ class ClienteController extends Controller
 
     public function destroy($id)
     {
-        Cliente::findOrFail($id)->delete();
-        return redirect('/clienti');
+        $cliente = Cliente::with('commesse.preventivi.ordine')->findOrFail($id);
+
+    foreach ($cliente->commesse as $commessa) {
+        foreach ($commessa->preventivi as $preventivo) {
+
+            if ($preventivo->ordine) {
+                return redirect('/clienti/' . $cliente->id)
+                    ->with('error', 'Non puoi eliminare questo cliente perché ha ordini collegati.');
+            }
+        }
+    }
+
+    foreach ($cliente->commesse as $commessa) {
+        foreach ($commessa->preventivi as $preventivo) {
+
+            foreach ($preventivo->righeProdotti as $riga) {
+                $riga->servizi()->delete();
+                $riga->delete();
+            }
+
+            $preventivo->delete();
+        }
+
+        $commessa->delete();
+    }
+
+    $cliente->delete();
+
+    return redirect('/clienti')->with('success', 'Cliente eliminato');
     }
 }

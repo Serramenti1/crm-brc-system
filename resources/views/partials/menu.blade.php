@@ -22,26 +22,50 @@
         Preventivi
     </a>
 
-    <!-- ORDINI NUOVA STRUTTURA -->
+    <!-- ORDINI -->
 
     <a href="/ordini/stato/in_lavorazione"
        class="btn {{ request()->is('ordini/stato/in_lavorazione') ? 'active' : '' }}">
         In lavorazione
+
+        @if(($conteggiOrdini['in_lavorazione'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['in_lavorazione'] }}
+            </span>
+        @endif
     </a>
 
     <a href="/ordini/stato/completo_attesa_merce"
        class="btn {{ request()->is('ordini/stato/completo_attesa_merce') ? 'active' : '' }}">
         Attesa merce
+
+        @if(($conteggiOrdini['completo_attesa_merce'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['completo_attesa_merce'] }}
+            </span>
+        @endif
     </a>
 
     <a href="/ordini/stato/attesa_saldo_merce"
        class="btn {{ request()->is('ordini/stato/attesa_saldo_merce') ? 'active' : '' }}">
         Attesa saldo
+
+        @if(($conteggiOrdini['attesa_saldo_merce'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['attesa_saldo_merce'] }}
+            </span>
+        @endif
     </a>
 
     <a href="/ordini/stato/programmare_posa"
        class="btn {{ request()->is('ordini/stato/programmare_posa') ? 'active' : '' }}">
         Programmare posa
+
+        @if(($conteggiOrdini['programmare_posa'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['programmare_posa'] }}
+            </span>
+        @endif
     </a>
 
     <a href="/ordini/stato/concluso"
