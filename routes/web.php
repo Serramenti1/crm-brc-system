@@ -9,6 +9,7 @@ use App\Http\Controllers\RigaPreventivoServizioController;
 use App\Http\Controllers\ProdottoFornitoreController;
 use App\Http\Controllers\FornitoreController;
 use App\Http\Controllers\OrdineController;
+use App\Http\Controllers\ImpostazioneController;
 
 Route::get('/', function () {
     return view('dashboard');
@@ -37,5 +38,13 @@ Route::post('/ordini/{id}/aggiorna-stato-avanzato', [OrdineController::class, 'a
     ->name('ordini.aggiornaStatoAvanzato');
 
 Route::put('/servizi-riga/{id}', [RigaPreventivoServizioController::class, 'update']);
-
 Route::delete('/servizi-riga/{id}', [RigaPreventivoServizioController::class, 'destroy']);
+
+Route::get('/impostazioni', [ImpostazioneController::class, 'index']);
+Route::get('/impostazioni/iva', [ImpostazioneController::class, 'iva']);
+Route::post('/impostazioni/iva', [ImpostazioneController::class, 'storeIva']);
+Route::put('/impostazioni/iva/{id}', [ImpostazioneController::class, 'updateIva']);
+
+Route::get('/impostazioni/detrazioni', [ImpostazioneController::class, 'detrazioni']);
+Route::post('/impostazioni/detrazioni', [ImpostazioneController::class, 'storeDetrazione']);
+Route::put('/impostazioni/detrazioni/{id}', [ImpostazioneController::class, 'updateDetrazione']);

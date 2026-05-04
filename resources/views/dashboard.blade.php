@@ -1,5 +1,21 @@
 @include('partials.menu')
 
+
+<h1>Dashboard</h1>
+
+<br>
+
+<a href="/impostazioni" style="
+    display:inline-block;
+    padding:10px 20px;
+    background:#007bff;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+">
+    ⚙️ Impostazioni
+</a>
+
 <h1>Gestionale CRM BRC System</h1>
 
 <hr>
