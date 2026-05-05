@@ -10,11 +10,7 @@ class Detrazione extends Model
 
     protected $fillable = [
         'nome',
+        'percentuale',
         'attiva',
     ];
-
-    public function varianti()
-    {
-        return $this->hasMany(DetrazioneVariante::class, 'detrazione_id');
-    }
 }

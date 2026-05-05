@@ -56,7 +56,7 @@ class ImpostazioneController extends Controller
 
     public function detrazioni()
     {
-        $detrazioni = Detrazione::with('varianti')->orderBy('nome')->get();
+        $detrazioni = Detrazione::orderBy('nome')->get();
 
         return view('impostazioni.detrazioni', compact('detrazioni'));
     }
@@ -65,10 +65,12 @@ class ImpostazioneController extends Controller
     {
         $request->validate([
             'nome' => 'required|string|max:255',
+            'percentuale' => 'required|numeric|min:0|max:100',
         ]);
 
         Detrazione::create([
             'nome' => $request->nome,
+            'percentuale' => $request->percentuale,
             'attiva' => $request->has('attiva') ? 1 : 0,
         ]);
 
@@ -79,12 +81,14 @@ class ImpostazioneController extends Controller
     {
         $request->validate([
             'nome' => 'required|string|max:255',
+            'percentuale' => 'required|numeric|min:0|max:100',
         ]);
 
         $detrazione = Detrazione::findOrFail($id);
 
         $detrazione->update([
             'nome' => $request->nome,
+            'percentuale' => $request->percentuale,
             'attiva' => $request->has('attiva') ? 1 : 0,
         ]);
 

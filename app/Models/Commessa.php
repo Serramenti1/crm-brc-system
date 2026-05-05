@@ -14,14 +14,29 @@ class Commessa extends Model
     protected $fillable = [
         'cliente_id',
         'titolo',
+
         'indirizzo_lavoro',
         'citta_lavoro',
         'provincia_lavoro',
         'cap_lavoro',
+
+        'piano_posa',
+        'autoscala',
+
         'tipologia_abitazione',
         'tipo_lavoro',
         'tipo_detrazione',
         'percentuale_detrazione',
+
+        'dati_catastali',
+        'numero_catastale',
+
+        'pratica_edilizia_tipo',
+        'pratica_edilizia_numero',
+        'pratica_edilizia_protocollo',
+
+        'pratica_enea',
+
         'stato',
         'note'
     ];
