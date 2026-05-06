@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ImpostazioneIva;
 use App\Models\Detrazione;
+use App\Models\ServizioExtra;
 
 class ImpostazioneController extends Controller
 {
@@ -94,4 +95,62 @@ class ImpostazioneController extends Controller
 
         return redirect('/impostazioni/detrazioni')->with('success', 'Detrazione aggiornata');
     }
+    public function servizi()
+{
+    $servizi = ServizioExtra::orderBy('nome')->get();
+
+    return view('impostazioni.servizi', compact('servizi'));
+}
+
+public function storeServizio(Request $request)
+{
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
+
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $prezzoCliente = $costo * (1 + ($ricarico / 100));
+
+    ServizioExtra::create([
+        'nome' => $request->nome,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzoCliente,
+        'attivo' => $request->has('attivo') ? 1 : 0,
+        'note' => $request->note,
+    ]);
+
+    return redirect('/impostazioni/servizi')->with('success', 'Servizio extra salvato');
+}
+
+public function updateServizio(Request $request, $id)
+{
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
+
+    $servizio = ServizioExtra::findOrFail($id);
+
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $prezzoCliente = $costo * (1 + ($ricarico / 100));
+
+    $servizio->update([
+        'nome' => $request->nome,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzoCliente,
+        'attivo' => $request->has('attivo') ? 1 : 0,
+        'note' => $request->note,
+    ]);
+
+    return redirect('/impostazioni/servizi')->with('success', 'Servizio extra aggiornato');
+}
 }

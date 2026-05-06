@@ -48,3 +48,7 @@ Route::put('/impostazioni/iva/{id}', [ImpostazioneController::class, 'updateIva'
 Route::get('/impostazioni/detrazioni', [ImpostazioneController::class, 'detrazioni']);
 Route::post('/impostazioni/detrazioni', [ImpostazioneController::class, 'storeDetrazione']);
 Route::put('/impostazioni/detrazioni/{id}', [ImpostazioneController::class, 'updateDetrazione']);
+
+Route::get('/impostazioni/servizi', [ImpostazioneController::class, 'servizi']);
+Route::post('/impostazioni/servizi', [ImpostazioneController::class, 'storeServizio']);
+Route::put('/impostazioni/servizi/{id}', [ImpostazioneController::class, 'updateServizio']);

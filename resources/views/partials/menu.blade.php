@@ -75,13 +75,7 @@
 
     <!-- FINE ORDINI -->
 
-    <a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">
-        Fornitori
-    </a>
-
-    <a href="/prodotti-fornitore" class="btn {{ request()->is('prodotti-fornitore*') ? 'active' : '' }}">
-        Prodotti Fornitore
-    </a>
+   
 
     
 
