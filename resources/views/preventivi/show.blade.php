@@ -7,6 +7,11 @@
 @if(session('success'))
     <p style="color:green;">{{ session('success') }}</p>
 @endif
+<div style="margin-bottom:15px;">
+    <a href="/preventivi">
+        ← Torna ai preventivi
+    </a>
+</div>
 
 <h2>Prodotti</h2>
 
@@ -251,6 +256,7 @@ Bene significativo
 
 <button>Salva modifica</button>
 <button type="button" onclick="chiudiModificaRiga({{ $riga->id }})">Annulla</button>
+
 
 </form>
 

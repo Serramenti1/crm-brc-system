@@ -17,20 +17,18 @@
 
 <table border="1" cellpadding="5">
     <tr>
-        <th>ID</th>
+        
         <th>Numero</th>
         <th>Cliente</th>
-        <th>Descrizione</th>
         <th>Commessa</th>
         <th>Totale Cliente</th>
         <th>Sconto Medio</th>
-        <th>Utile</th>
         <th>Azioni</th>
     </tr>
 
     @foreach($preventivi as $preventivo)
     <tr>
-        <td>{{ $preventivo->id }}</td>
+        
 
         <td>
             <strong>{{ $preventivo->numero }}</strong>
@@ -42,7 +40,7 @@
                 : '' }}
         </td>
         
-        <td>{{ $preventivo->descrizione }}</td>
+       
 
         <td>
             {{ $preventivo->commessa ? $preventivo->commessa->titolo : '' }}
@@ -56,9 +54,6 @@
             {{ number_format($preventivo->sconto_medio_cliente, 2, ',', '.') }} %
         </td>
 
-        <td>
-            {{ number_format($preventivo->utile_totale, 2, ',', '.') }} €
-        </td>
 
         <td>
             <a href="/preventivi/{{ $preventivo->id }}">Apri</a>

@@ -15,59 +15,68 @@
 <form method="POST" action="/clienti">
     @csrf
 
-    <p>
-        Nome:<br>
-        <input type="text" name="nome">
-    </p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
 
-    <p>
-        Cognome:<br>
-        <input type="text" name="cognome">
-    </p>
+        <p>
+            Nome:<br>
+            <input type="text" name="nome" style="width:100%;">
+        </p>
 
-    <p>
-        Telefono:<br>
-        <input type="text" name="telefono">
-    </p>
+        <p>
+            Cognome:<br>
+            <input type="text" name="cognome" style="width:100%;">
+        </p>
 
-    <p>
-        Email:<br>
-        <input type="text" name="email">
-    </p>
+        <p>
+            Telefono:<br>
+            <input type="text" name="telefono" style="width:100%;">
+        </p>
 
-    <p>
-        Indirizzo:<br>
-        <input type="text" name="indirizzo">
-    </p>
+        <p>
+            Email:<br>
+            <input type="email" name="email" style="width:100%;">
+        </p>
 
-    <p>
-        Città:<br>
-        <input type="text" name="citta">
-    </p>
+        <p>
+            Codice fiscale:<br>
+            <input type="text" name="codice_fiscale" style="width:100%;">
+        </p>
 
-    <p>
-        CAP:<br>
-        <input type="text" name="cap">
-    </p>
+        <p>
+            Partita IVA:<br>
+            <input type="text" name="partita_iva" style="width:100%;">
+        </p>
 
-    <p>
-        Provincia:<br>
-        <input type="text" name="provincia">
-    </p>
+        <p style="grid-column: span 2;">
+            Indirizzo:<br>
+            <input type="text" name="indirizzo" style="width:100%;">
+        </p>
 
-    <p>
-        Codice Fiscale:<br>
-        <input type="text" name="codice_fiscale">
-    </p>
+        <p>
+            CAP:<br>
+            <input type="text" name="cap" style="width:100%;">
+        </p>
 
-    <p>
-        Partita IVA:<br>
-        <input type="text" name="partita_iva">
-    </p>
+        <p>
+            Città:<br>
+            <input type="text" name="citta" style="width:100%;">
+        </p>
+
+        <p>
+            Provincia:<br>
+            <input type="text" name="provincia" style="width:100%;">
+        </p>
+
+        <p style="grid-column: span 3;">
+            Note:<br>
+            <textarea name="note" rows="4" style="width:100%;"></textarea>
+        </p>
+
+    </div>
 
     <button type="submit">Salva Cliente</button>
 </form>
 
 <br>
 
-<a href="/clienti">Torna alla lista</a>
+<a href="/clienti">← Torna ai clienti</a>

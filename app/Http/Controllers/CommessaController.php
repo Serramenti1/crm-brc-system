@@ -9,12 +9,32 @@ use App\Models\Detrazione;
 
 class CommessaController extends Controller
 {
-    public function index()
-    {
-        $commesse = Commessa::with('cliente')->get();
+    public function index(Request $request)
+{
+    $query = Commessa::with('cliente');
 
-        return view('commesse.index', compact('commesse'));
+    if ($request->filled('q')) {
+        $parole = explode(' ', trim($request->q));
+
+        $query->where(function ($query) use ($parole) {
+            foreach ($parole as $parola) {
+                $query->where(function ($sub) use ($parola) {
+                    $sub->where('indirizzo_lavoro', 'like', '%' . $parola . '%')
+                        ->orWhere('citta_lavoro', 'like', '%' . $parola . '%')
+                        ->orWhere('tipo_detrazione', 'like', '%' . $parola . '%')
+                        ->orWhereHas('cliente', function ($clienteQuery) use ($parola) {
+                            $clienteQuery->where('nome', 'like', $parola . '%')
+                                ->orWhere('cognome', 'like', $parola . '%');
+                        });
+                });
+            }
+        });
     }
+
+    $commesse = $query->get();
+
+    return view('commesse.index', compact('commesse'));
+}
 
     public function create()
     {
@@ -171,12 +191,23 @@ class CommessaController extends Controller
     }
 
     public function destroy($id)
-    {
+{
+    try {
+
         $commessa = Commessa::findOrFail($id);
         $commessa->delete();
 
-        return redirect('/commesse');
+        return redirect('/commesse')
+            ->with('success', 'Commessa eliminata');
+
+    } catch (\Exception $e) {
+
+        return redirect('/commesse')
+            ->with('error', 'Impossibile eliminare la commessa perché collegata a preventivi o ordini');
+
     }
+
+ }
 
     private function calcolaPercentualeDetrazione($nomeDetrazione)
     {
