@@ -22,6 +22,7 @@
 <table border="1">
 <tr>
 <th>Nome</th>
+<th>Referente</th>
 <th>Telefono</th>
 <th>Email</th>
 <th>Azioni</th>
@@ -30,6 +31,7 @@
 @foreach($fornitori as $f)
 <tr>
 <td>{{ $f->ragione_sociale }}</td>
+<td>{{ $f->referente }}</td>
 <td>{{ $f->telefono }}</td>
 <td>{{ $f->email }}</td>
 <td>

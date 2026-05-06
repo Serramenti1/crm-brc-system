@@ -10,9 +10,17 @@ use App\Http\Controllers\ProdottoFornitoreController;
 use App\Http\Controllers\FornitoreController;
 use App\Http\Controllers\OrdineController;
 use App\Http\Controllers\ImpostazioneController;
+use App\Models\Ordine;
 
 Route::get('/', function () {
-    return view('dashboard');
+    $conteggiOrdini = [
+        'in_lavorazione' => Ordine::where('stato', 'in_lavorazione')->count(),
+        'completo_attesa_merce' => Ordine::where('stato', 'completo_attesa_merce')->count(),
+        'attesa_saldo_merce' => Ordine::where('stato', 'attesa_saldo_merce')->count(),
+        'programmare_posa' => Ordine::where('stato', 'programmare_posa')->count(),
+    ];
+
+    return view('dashboard', compact('conteggiOrdini'));
 });
 
 Route::resource('clienti', ClienteController::class);

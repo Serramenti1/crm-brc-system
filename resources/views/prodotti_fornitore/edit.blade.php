@@ -13,7 +13,7 @@
 </option>
 @endforeach
 </select>
-@include('partials.menu')
+
 
 <h1>Modifica Prodotto Fornitore</h1>
 

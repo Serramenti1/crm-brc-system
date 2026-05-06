@@ -13,7 +13,7 @@
 <input type="text" name="telefono" value="{{ $fornitore->telefono }}">
 
 <input type="email" name="email" value="{{ $fornitore->email }}">
-@include('partials.menu')
+
 
 <h1>Modifica Fornitore</h1>
 

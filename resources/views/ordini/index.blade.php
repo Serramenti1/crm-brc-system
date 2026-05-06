@@ -24,25 +24,25 @@
 
 <table border="1" cellpadding="5" width="100%">
     <tr>
-        <th>Numero</th>
         <th>Cliente</th>
-        <th>Preventivo origine</th>
+        <th>Commessa</th>
         <th>Costo a noi</th>
         <th>Stato</th>
+        <th>Stati righe</th>
         <th>Azioni</th>
     </tr>
 
     @forelse($ordini as $ordine)
         <tr>
-            <td>{{ $ordine->numero }}</td>
-
             <td>
-                {{ optional(optional(optional($ordine->commessa)->cliente))->nome }}
-                {{ optional(optional(optional($ordine->commessa)->cliente))->cognome }}
+                {{ optional(optional($ordine->commessa)->cliente)->nome }}
+                {{ optional(optional($ordine->commessa)->cliente)->cognome }}
             </td>
 
             <td>
-                {{ $ordine->preventivo->numero ?? '' }}
+                {{ optional($ordine->commessa)->titolo }}
+                <br>
+                {{ optional($ordine->commessa)->indirizzo_lavoro }}
             </td>
 
             <td>
@@ -53,7 +53,7 @@
                 @if($ordine->stato == 'in_lavorazione')
                     In lavorazione
                 @elseif($ordine->stato == 'completo_attesa_merce')
-                    Completo - attesa merce
+                    Attesa merce
                 @elseif($ordine->stato == 'attesa_saldo_merce')
                     Attesa saldo merce
                 @elseif($ordine->stato == 'programmare_posa')
@@ -63,6 +63,32 @@
                 @else
                     {{ $ordine->stato }}
                 @endif
+            </td>
+
+            <td>
+                @foreach($ordine->righe as $riga)
+                    <div style="margin-bottom:8px; border-bottom:1px solid #ddd; padding-bottom:5px;">
+                        <strong>{{ $riga->descrizione }}</strong><br>
+
+                        @if($ordine->stato == 'in_lavorazione')
+                            Inviato:
+                            {{ $riga->inviato ? 'Sì' : 'No' }}
+                            |
+                            CO:
+                            {{ $riga->co_ricevuta ? 'Sì' : 'No' }}
+                            |
+                            Produzione:
+                            {{ $riga->in_produzione ? 'Sì' : 'No' }}
+
+                        @elseif($ordine->stato == 'completo_attesa_merce')
+                            Merce arrivata:
+                            {{ $riga->merce_arrivata ? 'Sì' : 'No' }}
+
+                        @else
+                            -
+                        @endif
+                    </div>
+                @endforeach
             </td>
 
             <td>
