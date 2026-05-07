@@ -20,6 +20,8 @@ class Ordine extends Model
         'saldo_merce_ricevuto',
         'posa_effettuata',
         'fattura_saldo_posa_fatta',
+        'ultimo_avanzamento_tipo',
+        'ultimo_avanzamento_riga_id',
     ];
 
     public function preventivo()

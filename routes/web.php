@@ -61,3 +61,5 @@ Route::put('/impostazioni/detrazioni/{id}', [ImpostazioneController::class, 'upd
 Route::get('/impostazioni/servizi', [ImpostazioneController::class, 'servizi']);
 Route::post('/impostazioni/servizi', [ImpostazioneController::class, 'storeServizio']);
 Route::put('/impostazioni/servizi/{id}', [ImpostazioneController::class, 'updateServizio']);
+Route::post('/ordini/{id}/stato-precedente', [OrdineController::class, 'tornaStatoPrecedente'])
+    ->name('ordini.tornaStatoPrecedente');

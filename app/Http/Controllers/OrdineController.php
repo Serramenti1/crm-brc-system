@@ -13,7 +13,7 @@ class OrdineController extends Controller
 {
     public function index()
     {
-        $ordini = Ordine::with('commessa.cliente')
+        $ordini = Ordine::with('commessa.cliente', 'righe')
             ->where('stato', 'in_lavorazione')
             ->get();
 
@@ -22,7 +22,7 @@ class OrdineController extends Controller
 
     public function completi()
     {
-        $ordini = Ordine::with('commessa.cliente')
+        $ordini = Ordine::with('commessa.cliente', 'righe')
             ->where('stato', 'concluso')
             ->get();
 
@@ -43,7 +43,7 @@ class OrdineController extends Controller
             abort(404);
         }
 
-        $ordini = Ordine::with('commessa.cliente')
+        $ordini = Ordine::with('commessa.cliente', 'righe')
             ->where('stato', $stato)
             ->get();
 
@@ -76,10 +76,6 @@ class OrdineController extends Controller
         $prossimoNumero = Ordine::max('id') + 1;
         $numeroOrdine = 'ORD-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT);
 
-        /*
-            ORDINE = solo costo netto prodotti a noi.
-            I servizi NON vengono calcolati.
-        */
         $imponibile = 0;
 
         foreach ($preventivo->righeProdotti as $riga) {
@@ -102,6 +98,8 @@ class OrdineController extends Controller
             'saldo_merce_ricevuto' => false,
             'posa_effettuata' => false,
             'fattura_saldo_posa_fatta' => false,
+            'ultimo_avanzamento_tipo' => null,
+            'ultimo_avanzamento_riga_id' => null,
         ]);
 
         foreach ($preventivo->righeProdotti as $riga) {
@@ -129,14 +127,31 @@ class OrdineController extends Controller
         $riga = RigaOrdine::findOrFail($id);
         $ordine = Ordine::with('righe')->findOrFail($riga->ordine_id);
 
+        $ultimoTipo = null;
+        $ultimoRigaId = null;
+
         if ($ordine->stato == 'in_lavorazione') {
+            $primaInProduzione = $riga->in_produzione;
+
             $riga->inviato = $request->has('inviato') ? 1 : 0;
             $riga->co_ricevuta = $request->has('co_ricevuta') ? 1 : 0;
             $riga->in_produzione = $request->has('in_produzione') ? 1 : 0;
+
+            if (!$primaInProduzione && $riga->in_produzione) {
+                $ultimoTipo = 'in_produzione';
+                $ultimoRigaId = $riga->id;
+            }
         }
 
         if ($ordine->stato == 'completo_attesa_merce') {
+            $primaMerceArrivata = $riga->merce_arrivata;
+
             $riga->merce_arrivata = $request->has('merce_arrivata') ? 1 : 0;
+
+            if (!$primaMerceArrivata && $riga->merce_arrivata) {
+                $ultimoTipo = 'merce_arrivata';
+                $ultimoRigaId = $riga->id;
+            }
         }
 
         if ($request->hasFile('pdf')) {
@@ -152,7 +167,7 @@ class OrdineController extends Controller
 
         $ordine = Ordine::with('righe')->findOrFail($ordine->id);
 
-        $messaggioCambioStato = $this->aggiornaStatoOrdine($ordine);
+        $messaggioCambioStato = $this->aggiornaStatoOrdine($ordine, $ultimoTipo, $ultimoRigaId);
 
         if ($messaggioCambioStato) {
             return redirect('/ordini/' . $ordine->id)
@@ -167,20 +182,35 @@ class OrdineController extends Controller
     {
         $ordine = Ordine::with('righe')->findOrFail($id);
 
+        $ultimoTipo = null;
+        $ultimoRigaId = null;
+
         if ($ordine->stato == 'attesa_saldo_merce') {
+            $primaSaldo = $ordine->saldo_merce_ricevuto;
+
             $ordine->saldo_merce_ricevuto = $request->has('saldo_merce_ricevuto') ? 1 : 0;
+
+            if (!$primaSaldo && $ordine->saldo_merce_ricevuto) {
+                $ultimoTipo = 'saldo_merce_ricevuto';
+            }
         }
 
         if ($ordine->stato == 'programmare_posa') {
+            $primaFattura = $ordine->fattura_saldo_posa_fatta;
+
             $ordine->posa_effettuata = $request->has('posa_effettuata') ? 1 : 0;
             $ordine->fattura_saldo_posa_fatta = $request->has('fattura_saldo_posa_fatta') ? 1 : 0;
+
+            if (!$primaFattura && $ordine->fattura_saldo_posa_fatta) {
+                $ultimoTipo = 'fattura_saldo_posa_fatta';
+            }
         }
 
         $ordine->save();
 
         $ordine = Ordine::with('righe')->findOrFail($ordine->id);
 
-        $messaggioCambioStato = $this->aggiornaStatoOrdine($ordine);
+        $messaggioCambioStato = $this->aggiornaStatoOrdine($ordine, $ultimoTipo, $ultimoRigaId);
 
         if ($messaggioCambioStato) {
             return redirect('/ordini/' . $ordine->id)
@@ -191,7 +221,7 @@ class OrdineController extends Controller
             ->with('success', 'Stato ordine aggiornato correttamente.');
     }
 
-    private function aggiornaStatoOrdine($ordine)
+    private function aggiornaStatoOrdine($ordine, $ultimoTipo = null, $ultimoRigaId = null)
     {
         $messaggio = null;
 
@@ -207,6 +237,8 @@ class OrdineController extends Controller
 
             if ($tuttePronte) {
                 $ordine->stato = 'completo_attesa_merce';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = $ultimoRigaId;
                 $messaggio = 'Tutte le righe sono complete. L’ordine è stato spostato in: Completo - attesa merce.';
             }
         }
@@ -223,6 +255,8 @@ class OrdineController extends Controller
 
             if ($merceTuttaArrivata) {
                 $ordine->stato = 'attesa_saldo_merce';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = $ultimoRigaId;
                 $messaggio = 'Tutta la merce è arrivata. L’ordine è stato spostato in: Attesa saldo merce.';
             }
         }
@@ -230,6 +264,8 @@ class OrdineController extends Controller
         if ($ordine->stato == 'attesa_saldo_merce') {
             if ($ordine->saldo_merce_ricevuto) {
                 $ordine->stato = 'programmare_posa';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = null;
                 $messaggio = 'Saldo merce ricevuto. L’ordine è stato spostato in: Programmare posa.';
             }
         }
@@ -237,6 +273,8 @@ class OrdineController extends Controller
         if ($ordine->stato == 'programmare_posa') {
             if ($ordine->posa_effettuata && $ordine->fattura_saldo_posa_fatta) {
                 $ordine->stato = 'concluso';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = null;
                 $messaggio = 'Posa effettuata e fattura saldo posa fatta. L’ordine è stato concluso.';
             }
         }
@@ -244,6 +282,65 @@ class OrdineController extends Controller
         $ordine->save();
 
         return $messaggio;
+    }
+
+    public function tornaStatoPrecedente($id)
+    {
+        $ordine = Ordine::with('righe')->findOrFail($id);
+
+        if ($ordine->stato == 'completo_attesa_merce') {
+            if ($ordine->ultimo_avanzamento_tipo == 'in_produzione' && $ordine->ultimo_avanzamento_riga_id) {
+                $riga = RigaOrdine::find($ordine->ultimo_avanzamento_riga_id);
+
+                if ($riga) {
+                    $riga->in_produzione = 0;
+                    $riga->save();
+                }
+            }
+
+            $ordine->stato = 'in_lavorazione';
+            $messaggio = 'Ordine riportato in lavorazione. Rimossa solo la spunta che aveva causato l’avanzamento.';
+
+        } elseif ($ordine->stato == 'attesa_saldo_merce') {
+            if ($ordine->ultimo_avanzamento_tipo == 'merce_arrivata' && $ordine->ultimo_avanzamento_riga_id) {
+                $riga = RigaOrdine::find($ordine->ultimo_avanzamento_riga_id);
+
+                if ($riga) {
+                    $riga->merce_arrivata = 0;
+                    $riga->save();
+                }
+            }
+
+            $ordine->stato = 'completo_attesa_merce';
+            $messaggio = 'Ordine riportato in attesa merce. Rimossa solo la spunta che aveva causato l’avanzamento.';
+
+        } elseif ($ordine->stato == 'programmare_posa') {
+            if ($ordine->ultimo_avanzamento_tipo == 'saldo_merce_ricevuto') {
+                $ordine->saldo_merce_ricevuto = 0;
+            }
+
+            $ordine->stato = 'attesa_saldo_merce';
+            $messaggio = 'Ordine riportato in attesa saldo merce. Rimossa la spunta saldo merce ricevuto.';
+
+        } elseif ($ordine->stato == 'concluso') {
+            if ($ordine->ultimo_avanzamento_tipo == 'fattura_saldo_posa_fatta') {
+                $ordine->fattura_saldo_posa_fatta = 0;
+            }
+
+            $ordine->stato = 'programmare_posa';
+            $messaggio = 'Ordine riportato in programmare posa. Rimossa la spunta fattura saldo posa fatta.';
+
+        } else {
+            return redirect('/ordini/' . $ordine->id)
+                ->with('error', 'Questo ordine non può tornare a uno stato precedente.');
+        }
+
+        $ordine->ultimo_avanzamento_tipo = null;
+        $ordine->ultimo_avanzamento_riga_id = null;
+        $ordine->save();
+
+        return redirect('/ordini/' . $ordine->id)
+            ->with('success', $messaggio);
     }
 
     public function destroy($id)

@@ -1,215 +1,362 @@
 @include('partials.menu')
 
 @if(session('success'))
-    <p style="color:green;">{{ session('success') }}</p>
+    <div style="color:green; margin-bottom:15px;">
+        {{ session('success') }}
+    </div>
 @endif
 
 @if(session('error'))
-    <p style="color:red;">{{ session('error') }}</p>
+    <div style="color:red; margin-bottom:15px;">
+        {{ session('error') }}
+    </div>
 @endif
 
-<h1>Dettaglio Ordine</h1>
+<div style="margin-bottom:20px;">
+    <a href="/ordini/stato/{{ $ordine->stato }}">
+        ← Torna alla lista ordini
+    </a>
+</div>
 
-<p><strong>Numero ordine:</strong> {{ $ordine->numero }}</p>
-<p><strong>Preventivo origine:</strong> {{ $ordine->preventivo->numero ?? '' }}</p>
+<h1>Ordine {{ $ordine->numero }}</h1>
 
-<p>
-    <strong>Cliente:</strong>
-    {{ optional(optional($ordine->commessa)->cliente)->nome }}
-    {{ optional(optional($ordine->commessa)->cliente)->cognome }}
-</p>
+<div style="margin-bottom:20px; border:1px solid #ccc; padding:15px;">
 
-<p>
-    <strong>Costo netto prodotti a noi:</strong>
-    {{ number_format($ordine->imponibile, 2, ',', '.') }} €
-</p>
+    <p>
+        <strong>Cliente:</strong>
+        {{ $ordine->commessa && $ordine->commessa->cliente
+            ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
+            : '' }}
+    </p>
 
-<p><strong>Stato:</strong> {{ $ordine->stato }}</p>
+    <p>
+        <strong>Commessa:</strong>
+        {{ $ordine->commessa ? $ordine->commessa->titolo : '' }}
+    </p>
 
-<hr>
+    <p>
+        <strong>Indirizzo intervento:</strong>
+        {{ $ordine->commessa ? $ordine->commessa->indirizzo_lavoro : '' }}
+    </p>
 
-<h2>Righe Ordine</h2>
+    <p>
+        <strong>Stato:</strong>
+
+        @if($ordine->stato == 'in_lavorazione')
+            In lavorazione
+        @elseif($ordine->stato == 'completo_attesa_merce')
+            Completo - attesa merce
+        @elseif($ordine->stato == 'attesa_saldo_merce')
+            Attesa saldo merce
+        @elseif($ordine->stato == 'programmare_posa')
+            Programmare posa
+        @elseif($ordine->stato == 'concluso')
+            Concluso
+        @endif
+    </p>
+
+    @if($ordine->stato != 'in_lavorazione')
+        <form method="POST"
+              action="/ordini/{{ $ordine->id }}/stato-precedente"
+              style="margin-top:10px;"
+              onsubmit="return confermaRitornoStato()">
+
+            @csrf
+
+            <button type="submit">
+                ← Torna allo stato precedente
+            </button>
+        </form>
+    @endif
+
+</div>
+
+<h2>Righe ordine</h2>
 
 <table border="1" cellpadding="5" width="100%">
-<tr>
-<th>Prodotto</th>
-<th>Fornitore</th>
-<th>Quantità</th>
-<th>Costo</th>
-<th>Stati</th>
-<th>Salva</th>
-</tr>
 
-@foreach($ordine->righe as $riga)
-<tr>
-<form method="POST" action="/righe-ordine/{{ $riga->id }}/aggiorna" onsubmit="return confermaCambioStato(this)">
-@csrf
+    <tr>
+        <th>Prodotto</th>
+        <th>Fornitore</th>
+        <th>Quantità</th>
+        <th>Imponibile</th>
+        <th>Stati</th>
+        <th>PDF</th>
+        <th>Azioni</th>
+    </tr>
 
-<td>{{ $riga->descrizione }}</td>
-<td>{{ $riga->fornitore->ragione_sociale ?? '' }}</td>
-<td>{{ $riga->quantita }}</td>
-<td>{{ number_format($riga->imponibile,2,',','.') }} €</td>
+    @foreach($ordine->righe as $riga)
 
-<td>
+        <form id="form_riga_{{ $riga->id }}"
+              method="POST"
+              action="/righe-ordine/{{ $riga->id }}/aggiorna"
+              enctype="multipart/form-data"
+              onsubmit="return confermaAvanzamentoRiga(this)">
+            @csrf
+        </form>
 
-@if($ordine->stato == 'in_lavorazione')
+        <tr>
+            <td>
+                {{ $riga->descrizione }}
+            </td>
 
-<label>
-<input type="checkbox" name="inviato" {{ $riga->inviato ? 'checked' : '' }}>
-Inviato
-</label><br>
+            <td>
+                {{ $riga->fornitore ? $riga->fornitore->ragione_sociale : '' }}
+            </td>
 
-<label>
-<input type="checkbox" name="co_ricevuta" {{ $riga->co_ricevuta ? 'checked' : '' }}>
-CO ricevuta
-</label><br>
+            <td>
+                {{ $riga->quantita }}
+            </td>
 
-<label>
-<input type="checkbox" name="in_produzione" {{ $riga->in_produzione ? 'checked' : '' }}>
-Produzione
-</label>
+            <td>
+                {{ number_format($riga->imponibile, 2, ',', '.') }} €
+            </td>
 
-@elseif($ordine->stato == 'completo_attesa_merce')
+            <td>
+                @if($ordine->stato == 'in_lavorazione')
 
-<label>
-<input type="checkbox" name="merce_arrivata" {{ $riga->merce_arrivata ? 'checked' : '' }}>
-Merce arrivata
-</label>
+                    <label>
+                        <input type="checkbox"
+                               class="chk-inviato"
+                               form="form_riga_{{ $riga->id }}"
+                               name="inviato"
+                               value="1"
+                               {{ $riga->inviato ? 'checked' : '' }}>
+                        Inviato
+                    </label>
 
-@else
+                    <br>
 
-✔ completato
+                    <label>
+                        <input type="checkbox"
+                               class="chk-co"
+                               form="form_riga_{{ $riga->id }}"
+                               name="co_ricevuta"
+                               value="1"
+                               {{ $riga->co_ricevuta ? 'checked' : '' }}>
+                        Conferma ordine ricevuta
+                    </label>
 
-@endif
+                    <br>
 
-</td>
+                    <label>
+                        <input type="checkbox"
+                               class="chk-produzione"
+                               form="form_riga_{{ $riga->id }}"
+                               name="in_produzione"
+                               value="1"
+                               {{ $riga->in_produzione ? 'checked' : '' }}>
+                        In produzione
+                    </label>
 
-<td>
-@if($ordine->stato == 'in_lavorazione' || $ordine->stato == 'completo_attesa_merce')
-<button>Salva</button>
-@endif
-</td>
+                @elseif($ordine->stato == 'completo_attesa_merce')
 
-</form>
-</tr>
-@endforeach
+                    <label>
+                        <input type="checkbox"
+                               class="chk-merce"
+                               form="form_riga_{{ $riga->id }}"
+                               name="merce_arrivata"
+                               value="1"
+                               {{ $riga->merce_arrivata ? 'checked' : '' }}>
+                        Merce arrivata
+                    </label>
+
+                @else
+                    -
+                @endif
+            </td>
+
+            <td>
+                @if($riga->pdf_path)
+                    <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
+                        Apri PDF
+                    </a>
+                    <br>
+                @endif
+
+                @if($ordine->stato != 'concluso')
+                    <input type="file"
+                           form="form_riga_{{ $riga->id }}"
+                           name="pdf"
+                           accept="application/pdf">
+                @endif
+            </td>
+
+            <td>
+                @if($ordine->stato == 'in_lavorazione' || $ordine->stato == 'completo_attesa_merce')
+                    <button type="submit" form="form_riga_{{ $riga->id }}">
+                        Salva
+                    </button>
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
+
+    @endforeach
 
 </table>
 
-@if($ordine->stato == 'attesa_saldo_merce')
+@if($ordine->stato == 'attesa_saldo_merce' || $ordine->stato == 'programmare_posa')
 
-<hr>
-<form method="POST" action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato" onsubmit="return confermaCambioStato(this)">
-@csrf
+    <br>
 
-<label>
-<input type="checkbox" name="saldo_merce_ricevuto" {{ $ordine->saldo_merce_ricevuto ? 'checked' : '' }}>
-Saldo ricevuto
-</label>
+    <h2>Stato avanzato ordine</h2>
 
-<br><br>
-<button>Salva</button>
+    <form id="form_stato_avanzato"
+          method="POST"
+          action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato"
+          onsubmit="return confermaAvanzamentoAvanzato(this)">
 
-</form>
+        @csrf
 
-@endif
+        @if($ordine->stato == 'attesa_saldo_merce')
 
-@if($ordine->stato == 'programmare_posa')
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="saldo_merce_ricevuto"
+                           name="saldo_merce_ricevuto"
+                           value="1"
+                           {{ $ordine->saldo_merce_ricevuto ? 'checked' : '' }}>
 
-<hr>
-<form method="POST" action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato" onsubmit="return confermaCambioStato(this)">
-@csrf
+                    Saldo merce ricevuto
+                </label>
+            </p>
 
-<label>
-<input type="checkbox" name="posa_effettuata" {{ $ordine->posa_effettuata ? 'checked' : '' }}>
-Posa fatta
-</label><br>
+        @endif
 
-<label>
-<input type="checkbox" name="fattura_saldo_posa_fatta" {{ $ordine->fattura_saldo_posa_fatta ? 'checked' : '' }}>
-Fattura saldo fatta
-</label>
+        @if($ordine->stato == 'programmare_posa')
 
-<br><br>
-<button>Salva</button>
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="posa_effettuata"
+                           name="posa_effettuata"
+                           value="1"
+                           {{ $ordine->posa_effettuata ? 'checked' : '' }}>
 
-</form>
+                    Posa effettuata
+                </label>
+            </p>
+
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="fattura_saldo_posa_fatta"
+                           name="fattura_saldo_posa_fatta"
+                           value="1"
+                           {{ $ordine->fattura_saldo_posa_fatta ? 'checked' : '' }}>
+
+                    Fattura saldo posa fatta
+                </label>
+            </p>
+
+        @endif
+
+        <button type="submit">
+            Salva stato avanzato
+        </button>
+
+    </form>
 
 @endif
 
 <script>
-function confermaCambioStato(form) {
+let statoOrdine = "{{ $ordine->stato }}";
 
-    let stato = "{{ $ordine->stato }}";
+function tutteSpuntate(selector) {
+    let elementi = document.querySelectorAll(selector);
 
-    // -------------------------
-    // IN LAVORAZIONE → COMPLETO
-    // -------------------------
-    if (stato === "in_lavorazione") {
+    if (elementi.length === 0) {
+        return false;
+    }
 
-        let tutteOk = true;
+    for (let i = 0; i < elementi.length; i++) {
+        if (!elementi[i].checked) {
+            return false;
+        }
+    }
 
-        document.querySelectorAll('input[name="inviato"]').forEach(i => { if(!i.checked) tutteOk = false; });
-        document.querySelectorAll('input[name="co_ricevuta"]').forEach(i => { if(!i.checked) tutteOk = false; });
-        document.querySelectorAll('input[name="in_produzione"]').forEach(i => { if(!i.checked) tutteOk = false; });
+    return true;
+}
 
-        if (tutteOk) {
-            if (!confirm("Ordine passerà a: COMPLETO - ATTESA MERCE. Continuare?")) {
-                form.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+function confermaAvanzamentoRiga(form) {
+
+    if (statoOrdine === 'in_lavorazione') {
+        let tutteInviato = tutteSpuntate('.chk-inviato');
+        let tutteCo = tutteSpuntate('.chk-co');
+        let tutteProduzione = tutteSpuntate('.chk-produzione');
+
+        if (tutteInviato && tutteCo && tutteProduzione) {
+            let conferma = confirm(
+                'Tutte le righe risultano complete.\n\nL ordine verrà spostato in: Completo - attesa merce.\n\nConfermi?'
+            );
+
+            if (!conferma) {
+                form.reset();
                 return false;
             }
         }
     }
 
-    // -------------------------
-    // MERCE → SALDO
-    // -------------------------
-    if (stato === "completo_attesa_merce") {
+    if (statoOrdine === 'completo_attesa_merce') {
+        let tuttaMerceArrivata = tutteSpuntate('.chk-merce');
 
-        let tutteOk = true;
+        if (tuttaMerceArrivata) {
+            let conferma = confirm(
+                'Tutta la merce risulta arrivata.\n\nL ordine verrà spostato in: Attesa saldo merce.\n\nConfermi?'
+            );
 
-        document.querySelectorAll('input[name="merce_arrivata"]').forEach(i => { if(!i.checked) tutteOk = false; });
-
-        if (tutteOk) {
-            if (!confirm("Ordine passerà a: ATTESA SALDO MERCE. Continuare?")) {
-                form.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-                return false;
-            }
-        }
-    }
-
-    // -------------------------
-    // SALDO → POSA
-    // -------------------------
-    if (stato === "attesa_saldo_merce") {
-
-        let saldo = form.querySelector('input[name="saldo_merce_ricevuto"]');
-
-        if (saldo && saldo.checked) {
-            if (!confirm("Ordine passerà a: PROGRAMMARE POSA. Continuare?")) {
-                saldo.checked = false;
-                return false;
-            }
-        }
-    }
-
-    // -------------------------
-    // POSA → CONCLUSO
-    // -------------------------
-    if (stato === "programmare_posa") {
-
-        let posa = form.querySelector('input[name="posa_effettuata"]');
-        let fattura = form.querySelector('input[name="fattura_saldo_posa_fatta"]');
-
-        if (posa && fattura && posa.checked && fattura.checked) {
-            if (!confirm("Ordine verrà CONCLUSO. Continuare?")) {
-                posa.checked = false;
-                fattura.checked = false;
+            if (!conferma) {
+                form.reset();
                 return false;
             }
         }
     }
 
     return true;
+}
+
+function confermaAvanzamentoAvanzato(form) {
+
+    if (statoOrdine === 'attesa_saldo_merce') {
+        let saldo = document.getElementById('saldo_merce_ricevuto');
+
+        if (saldo && saldo.checked) {
+            let conferma = confirm(
+                'Il saldo merce risulta ricevuto.\n\nL ordine verrà spostato in: Programmare posa.\n\nConfermi?'
+            );
+
+            if (!conferma) {
+                form.reset();
+                return false;
+            }
+        }
+    }
+
+    if (statoOrdine === 'programmare_posa') {
+        let posa = document.getElementById('posa_effettuata');
+        let fattura = document.getElementById('fattura_saldo_posa_fatta');
+
+        if (posa && fattura && posa.checked && fattura.checked) {
+            let conferma = confirm(
+                'Posa effettuata e fattura saldo posa fatta.\n\nL ordine verrà spostato in: Concluso.\n\nConfermi?'
+            );
+
+            if (!conferma) {
+                form.reset();
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+function confermaRitornoStato() {
+    return confirm(
+        'L ordine verrà riportato allo stato precedente e sarà rimossa solo la spunta che aveva causato l avanzamento.\n\nConfermi il ritorno?'
+    );
 }
 </script>

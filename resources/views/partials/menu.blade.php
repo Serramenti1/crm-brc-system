@@ -22,10 +22,12 @@
         Preventivi
     </a>
 
-    <!-- ORDINI -->
-
     <a href="/ordini/stato/in_lavorazione"
-       class="btn {{ request()->is('ordini/stato/in_lavorazione') ? 'active' : '' }}">
+       class="btn {{
+            request()->is('ordini/stato/in_lavorazione') ||
+            (isset($ordine) && $ordine->stato == 'in_lavorazione')
+            ? 'active' : ''
+       }}">
         In lavorazione
 
         @if(($conteggiOrdini['in_lavorazione'] ?? 0) > 0)
@@ -36,7 +38,11 @@
     </a>
 
     <a href="/ordini/stato/completo_attesa_merce"
-       class="btn {{ request()->is('ordini/stato/completo_attesa_merce') ? 'active' : '' }}">
+       class="btn {{
+            request()->is('ordini/stato/completo_attesa_merce') ||
+            (isset($ordine) && $ordine->stato == 'completo_attesa_merce')
+            ? 'active' : ''
+       }}">
         Attesa merce
 
         @if(($conteggiOrdini['completo_attesa_merce'] ?? 0) > 0)
@@ -47,7 +53,11 @@
     </a>
 
     <a href="/ordini/stato/attesa_saldo_merce"
-       class="btn {{ request()->is('ordini/stato/attesa_saldo_merce') ? 'active' : '' }}">
+       class="btn {{
+            request()->is('ordini/stato/attesa_saldo_merce') ||
+            (isset($ordine) && $ordine->stato == 'attesa_saldo_merce')
+            ? 'active' : ''
+       }}">
         Attesa saldo
 
         @if(($conteggiOrdini['attesa_saldo_merce'] ?? 0) > 0)
@@ -58,7 +68,11 @@
     </a>
 
     <a href="/ordini/stato/programmare_posa"
-       class="btn {{ request()->is('ordini/stato/programmare_posa') ? 'active' : '' }}">
+       class="btn {{
+            request()->is('ordini/stato/programmare_posa') ||
+            (isset($ordine) && $ordine->stato == 'programmare_posa')
+            ? 'active' : ''
+       }}">
         Programmare posa
 
         @if(($conteggiOrdini['programmare_posa'] ?? 0) > 0)
@@ -69,14 +83,12 @@
     </a>
 
     <a href="/ordini/stato/concluso"
-       class="btn {{ request()->is('ordini/stato/concluso') ? 'active' : '' }}">
+       class="btn {{
+            request()->is('ordini/stato/concluso') ||
+            (isset($ordine) && $ordine->stato == 'concluso')
+            ? 'active' : ''
+       }}">
         Conclusi
     </a>
-
-    <!-- FINE ORDINI -->
-
-   
-
-    
 
 </div>
