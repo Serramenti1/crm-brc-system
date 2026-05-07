@@ -10,6 +10,7 @@ use App\Models\ProdottoFornitore;
 use App\Models\RigaPreventivoProdotto;
 use App\Models\Ordine;
 use App\Models\ImpostazioneIva;
+use App\Models\ServizioExtra;
 
 class PreventivoController extends Controller
 {
@@ -30,7 +31,9 @@ class PreventivoController extends Controller
             });
         }
 
-        $preventivi = $query->get();
+        $preventivi = $query
+        ->latest()
+        ->get();
 
         return view('preventivi.index', compact('preventivi'));
     }
@@ -82,7 +85,11 @@ class PreventivoController extends Controller
         $fornitori = Fornitore::all();
         $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
 
-        return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore'));
+        $serviziExtra = ServizioExtra::where('attivo', 1)
+        ->orderBy('nome')
+        ->get();
+
+return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore', 'serviziExtra'));
     }
 
     public function destroy($id)

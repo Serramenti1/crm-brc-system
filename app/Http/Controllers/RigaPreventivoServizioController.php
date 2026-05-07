@@ -9,13 +9,14 @@ use App\Models\Preventivo;
 
 class RigaPreventivoServizioController extends Controller
 {
-    // CREA SERVIZIO
     public function store(Request $request, $riga_prodotto_id)
     {
         $request->validate([
             'tipo_servizio' => 'required|string|max:255',
+            'descrizione' => 'nullable|string|max:255',
             'costo_brc' => 'nullable|numeric|min:0',
             'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string',
         ]);
 
         $riga = RigaPreventivoProdotto::findOrFail($riga_prodotto_id);
@@ -28,9 +29,11 @@ class RigaPreventivoServizioController extends Controller
         RigaPreventivoServizio::create([
             'riga_prodotto_id' => $riga->id,
             'tipo_servizio' => $request->tipo_servizio,
+            'descrizione' => $request->descrizione,
             'costo_brc' => $costo,
             'ricarico_percentuale' => $ricarico,
             'prezzo_cliente' => $prezzo,
+            'note' => $request->note,
         ]);
 
         $this->aggiornaTotaliPreventivo($riga->preventivo_id);
@@ -38,15 +41,16 @@ class RigaPreventivoServizioController extends Controller
         return redirect('/preventivi/' . $riga->preventivo_id);
     }
 
-    // MODIFICA SERVIZIO
     public function update(Request $request, $id)
     {
         $servizio = RigaPreventivoServizio::findOrFail($id);
 
         $request->validate([
             'tipo_servizio' => 'required|string|max:255',
+            'descrizione' => 'nullable|string|max:255',
             'costo_brc' => 'nullable|numeric|min:0',
             'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string',
         ]);
 
         $costo = (float) ($request->costo_brc ?? 0);
@@ -56,9 +60,11 @@ class RigaPreventivoServizioController extends Controller
 
         $servizio->update([
             'tipo_servizio' => $request->tipo_servizio,
+            'descrizione' => $request->descrizione,
             'costo_brc' => $costo,
             'ricarico_percentuale' => $ricarico,
             'prezzo_cliente' => $prezzo,
+            'note' => $request->note,
         ]);
 
         $this->aggiornaTotaliPreventivo($servizio->rigaProdotto->preventivo_id);
@@ -66,7 +72,6 @@ class RigaPreventivoServizioController extends Controller
         return redirect('/preventivi/' . $servizio->rigaProdotto->preventivo_id);
     }
 
-    // ELIMINA SERVIZIO
     public function destroy($id)
     {
         $servizio = RigaPreventivoServizio::findOrFail($id);
@@ -79,7 +84,6 @@ class RigaPreventivoServizioController extends Controller
         return redirect('/preventivi/' . $preventivoId);
     }
 
-    // AGGIORNA TOTALI (CORRETTO CON QUANTITÀ)
     private function aggiornaTotaliPreventivo($preventivoId)
     {
         $preventivo = Preventivo::with('righeProdotti.servizi')->findOrFail($preventivoId);

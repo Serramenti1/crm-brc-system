@@ -33,16 +33,32 @@
         <th>Descrizione</th>
         <th>Quantità</th>
         <th>Bene significativo</th>
-        <th>Totale cliente</th>
+        <th>Imponibile noi</th>
+        <th>Imponibile cliente</th>
+        <th>Markup</th>
         <th>Servizi</th>
     </tr>
 
     @foreach($preventivo->righeProdotti as $riga)
         <tr>
             <td>{{ $riga->descrizione }}</td>
+
             <td>{{ $riga->quantita }}</td>
+
             <td>{{ $riga->bene_significativo ? 'Sì' : 'No' }}</td>
-            <td>{{ number_format($riga->totale_cliente, 2, ',', '.') }} €</td>
+
+            <td>
+                {{ number_format($riga->totale_costo, 2, ',', '.') }} €
+            </td>
+
+            <td>
+                {{ number_format($riga->totale_cliente, 2, ',', '.') }} €
+            </td>
+
+            <td>
+                {{ number_format($riga->totale_cliente - $riga->totale_costo, 2, ',', '.') }} €
+            </td>
+
             <td>
                 @foreach($riga->servizi as $servizio)
                     {{ $servizio->tipo_servizio }}
@@ -80,55 +96,65 @@
         <td>{{ number_format($calcoloIva['totale_cliente'], 2, ',', '.') }} €</td>
     </tr>
 
-    <tr>
-        <td>Beni significativi costo a noi</td>
-        <td>{{ number_format($calcoloIva['beni_significativi_costo'], 2, ',', '.') }} €</td>
-    </tr>
+    @if($calcoloIva['beni_significativi_costo'] > 0)
+        <tr>
+            <td>Beni significativi costo a noi</td>
+            <td>{{ number_format($calcoloIva['beni_significativi_costo'], 2, ',', '.') }} €</td>
+        </tr>
 
-    <tr>
-        <td>Markup beni significativi</td>
-        <td>{{ number_format($calcoloIva['markup_beni_significativi'], 2, ',', '.') }} €</td>
-    </tr>
+        <tr>
+            <td>Markup beni significativi</td>
+            <td>{{ number_format($calcoloIva['markup_beni_significativi'], 2, ',', '.') }} €</td>
+        </tr>
 
-    <tr>
-        <td>Beni significativi al 10%</td>
-        <td>{{ number_format($calcoloIva['beni_significativi_al_10'], 2, ',', '.') }} €</td>
-    </tr>
+        <tr>
+            <td>Beni significativi al 10%</td>
+            <td>{{ number_format($calcoloIva['beni_significativi_al_10'], 2, ',', '.') }} €</td>
+        </tr>
 
-    <tr>
-        <td>Beni significativi al 22%</td>
-        <td>{{ number_format($calcoloIva['beni_significativi_al_22'], 2, ',', '.') }} €</td>
-    </tr>
+        @if($calcoloIva['beni_significativi_al_22'] > 0)
+            <tr>
+                <td>Beni significativi al 22%</td>
+                <td>{{ number_format($calcoloIva['beni_significativi_al_22'], 2, ',', '.') }} €</td>
+            </tr>
+        @endif
+    @endif
 
-    <tr>
-        <td>Imponibile 4%</td>
-        <td>{{ number_format($calcoloIva['imponibile_4'], 2, ',', '.') }} €</td>
-    </tr>
+    @if($calcoloIva['imponibile_4'] > 0)
+        <tr>
+            <td>Imponibile 4%</td>
+            <td>{{ number_format($calcoloIva['imponibile_4'], 2, ',', '.') }} €</td>
+        </tr>
 
-    <tr>
-        <td>IVA 4%</td>
-        <td>{{ number_format($calcoloIva['iva_4'], 2, ',', '.') }} €</td>
-    </tr>
+        <tr>
+            <td>IVA 4%</td>
+            <td>{{ number_format($calcoloIva['iva_4'], 2, ',', '.') }} €</td>
+        </tr>
+    @endif
 
-    <tr>
-        <td>Imponibile 10%</td>
-        <td>{{ number_format($calcoloIva['imponibile_10'], 2, ',', '.') }} €</td>
-    </tr>
+    @if($calcoloIva['imponibile_10'] > 0)
+        <tr>
+            <td>Imponibile 10%</td>
+            <td>{{ number_format($calcoloIva['imponibile_10'], 2, ',', '.') }} €</td>
+        </tr>
 
-    <tr>
-        <td>IVA 10%</td>
-        <td>{{ number_format($calcoloIva['iva_10'], 2, ',', '.') }} €</td>
-    </tr>
+        <tr>
+            <td>IVA 10%</td>
+            <td>{{ number_format($calcoloIva['iva_10'], 2, ',', '.') }} €</td>
+        </tr>
+    @endif
 
-    <tr>
-        <td>Imponibile 22%</td>
-        <td>{{ number_format($calcoloIva['imponibile_22'], 2, ',', '.') }} €</td>
-    </tr>
+    @if($calcoloIva['imponibile_22'] > 0)
+        <tr>
+            <td>Imponibile 22%</td>
+            <td>{{ number_format($calcoloIva['imponibile_22'], 2, ',', '.') }} €</td>
+        </tr>
 
-    <tr>
-        <td>IVA 22%</td>
-        <td>{{ number_format($calcoloIva['iva_22'], 2, ',', '.') }} €</td>
-    </tr>
+        <tr>
+            <td>IVA 22%</td>
+            <td>{{ number_format($calcoloIva['iva_22'], 2, ',', '.') }} €</td>
+        </tr>
+    @endif
 
     <tr>
         <th>Totale IVA</th>
