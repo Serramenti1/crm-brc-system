@@ -25,6 +25,7 @@ Route::get('/', function () {
 
 Route::resource('clienti', ClienteController::class);
 Route::resource('commesse', CommessaController::class);
+Route::get('/preventivi/{id}/visualizza', [PreventivoController::class, 'visualizza']);
 Route::resource('preventivi', PreventivoController::class);
 Route::resource('righe-preventivo-prodotti', RigaPreventivoProdottoController::class);
 Route::resource('prodotti-fornitore', ProdottoFornitoreController::class);

@@ -77,6 +77,30 @@
                 </button>
             </form>
         </td>
+        <td>
+    <a href="/preventivi/{{ $preventivo->id }}">Apri</a>
+    |
+    <a href="/preventivi/{{ $preventivo->id }}/visualizza">Visualizza</a>
+
+    @if($preventivo->ordine)
+        | <a href="/ordini/{{ $preventivo->ordine->id }}">Ordine</a>
+    @else
+        <form action="/preventivi/{{ $preventivo->id }}/crea-ordine" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" onclick="return confirm('Creare ordine da questo preventivo?')">
+                Crea ordine
+            </button>
+        </form>
+    @endif
+
+    <form action="/preventivi/{{ $preventivo->id }}" method="POST" style="display:inline;">
+        @csrf
+        @method('DELETE')
+        <button type="submit" onclick="return confirm('Eliminare questo preventivo?')">
+            Elimina
+        </button>
+    </form>
+</td>
     </tr>
     @endforeach
 </table>
