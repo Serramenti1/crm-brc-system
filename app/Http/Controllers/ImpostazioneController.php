@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ImpostazioneIva;
 use App\Models\Detrazione;
 use App\Models\ServizioExtra;
+use App\Models\TipoIntervento;
 
 class ImpostazioneController extends Controller
 {
@@ -152,5 +153,47 @@ public function updateServizio(Request $request, $id)
     ]);
 
     return redirect('/impostazioni/servizi')->with('success', 'Servizio extra aggiornato');
+}
+public function tipiIntervento()
+{
+    $tipiIntervento = TipoIntervento::orderBy('nome')->get();
+
+    return view('impostazioni.tipi_intervento', compact('tipiIntervento'));
+}
+
+public function storeTipoIntervento(Request $request)
+{
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'note' => 'nullable|string',
+    ]);
+
+    TipoIntervento::create([
+        'nome' => $request->nome,
+        'attivo' => $request->has('attivo') ? 1 : 0,
+        'note' => $request->note,
+    ]);
+
+    return redirect('/impostazioni/tipi-intervento')
+        ->with('success', 'Tipo intervento salvato');
+}
+
+public function updateTipoIntervento(Request $request, $id)
+{
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'note' => 'nullable|string',
+    ]);
+
+    $tipo = TipoIntervento::findOrFail($id);
+
+    $tipo->update([
+        'nome' => $request->nome,
+        'attivo' => $request->has('attivo') ? 1 : 0,
+        'note' => $request->note,
+    ]);
+
+    return redirect('/impostazioni/tipi-intervento')
+        ->with('success', 'Tipo intervento aggiornato');
 }
 }

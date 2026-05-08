@@ -117,11 +117,41 @@
     <div class="form-grid">
         <div class="form-field">
             <label>Tipologia abitazione</label><br>
-            <select name="tipologia_abitazione" id="tipologia_abitazione" onchange="aggiornaPercentualeDetrazione()">
-                <option value="">-- Seleziona --</option>
-                <option value="principale" {{ $commessa->tipologia_abitazione == 'principale' ? 'selected' : '' }}>Prima casa</option>
-                <option value="secondaria" {{ $commessa->tipologia_abitazione == 'secondaria' ? 'selected' : '' }}>Seconda casa</option>
-            </select>
+            <select name="tipologia_abitazione" id="tipologia_abitazione">
+
+    <option value="">-- Seleziona --</option>
+
+    <option value="prima_casa"
+        {{ $commessa->tipologia_abitazione == 'prima_casa' ? 'selected' : '' }}>
+        Prima casa
+    </option>
+
+    <option value="seconda_casa"
+        {{ $commessa->tipologia_abitazione == 'seconda_casa' ? 'selected' : '' }}>
+        Seconda casa
+    </option>
+
+    <option value="condominio"
+        {{ $commessa->tipologia_abitazione == 'condominio' ? 'selected' : '' }}>
+        Condominio
+    </option>
+
+    <option value="locale_commerciale"
+        {{ $commessa->tipologia_abitazione == 'locale_commerciale' ? 'selected' : '' }}>
+        Locale commerciale
+    </option>
+
+    <option value="ufficio"
+        {{ $commessa->tipologia_abitazione == 'ufficio' ? 'selected' : '' }}>
+        Ufficio
+    </option>
+
+    <option value="capannone"
+        {{ $commessa->tipologia_abitazione == 'capannone' ? 'selected' : '' }}>
+        Capannone
+    </option>
+
+</select>
         </div>
 
         <div class="form-field">
@@ -157,14 +187,34 @@
     <h3>Dati catastali</h3>
 
     <div class="form-grid">
-        <div class="form-field-full">
-            <label>Dati catastali</label><br>
-            <textarea name="dati_catastali" rows="3">{{ $commessa->dati_catastali }}</textarea>
+        <div class="form-field">
+            <label>Foglio</label><br>
+            <input type="text" name="foglio_catastale" value="{{ $commessa->foglio_catastale }}">
+        </div>
+
+        <div class="form-field">
+            <label>Mappale</label><br>
+            <input type="text" name="mappale_catastale" value="{{ $commessa->mappale_catastale }}">
+        </div>
+
+        <div class="form-field">
+            <label>Particella</label><br>
+            <input type="text" name="particella_catastale" value="{{ $commessa->particella_catastale }}">
+        </div>
+
+        <div class="form-field">
+            <label>Sub</label><br>
+            <input type="text" name="sub_catastale" value="{{ $commessa->sub_catastale }}">
         </div>
 
         <div class="form-field">
             <label>Numero catastale</label><br>
             <input type="text" name="numero_catastale" value="{{ $commessa->numero_catastale }}">
+        </div>
+
+        <div class="form-field-full">
+            <label>Note catastali</label><br>
+            <textarea name="dati_catastali" rows="3">{{ $commessa->dati_catastali }}</textarea>
         </div>
     </div>
 </div>

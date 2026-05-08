@@ -6,35 +6,37 @@ use Illuminate\Http\Request;
 use App\Models\Commessa;
 use App\Models\Cliente;
 use App\Models\Detrazione;
+use App\Models\TipoIntervento;
 
 class CommessaController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Commessa::with('cliente');
+    {
+        $query = Commessa::with('cliente');
 
-    if ($request->filled('q')) {
-        $parole = explode(' ', trim($request->q));
+        if ($request->filled('q')) {
+            $parole = explode(' ', trim($request->q));
 
-        $query->where(function ($query) use ($parole) {
-            foreach ($parole as $parola) {
-                $query->where(function ($sub) use ($parola) {
-                    $sub->where('indirizzo_lavoro', 'like', '%' . $parola . '%')
-                        ->orWhere('citta_lavoro', 'like', '%' . $parola . '%')
-                        ->orWhere('tipo_detrazione', 'like', '%' . $parola . '%')
-                        ->orWhereHas('cliente', function ($clienteQuery) use ($parola) {
-                            $clienteQuery->where('nome', 'like', $parola . '%')
-                                ->orWhere('cognome', 'like', $parola . '%');
-                        });
-                });
-            }
-        });
+            $query->where(function ($query) use ($parole) {
+                foreach ($parole as $parola) {
+                    $query->where(function ($sub) use ($parola) {
+                        $sub->where('indirizzo_lavoro', 'like', '%' . $parola . '%')
+                            ->orWhere('citta_lavoro', 'like', '%' . $parola . '%')
+                            ->orWhere('tipo_detrazione', 'like', '%' . $parola . '%')
+                            ->orWhere('tipo_lavoro', 'like', '%' . $parola . '%')
+                            ->orWhereHas('cliente', function ($clienteQuery) use ($parola) {
+                                $clienteQuery->where('nome', 'like', $parola . '%')
+                                    ->orWhere('cognome', 'like', $parola . '%');
+                            });
+                    });
+                }
+            });
+        }
+
+        $commesse = $query->orderBy('id', 'desc')->get();
+
+        return view('commesse.index', compact('commesse'));
     }
-
-    $commesse = $query->get();
-
-    return view('commesse.index', compact('commesse'));
-}
 
     public function create()
     {
@@ -44,7 +46,11 @@ class CommessaController extends Controller
             ->orderBy('nome')
             ->get();
 
-        return view('commesse.create', compact('clienti', 'detrazioni'));
+        $tipiIntervento = TipoIntervento::where('attivo', 1)
+            ->orderBy('nome')
+            ->get();
+
+        return view('commesse.create', compact('clienti', 'detrazioni', 'tipiIntervento'));
     }
 
     public function store(Request $request)
@@ -68,6 +74,10 @@ class CommessaController extends Controller
 
             'dati_catastali' => 'nullable|string',
             'numero_catastale' => 'nullable|string|max:255',
+            'foglio_catastale' => 'nullable|string|max:255',
+            'mappale_catastale' => 'nullable|string|max:255',
+            'particella_catastale' => 'nullable|string|max:255',
+            'sub_catastale' => 'nullable|string|max:255',
 
             'pratica_edilizia_tipo' => 'nullable|string|max:255',
             'pratica_edilizia_numero' => 'nullable|string|max:255',
@@ -98,6 +108,10 @@ class CommessaController extends Controller
 
             'dati_catastali' => $request->dati_catastali,
             'numero_catastale' => $request->numero_catastale,
+            'foglio_catastale' => $request->foglio_catastale,
+            'mappale_catastale' => $request->mappale_catastale,
+            'particella_catastale' => $request->particella_catastale,
+            'sub_catastale' => $request->sub_catastale,
 
             'pratica_edilizia_tipo' => $request->pratica_edilizia_tipo,
             'pratica_edilizia_numero' => $request->pratica_edilizia_numero,
@@ -109,7 +123,7 @@ class CommessaController extends Controller
             'note' => $request->note,
         ]);
 
-        return redirect('/commesse');
+        return redirect('/commesse')->with('success', 'Commessa creata correttamente');
     }
 
     public function edit($id)
@@ -121,7 +135,11 @@ class CommessaController extends Controller
             ->orderBy('nome')
             ->get();
 
-        return view('commesse.edit', compact('commessa', 'clienti', 'detrazioni'));
+        $tipiIntervento = TipoIntervento::where('attivo', 1)
+            ->orderBy('nome')
+            ->get();
+
+        return view('commesse.edit', compact('commessa', 'clienti', 'detrazioni', 'tipiIntervento'));
     }
 
     public function update(Request $request, $id)
@@ -145,6 +163,10 @@ class CommessaController extends Controller
 
             'dati_catastali' => 'nullable|string',
             'numero_catastale' => 'nullable|string|max:255',
+            'foglio_catastale' => 'nullable|string|max:255',
+            'mappale_catastale' => 'nullable|string|max:255',
+            'particella_catastale' => 'nullable|string|max:255',
+            'sub_catastale' => 'nullable|string|max:255',
 
             'pratica_edilizia_tipo' => 'nullable|string|max:255',
             'pratica_edilizia_numero' => 'nullable|string|max:255',
@@ -177,6 +199,10 @@ class CommessaController extends Controller
 
             'dati_catastali' => $request->dati_catastali,
             'numero_catastale' => $request->numero_catastale,
+            'foglio_catastale' => $request->foglio_catastale,
+            'mappale_catastale' => $request->mappale_catastale,
+            'particella_catastale' => $request->particella_catastale,
+            'sub_catastale' => $request->sub_catastale,
 
             'pratica_edilizia_tipo' => $request->pratica_edilizia_tipo,
             'pratica_edilizia_numero' => $request->pratica_edilizia_numero,
@@ -187,27 +213,23 @@ class CommessaController extends Controller
             'note' => $request->note,
         ]);
 
-        return redirect('/commesse');
+        return redirect('/commesse')->with('success', 'Commessa aggiornata correttamente');
     }
 
     public function destroy($id)
-{
-    try {
+    {
+        try {
+            $commessa = Commessa::findOrFail($id);
+            $commessa->delete();
 
-        $commessa = Commessa::findOrFail($id);
-        $commessa->delete();
+            return redirect('/commesse')
+                ->with('success', 'Commessa eliminata');
 
-        return redirect('/commesse')
-            ->with('success', 'Commessa eliminata');
-
-    } catch (\Exception $e) {
-
-        return redirect('/commesse')
-            ->with('error', 'Impossibile eliminare la commessa perché collegata a preventivi o ordini');
-
+        } catch (\Exception $e) {
+            return redirect('/commesse')
+                ->with('error', 'Impossibile eliminare la commessa perché collegata a preventivi o ordini');
+        }
     }
-
- }
 
     private function calcolaPercentualeDetrazione($nomeDetrazione)
     {

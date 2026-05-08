@@ -29,6 +29,10 @@ class Commessa extends Model
         'percentuale_detrazione',
 
         'dati_catastali',
+        'foglio_catastale',
+        'mappale_catastale',
+        'particella_catastale',
+        'sub_catastale',
         'numero_catastale',
 
         'pratica_edilizia_tipo',

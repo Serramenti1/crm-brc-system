@@ -23,17 +23,18 @@
     .form-field-full {
         grid-column: span 3;
     }
+
     .form-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 100%;
-    padding-top: 22px;
-}
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 100%;
+        padding-top: 22px;
+    }
 
     .form-checkbox input {
-     width: auto;
-}
+        width: auto;
+    }
 </style>
 
 <h1>Nuova Commessa</h1>
@@ -103,10 +104,10 @@
             <input type="number" name="piano_posa" min="0">
         </div>
 
-       <div class="form-field form-checkbox">
-    <input type="checkbox" name="autoscala" value="1">
-    <label>Serve autoscala</label>
-</div>
+        <div class="form-field form-checkbox">
+            <input type="checkbox" name="autoscala" value="1">
+            <label>Serve autoscala</label>
+        </div>
     </div>
 </div>
 
@@ -116,38 +117,72 @@
     <div class="form-grid">
         <div class="form-field">
             <label>Tipologia abitazione</label><br>
-            <select name="tipologia_abitazione" id="tipologia_abitazione" onchange="aggiornaPercentualeDetrazione()">
-                <option value="">-- Seleziona --</option>
-                <option value="principale">Prima casa</option>
-                <option value="secondaria">Seconda casa</option>
-            </select>
+            <select name="tipologia_abitazione" id="tipologia_abitazione">
+
+    <option value="">-- Seleziona --</option>
+
+    <option value="prima_casa">
+        Prima casa
+    </option>
+
+    <option value="seconda_casa">
+        Seconda casa
+    </option>
+
+    <option value="condominio">
+        Condominio
+    </option>
+
+    <option value="locale_commerciale">
+        Locale commerciale
+    </option>
+
+    <option value="ufficio">
+        Ufficio
+    </option>
+
+    <option value="capannone">
+        Capannone
+    </option>
+
+</select>
         </div>
 
         <div class="form-field">
             <label>Tipo Intervento</label><br>
             <select name="tipo_lavoro">
                 <option value="">-- Seleziona --</option>
-                <option value="manutenzione">Manutenzione</option>
-                <option value="ristrutturazione">Ristrutturazione</option>
-                <option value="risparmio_energetico">Risparmio energetico</option>
+
+                @foreach($tipiIntervento as $tipo)
+                    <option value="{{ $tipo->nome }}">
+                        {{ $tipo->nome }}
+                    </option>
+                @endforeach
             </select>
         </div>
 
         <div class="form-field">
             <label>Tipo detrazione</label><br>
             <select name="tipo_detrazione" id="tipo_detrazione" onchange="aggiornaPercentualeDetrazione()">
-    <option value="">-- Nessuna detrazione --</option>
-    @foreach($detrazioni as $detrazione)
-        <option value="{{ $detrazione->nome }}">
-            {{ $detrazione->nome }} - {{ number_format($detrazione->percentuale, 2, ',', '.') }}%
-        </option>
-    @endforeach
-</select>
+                <option value="">-- Nessuna detrazione --</option>
+
+                @foreach($detrazioni as $detrazione)
+                    <option value="{{ $detrazione->nome }}">
+                        {{ $detrazione->nome }} - {{ number_format($detrazione->percentuale, 2, ',', '.') }}%
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         <div class="form-field">
             <label>Percentuale detrazione</label><br>
-            <input type="number" id="percentuale_detrazione" name="percentuale_detrazione" min="0" max="100" step="0.01" readonly>
+            <input type="number"
+                   id="percentuale_detrazione"
+                   name="percentuale_detrazione"
+                   min="0"
+                   max="100"
+                   step="0.01"
+                   readonly>
         </div>
     </div>
 </div>
@@ -156,14 +191,34 @@
     <h3>Dati catastali</h3>
 
     <div class="form-grid">
-        <div class="form-field-full">
-            <label>Dati catastali</label><br>
-            <textarea name="dati_catastali" rows="3"></textarea>
+        <div class="form-field">
+            <label>Foglio</label><br>
+            <input type="text" name="foglio_catastale">
+        </div>
+
+        <div class="form-field">
+            <label>Mappale</label><br>
+            <input type="text" name="mappale_catastale">
+        </div>
+
+        <div class="form-field">
+            <label>Particella</label><br>
+            <input type="text" name="particella_catastale">
+        </div>
+
+        <div class="form-field">
+            <label>Sub</label><br>
+            <input type="text" name="sub_catastale">
         </div>
 
         <div class="form-field">
             <label>Numero catastale</label><br>
             <input type="text" name="numero_catastale">
+        </div>
+
+        <div class="form-field-full">
+            <label>Note catastali</label><br>
+            <textarea name="dati_catastali" rows="3"></textarea>
         </div>
     </div>
 </div>
@@ -188,9 +243,9 @@
         </div>
 
         <div class="form-field form-checkbox">
-    <input type="checkbox" name="pratica_enea" value="1">
-    <label>Pratica ENEA</label>
-</div>
+            <input type="checkbox" name="pratica_enea" value="1">
+            <label>Pratica ENEA</label>
+        </div>
     </div>
 </div>
 
@@ -200,13 +255,13 @@
     <textarea name="note" rows="4" style="width:100%; box-sizing:border-box;"></textarea>
 </div>
 
-<button type="submit">Salva Commessa</button>
+<div style="margin-top:20px; margin-bottom:30px; display:flex; gap:15px; align-items:center;">
+    <button type="submit">Salva Commessa</button>
+
+    <a href="/commesse">Torna alla lista</a>
+</div>
 
 </form>
-
-<br>
-
-<a href="/commesse">Torna alla lista</a>
 
 <script>
 let detrazioni = @json($detrazioni);

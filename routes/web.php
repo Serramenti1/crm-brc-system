@@ -63,3 +63,6 @@ Route::post('/impostazioni/servizi', [ImpostazioneController::class, 'storeServi
 Route::put('/impostazioni/servizi/{id}', [ImpostazioneController::class, 'updateServizio']);
 Route::post('/ordini/{id}/stato-precedente', [OrdineController::class, 'tornaStatoPrecedente'])
     ->name('ordini.tornaStatoPrecedente');
+Route::get('/impostazioni/tipi-intervento', [ImpostazioneController::class, 'tipiIntervento']);
+Route::post('/impostazioni/tipi-intervento', [ImpostazioneController::class, 'storeTipoIntervento']);
+Route::put('/impostazioni/tipi-intervento/{id}', [ImpostazioneController::class, 'updateTipoIntervento']);

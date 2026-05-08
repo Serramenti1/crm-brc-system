@@ -41,5 +41,10 @@
         <h3>Prodotti Fornitore</h3>
         <p>Gestione prodotti e listini fornitori</p>
     </a>
+    <a href="/impostazioni/tipi-intervento"
+   style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
+    <h3>Tipi intervento</h3>
+    <p>Nuovo, manutenzione, ristrutturazione e altri tipi lavoro</p>
+</a>
 
 </div>
