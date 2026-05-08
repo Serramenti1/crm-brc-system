@@ -263,97 +263,118 @@ class OrdineController extends Controller
     }
 
     private function aggiornaStatoOrdine($ordine, $ultimoTipo = null, $ultimoRigaId = null)
-    {
-        $messaggio = null;
+{
+    if ($ordine->stato == 'preparazione_contratto') {
+        if ($ordine->contratto_firmato) {
+            $ordine->stato = 'in_lavorazione';
+            $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+            $ordine->ultimo_avanzamento_riga_id = null;
+            $ordine->save();
 
-        if ($ordine->stato == 'preparazione_contratto') {
-            if ($ordine->contratto_firmato) {
-                $ordine->stato = 'in_lavorazione';
-                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                $ordine->ultimo_avanzamento_riga_id = null;
-                $messaggio = 'Contratto firmato. L’ordine è stato spostato in: In lavorazione.';
-            }
+            return 'Contratto firmato. L’ordine è stato spostato in: In lavorazione.';
         }
 
-        if ($ordine->stato == 'in_lavorazione') {
-            $tuttePronte = true;
-
-            foreach ($ordine->righe as $riga) {
-                if (!$riga->inviato || !$riga->co_ricevuta || !$riga->in_produzione) {
-                    $tuttePronte = false;
-                    break;
-                }
-            }
-
-            if ($tuttePronte) {
-                $ordine->stato = 'completo_attesa_merce';
-                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                $ordine->ultimo_avanzamento_riga_id = $ultimoRigaId;
-                $messaggio = 'Tutte le righe sono complete. L’ordine è stato spostato in: Completo - attesa merce.';
-            }
-        }
-
-        if ($ordine->stato == 'completo_attesa_merce') {
-            $merceTuttaArrivata = true;
-
-            foreach ($ordine->righe as $riga) {
-                if (!$riga->merce_arrivata) {
-                    $merceTuttaArrivata = false;
-                    break;
-                }
-            }
-
-            if ($merceTuttaArrivata) {
-                $ordine->stato = 'attesa_saldo_merce';
-                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                $ordine->ultimo_avanzamento_riga_id = $ultimoRigaId;
-                $messaggio = 'Tutta la merce è arrivata. L’ordine è stato spostato in: Attesa saldo merce.';
-            }
-        }
-
-        if ($ordine->stato == 'attesa_saldo_merce') {
-            if ($ordine->saldo_merce_ricevuto) {
-                $ordine->stato = 'programmare_posa';
-                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                $ordine->ultimo_avanzamento_riga_id = null;
-                $messaggio = 'Saldo merce ricevuto. L’ordine è stato spostato in: Programmare posa.';
-            }
-        }
-
-        if ($ordine->stato == 'programmare_posa') {
-            if ($ordine->posa_effettuata && $ordine->fattura_saldo_posa_fatta) {
-                $ordine->stato = 'concluso';
-                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                $ordine->ultimo_avanzamento_riga_id = null;
-                $messaggio = 'Posa effettuata e fattura saldo posa fatta. L’ordine è stato concluso.';
-            }
-        }
-
-        if ($ordine->stato == 'concluso') {
-            $serveEnea = $ordine->commessa && $ordine->commessa->pratica_enea;
-
-            if ($serveEnea) {
-                if ($ordine->saldo_finale_ricevuto && $ordine->invio_enea_effettuato) {
-                    $ordine->stato = 'archiviato';
-                    $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                    $ordine->ultimo_avanzamento_riga_id = null;
-                    $messaggio = 'Saldo finale ricevuto e invio ENEA effettuato. L’ordine è stato archiviato.';
-                }
-            } else {
-                if ($ordine->saldo_finale_ricevuto) {
-                    $ordine->stato = 'archiviato';
-                    $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                    $ordine->ultimo_avanzamento_riga_id = null;
-                    $messaggio = 'Saldo finale ricevuto. L’ordine è stato archiviato.';
-                }
-            }
-        }
-
-        $ordine->save();
-
-        return $messaggio;
+        return null;
     }
 
+    if ($ordine->stato == 'in_lavorazione') {
+        $tuttePronte = true;
+
+        foreach ($ordine->righe as $riga) {
+            if (!$riga->inviato || !$riga->co_ricevuta || !$riga->in_produzione) {
+                $tuttePronte = false;
+                break;
+            }
+        }
+
+        if ($tuttePronte) {
+            $ordine->stato = 'completo_attesa_merce';
+            $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+            $ordine->ultimo_avanzamento_riga_id = $ultimoRigaId;
+            $ordine->save();
+
+            return 'Tutte le righe sono complete. L’ordine è stato spostato in: Completo - attesa merce.';
+        }
+
+        return null;
+    }
+
+    if ($ordine->stato == 'completo_attesa_merce') {
+        $merceTuttaArrivata = true;
+
+        foreach ($ordine->righe as $riga) {
+            if (!$riga->merce_arrivata) {
+                $merceTuttaArrivata = false;
+                break;
+            }
+        }
+
+        if ($merceTuttaArrivata) {
+            $ordine->stato = 'attesa_saldo_merce';
+            $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+            $ordine->ultimo_avanzamento_riga_id = $ultimoRigaId;
+            $ordine->save();
+
+            return 'Tutta la merce è arrivata. L’ordine è stato spostato in: Attesa saldo merce.';
+        }
+
+        return null;
+    }
+
+    if ($ordine->stato == 'attesa_saldo_merce') {
+        if ($ordine->saldo_merce_ricevuto) {
+            $ordine->stato = 'programmare_posa';
+            $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+            $ordine->ultimo_avanzamento_riga_id = null;
+            $ordine->save();
+
+            return 'Saldo merce ricevuto. L’ordine è stato spostato in: Programmare posa.';
+        }
+
+        return null;
+    }
+
+    if ($ordine->stato == 'programmare_posa') {
+        if ($ordine->posa_effettuata && $ordine->fattura_saldo_posa_fatta) {
+            $ordine->stato = 'concluso';
+            $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+            $ordine->ultimo_avanzamento_riga_id = null;
+            $ordine->save();
+
+            return 'Posa effettuata e fattura saldo posa fatta. L’ordine è stato concluso.';
+        }
+
+        return null;
+    }
+
+    if ($ordine->stato == 'concluso') {
+        $serveEnea = $ordine->commessa && $ordine->commessa->pratica_enea;
+
+        if ($serveEnea) {
+            if ($ordine->saldo_finale_ricevuto && $ordine->invio_enea_effettuato) {
+                $ordine->stato = 'archiviato';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = null;
+                $ordine->save();
+
+                return 'Saldo finale ricevuto e invio ENEA effettuato. L’ordine è stato archiviato.';
+            }
+        } else {
+            if ($ordine->saldo_finale_ricevuto) {
+                $ordine->stato = 'archiviato';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = null;
+                $ordine->save();
+
+                return 'Saldo finale ricevuto. L’ordine è stato archiviato.';
+            }
+        }
+
+        return null;
+    }
+
+    return null;
+}
     public function tornaStatoPrecedente($id)
     {
         $ordine = Ordine::with('righe', 'commessa')->findOrFail($id);
