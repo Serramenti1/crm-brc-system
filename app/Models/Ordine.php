@@ -17,9 +17,16 @@ class Ordine extends Model
         'iva_importo',
         'totale_con_iva',
         'stato',
+
+        'contratto_firmato',
+
         'saldo_merce_ricevuto',
         'posa_effettuata',
         'fattura_saldo_posa_fatta',
+
+        'saldo_finale_ricevuto',
+        'invio_enea_effettuato',
+
         'ultimo_avanzamento_tipo',
         'ultimo_avanzamento_riga_id',
     ];

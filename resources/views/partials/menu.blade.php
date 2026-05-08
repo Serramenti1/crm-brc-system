@@ -22,6 +22,21 @@
         Preventivi
     </a>
 
+    <a href="/ordini/stato/preparazione_contratto"
+       class="btn {{
+            request()->is('ordini/stato/preparazione_contratto') ||
+            (isset($ordine) && $ordine->stato == 'preparazione_contratto')
+            ? 'active' : ''
+       }}">
+        Preparazione contratto
+
+        @if(($conteggiOrdini['preparazione_contratto'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['preparazione_contratto'] }}
+            </span>
+        @endif
+    </a>
+
     <a href="/ordini/stato/in_lavorazione"
        class="btn {{
             request()->is('ordini/stato/in_lavorazione') ||
@@ -89,6 +104,21 @@
             ? 'active' : ''
        }}">
         Conclusi
+
+        @if(($conteggiOrdini['concluso'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['concluso'] }}
+            </span>
+        @endif
     </a>
+
+    <a href="/ordini/stato/archiviato"
+   class="btn {{
+        request()->is('ordini/stato/archiviato') ||
+        (isset($ordine) && $ordine->stato == 'archiviato')
+        ? 'active' : ''
+   }}">
+    Archiviati
+</a>
 
 </div>

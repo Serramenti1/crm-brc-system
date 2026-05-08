@@ -14,14 +14,26 @@
     }
 
     .form-field input,
-    .form-field select,
-    .form-field textarea {
-        width: 100%;
-        box-sizing: border-box;
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+    min-height: 42px;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+
+    font-size: 15px;
     }
 
     .form-field-full {
         grid-column: span 3;
+    }
+    .form-field textarea {
+    min-height: 100px;
+    resize: vertical;
     }
 
     .form-checkbox {
@@ -184,6 +196,10 @@
                    step="0.01"
                    readonly>
         </div>
+        <div class="form-field form-checkbox">
+            <input type="checkbox" name="pratica_enea" value="1">
+            <label>Pratica ENEA</label>
+        </div>
     </div>
 </div>
 
@@ -242,10 +258,7 @@
             <input type="text" name="pratica_edilizia_protocollo">
         </div>
 
-        <div class="form-field form-checkbox">
-            <input type="checkbox" name="pratica_enea" value="1">
-            <label>Pratica ENEA</label>
-        </div>
+        
     </div>
 </div>
 

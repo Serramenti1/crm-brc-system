@@ -13,6 +13,15 @@
 
 <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
 
+    <a href="/ordini/stato/preparazione_contratto"
+       style="border:1px solid #ccc; padding:20px; text-decoration:none; width:230px; color:black; border-radius:8px;">
+        <h3>Preparazione contratto</h3>
+        <p>Ordini in attesa contratto firmato</p>
+        <strong style="font-size:28px; color:red;">
+            {{ $conteggiOrdini['preparazione_contratto'] ?? 0 }}
+        </strong>
+    </a>
+
     <a href="/ordini/stato/in_lavorazione"
        style="border:1px solid #ccc; padding:20px; text-decoration:none; width:230px; color:black; border-radius:8px;">
         <h3>In lavorazione</h3>
@@ -46,6 +55,15 @@
         <p>Ordini pronti da organizzare per la posa</p>
         <strong style="font-size:28px; color:red;">
             {{ $conteggiOrdini['programmare_posa'] ?? 0 }}
+        </strong>
+    </a>
+
+    <a href="/ordini/stato/concluso"
+       style="border:1px solid #ccc; padding:20px; text-decoration:none; width:230px; color:black; border-radius:8px;">
+        <h3>Conclusi</h3>
+        <p>Ordini da saldare / ENEA / archiviare</p>
+        <strong style="font-size:28px; color:red;">
+            {{ $conteggiOrdini['concluso'] ?? 0 }}
         </strong>
     </a>
 

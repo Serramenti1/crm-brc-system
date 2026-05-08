@@ -14,7 +14,7 @@ class OrdineController extends Controller
     public function index()
     {
         $ordini = Ordine::with('commessa.cliente', 'righe')
-            ->where('stato', 'in_lavorazione')
+            ->where('stato', 'preparazione_contratto')
             ->get();
 
         return view('ordini.index', compact('ordini'));
@@ -32,11 +32,13 @@ class OrdineController extends Controller
     public function perStato($stato)
     {
         $statiValidi = [
+            'preparazione_contratto',
             'in_lavorazione',
             'completo_attesa_merce',
             'attesa_saldo_merce',
             'programmare_posa',
             'concluso',
+            'archiviato',
         ];
 
         if (!in_array($stato, $statiValidi)) {
@@ -94,10 +96,18 @@ class OrdineController extends Controller
             'iva_percentuale' => $ivaPercentuale,
             'iva_importo' => $ivaImporto,
             'totale_con_iva' => $totaleConIva,
-            'stato' => 'in_lavorazione',
+
+            'stato' => 'preparazione_contratto',
+
+            'contratto_firmato' => false,
+
             'saldo_merce_ricevuto' => false,
             'posa_effettuata' => false,
             'fattura_saldo_posa_fatta' => false,
+
+            'saldo_finale_ricevuto' => false,
+            'invio_enea_effettuato' => false,
+
             'ultimo_avanzamento_tipo' => null,
             'ultimo_avanzamento_riga_id' => null,
         ]);
@@ -119,7 +129,7 @@ class OrdineController extends Controller
         }
 
         return redirect('/ordini/' . $ordine->id)
-            ->with('success', 'Ordine creato correttamente. Stato: In lavorazione.');
+            ->with('success', 'Ordine creato correttamente. Stato: Preparazione contratto.');
     }
 
     public function aggiornaRiga(Request $request, $id)
@@ -165,7 +175,7 @@ class OrdineController extends Controller
 
         $riga->save();
 
-        $ordine = Ordine::with('righe')->findOrFail($ordine->id);
+        $ordine = Ordine::with('righe', 'commessa')->findOrFail($ordine->id);
 
         $messaggioCambioStato = $this->aggiornaStatoOrdine($ordine, $ultimoTipo, $ultimoRigaId);
 
@@ -180,10 +190,20 @@ class OrdineController extends Controller
 
     public function aggiornaStatoAvanzato(Request $request, $id)
     {
-        $ordine = Ordine::with('righe')->findOrFail($id);
+        $ordine = Ordine::with('righe', 'commessa')->findOrFail($id);
 
         $ultimoTipo = null;
         $ultimoRigaId = null;
+
+        if ($ordine->stato == 'preparazione_contratto') {
+            $primaContratto = $ordine->contratto_firmato;
+
+            $ordine->contratto_firmato = $request->has('contratto_firmato') ? 1 : 0;
+
+            if (!$primaContratto && $ordine->contratto_firmato) {
+                $ultimoTipo = 'contratto_firmato';
+            }
+        }
 
         if ($ordine->stato == 'attesa_saldo_merce') {
             $primaSaldo = $ordine->saldo_merce_ricevuto;
@@ -206,9 +226,30 @@ class OrdineController extends Controller
             }
         }
 
+        if ($ordine->stato == 'concluso') {
+            $primaSaldoFinale = $ordine->saldo_finale_ricevuto;
+            $primaEnea = $ordine->invio_enea_effettuato;
+
+            $ordine->saldo_finale_ricevuto = $request->has('saldo_finale_ricevuto') ? 1 : 0;
+
+            if ($ordine->commessa && $ordine->commessa->pratica_enea) {
+                $ordine->invio_enea_effettuato = $request->has('invio_enea_effettuato') ? 1 : 0;
+            } else {
+                $ordine->invio_enea_effettuato = 0;
+            }
+
+            if (!$primaSaldoFinale && $ordine->saldo_finale_ricevuto) {
+                $ultimoTipo = 'saldo_finale_ricevuto';
+            }
+
+            if (!$primaEnea && $ordine->invio_enea_effettuato) {
+                $ultimoTipo = 'invio_enea_effettuato';
+            }
+        }
+
         $ordine->save();
 
-        $ordine = Ordine::with('righe')->findOrFail($ordine->id);
+        $ordine = Ordine::with('righe', 'commessa')->findOrFail($ordine->id);
 
         $messaggioCambioStato = $this->aggiornaStatoOrdine($ordine, $ultimoTipo, $ultimoRigaId);
 
@@ -224,6 +265,15 @@ class OrdineController extends Controller
     private function aggiornaStatoOrdine($ordine, $ultimoTipo = null, $ultimoRigaId = null)
     {
         $messaggio = null;
+
+        if ($ordine->stato == 'preparazione_contratto') {
+            if ($ordine->contratto_firmato) {
+                $ordine->stato = 'in_lavorazione';
+                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                $ordine->ultimo_avanzamento_riga_id = null;
+                $messaggio = 'Contratto firmato. L’ordine è stato spostato in: In lavorazione.';
+            }
+        }
 
         if ($ordine->stato == 'in_lavorazione') {
             $tuttePronte = true;
@@ -279,6 +329,26 @@ class OrdineController extends Controller
             }
         }
 
+        if ($ordine->stato == 'concluso') {
+            $serveEnea = $ordine->commessa && $ordine->commessa->pratica_enea;
+
+            if ($serveEnea) {
+                if ($ordine->saldo_finale_ricevuto && $ordine->invio_enea_effettuato) {
+                    $ordine->stato = 'archiviato';
+                    $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                    $ordine->ultimo_avanzamento_riga_id = null;
+                    $messaggio = 'Saldo finale ricevuto e invio ENEA effettuato. L’ordine è stato archiviato.';
+                }
+            } else {
+                if ($ordine->saldo_finale_ricevuto) {
+                    $ordine->stato = 'archiviato';
+                    $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+                    $ordine->ultimo_avanzamento_riga_id = null;
+                    $messaggio = 'Saldo finale ricevuto. L’ordine è stato archiviato.';
+                }
+            }
+        }
+
         $ordine->save();
 
         return $messaggio;
@@ -286,9 +356,17 @@ class OrdineController extends Controller
 
     public function tornaStatoPrecedente($id)
     {
-        $ordine = Ordine::with('righe')->findOrFail($id);
+        $ordine = Ordine::with('righe', 'commessa')->findOrFail($id);
 
-        if ($ordine->stato == 'completo_attesa_merce') {
+        if ($ordine->stato == 'in_lavorazione') {
+            if ($ordine->ultimo_avanzamento_tipo == 'contratto_firmato') {
+                $ordine->contratto_firmato = 0;
+            }
+
+            $ordine->stato = 'preparazione_contratto';
+            $messaggio = 'Ordine riportato in preparazione contratto. Rimossa la spunta contratto firmato.';
+
+        } elseif ($ordine->stato == 'completo_attesa_merce') {
             if ($ordine->ultimo_avanzamento_tipo == 'in_produzione' && $ordine->ultimo_avanzamento_riga_id) {
                 $riga = RigaOrdine::find($ordine->ultimo_avanzamento_riga_id);
 
@@ -330,6 +408,16 @@ class OrdineController extends Controller
             $ordine->stato = 'programmare_posa';
             $messaggio = 'Ordine riportato in programmare posa. Rimossa la spunta fattura saldo posa fatta.';
 
+        } elseif ($ordine->stato == 'archiviato') {
+            if ($ordine->ultimo_avanzamento_tipo == 'invio_enea_effettuato') {
+                $ordine->invio_enea_effettuato = 0;
+            } elseif ($ordine->ultimo_avanzamento_tipo == 'saldo_finale_ricevuto') {
+                $ordine->saldo_finale_ricevuto = 0;
+            }
+
+            $ordine->stato = 'concluso';
+            $messaggio = 'Ordine riportato in conclusi. Rimossa la spunta che aveva causato l’archiviazione.';
+
         } else {
             return redirect('/ordini/' . $ordine->id)
                 ->with('error', 'Questo ordine non può tornare a uno stato precedente.');
@@ -356,7 +444,7 @@ class OrdineController extends Controller
         $ordine->righe()->delete();
         $ordine->delete();
 
-        return redirect('/ordini/stato/in_lavorazione')
+        return redirect('/ordini/stato/preparazione_contratto')
             ->with('success', 'Ordine eliminato correttamente.');
     }
 }

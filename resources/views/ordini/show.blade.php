@@ -42,7 +42,9 @@
     <p>
         <strong>Stato:</strong>
 
-        @if($ordine->stato == 'in_lavorazione')
+        @if($ordine->stato == 'preparazione_contratto')
+            Preparazione contratto
+        @elseif($ordine->stato == 'in_lavorazione')
             In lavorazione
         @elseif($ordine->stato == 'completo_attesa_merce')
             Completo - attesa merce
@@ -52,10 +54,12 @@
             Programmare posa
         @elseif($ordine->stato == 'concluso')
             Concluso
+        @elseif($ordine->stato == 'archiviato')
+            Archiviato
         @endif
     </p>
 
-    @if($ordine->stato != 'in_lavorazione')
+    @if($ordine->stato != 'preparazione_contratto')
         <form method="POST"
               action="/ordini/{{ $ordine->id }}/stato-precedente"
               style="margin-top:10px;"
@@ -96,24 +100,23 @@
         </form>
 
         <tr>
-            <td>
-                {{ $riga->descrizione }}
-            </td>
+            <td>{{ $riga->descrizione }}</td>
 
             <td>
                 {{ $riga->fornitore ? $riga->fornitore->ragione_sociale : '' }}
             </td>
 
-            <td>
-                {{ $riga->quantita }}
-            </td>
+            <td>{{ $riga->quantita }}</td>
 
             <td>
                 {{ number_format($riga->imponibile, 2, ',', '.') }} €
             </td>
 
             <td>
-                @if($ordine->stato == 'in_lavorazione')
+                @if($ordine->stato == 'preparazione_contratto')
+                    In attesa contratto firmato
+
+                @elseif($ordine->stato == 'in_lavorazione')
 
                     <label>
                         <input type="checkbox"
@@ -174,7 +177,7 @@
                     <br>
                 @endif
 
-                @if($ordine->stato != 'concluso')
+                @if($ordine->stato != 'concluso' && $ordine->stato != 'archiviato')
                     <input type="file"
                            form="form_riga_{{ $riga->id }}"
                            name="pdf"
@@ -197,7 +200,12 @@
 
 </table>
 
-@if($ordine->stato == 'attesa_saldo_merce' || $ordine->stato == 'programmare_posa')
+@if(
+    $ordine->stato == 'preparazione_contratto' ||
+    $ordine->stato == 'attesa_saldo_merce' ||
+    $ordine->stato == 'programmare_posa' ||
+    $ordine->stato == 'concluso'
+)
 
     <br>
 
@@ -209,6 +217,22 @@
           onsubmit="return confermaAvanzamentoAvanzato(this)">
 
         @csrf
+
+        @if($ordine->stato == 'preparazione_contratto')
+
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="contratto_firmato"
+                           name="contratto_firmato"
+                           value="1"
+                           {{ $ordine->contratto_firmato ? 'checked' : '' }}>
+
+                    Contratto firmato dal cliente
+                </label>
+            </p>
+
+        @endif
 
         @if($ordine->stato == 'attesa_saldo_merce')
 
@@ -251,6 +275,36 @@
                     Fattura saldo posa fatta
                 </label>
             </p>
+
+        @endif
+
+        @if($ordine->stato == 'concluso')
+
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="saldo_finale_ricevuto"
+                           name="saldo_finale_ricevuto"
+                           value="1"
+                           {{ $ordine->saldo_finale_ricevuto ? 'checked' : '' }}>
+
+                    Saldo finale ricevuto dal cliente
+                </label>
+            </p>
+
+            @if($ordine->commessa && $ordine->commessa->pratica_enea)
+                <p>
+                    <label>
+                        <input type="checkbox"
+                               id="invio_enea_effettuato"
+                               name="invio_enea_effettuato"
+                               value="1"
+                               {{ $ordine->invio_enea_effettuato ? 'checked' : '' }}>
+
+                        Invio ENEA effettuato
+                    </label>
+                </p>
+            @endif
 
         @endif
 
@@ -320,6 +374,21 @@ function confermaAvanzamentoRiga(form) {
 
 function confermaAvanzamentoAvanzato(form) {
 
+    if (statoOrdine === 'preparazione_contratto') {
+        let contratto = document.getElementById('contratto_firmato');
+
+        if (contratto && contratto.checked) {
+            let conferma = confirm(
+                'Contratto firmato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
+            );
+
+            if (!conferma) {
+                form.reset();
+                return false;
+            }
+        }
+    }
+
     if (statoOrdine === 'attesa_saldo_merce') {
         let saldo = document.getElementById('saldo_merce_ricevuto');
 
@@ -347,6 +416,35 @@ function confermaAvanzamentoAvanzato(form) {
             if (!conferma) {
                 form.reset();
                 return false;
+            }
+        }
+    }
+
+    if (statoOrdine === 'concluso') {
+        let saldoFinale = document.getElementById('saldo_finale_ricevuto');
+        let enea = document.getElementById('invio_enea_effettuato');
+
+        if (saldoFinale && saldoFinale.checked) {
+            if (enea) {
+                if (enea.checked) {
+                    let conferma = confirm(
+                        'Saldo finale ricevuto e invio ENEA effettuato.\n\nL ordine verrà spostato in: Archiviato.\n\nConfermi?'
+                    );
+
+                    if (!conferma) {
+                        form.reset();
+                        return false;
+                    }
+                }
+            } else {
+                let conferma = confirm(
+                    'Saldo finale ricevuto.\n\nL ordine verrà spostato in: Archiviato.\n\nConfermi?'
+                );
+
+                if (!conferma) {
+                    form.reset();
+                    return false;
+                }
             }
         }
     }
