@@ -77,3 +77,30 @@ button {
 button:hover {
     background: #1e40af;
 }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+}
+
+table th {
+    background: #f2f2f2;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #ccc;
+}
+
+table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+}
+
+table tr:hover {
+    background: #f8f8f8;
+}
+
+table tr:nth-child(even) {
+    background: #fcfcfc;
+}

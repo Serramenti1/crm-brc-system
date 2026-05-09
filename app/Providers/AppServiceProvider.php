@@ -19,35 +19,21 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        View::composer('partials.menu', function ($view) {
+   public function boot(): void
+{
+    View::composer(['partials.menu', 'dashboard'], function ($view) {
 
-            $conteggiOrdini = [
+        $conteggiOrdini = [
+            'preparazione_contratto' => Ordine::where('stato', 'preparazione_contratto')->count(),
+            'in_lavorazione' => Ordine::where('stato', 'in_lavorazione')->count(),
+            'completo_attesa_merce' => Ordine::where('stato', 'completo_attesa_merce')->count(),
+            'attesa_saldo_merce' => Ordine::where('stato', 'attesa_saldo_merce')->count(),
+            'programmare_posa' => Ordine::where('stato', 'programmare_posa')->count(),
+            'concluso' => Ordine::where('stato', 'concluso')->count(),
+            'archiviato' => Ordine::where('stato', 'archiviato')->count(),
+        ];
 
-                'preparazione_contratto' =>
-                    Ordine::where('stato', 'preparazione_contratto')->count(),
-
-                'in_lavorazione' =>
-                    Ordine::where('stato', 'in_lavorazione')->count(),
-
-                'completo_attesa_merce' =>
-                    Ordine::where('stato', 'completo_attesa_merce')->count(),
-
-                'attesa_saldo_merce' =>
-                    Ordine::where('stato', 'attesa_saldo_merce')->count(),
-
-                'programmare_posa' =>
-                    Ordine::where('stato', 'programmare_posa')->count(),
-
-                'concluso' =>
-                    Ordine::where('stato', 'concluso')->count(),
-
-                'archiviato' =>
-                    Ordine::where('stato', 'archiviato')->count(),
-            ];
-
-            $view->with('conteggiOrdini', $conteggiOrdini);
-        });
-    }
+        $view->with('conteggiOrdini', $conteggiOrdini);
+    });
+}
 }
