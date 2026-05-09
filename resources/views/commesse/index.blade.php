@@ -1,72 +1,107 @@
 @include('partials.menu')
 
-<h1>Lista Commesse</h1>
+<div class="container">
 
-<form method="GET" action="/commesse" style="margin-bottom:15px;">
-    <input type="text" name="q" placeholder="Cerca cliente..." value="{{ request('q') }}">
-    <button type="submit">Cerca</button>
-    <a href="/commesse">Reset</a>
-</form>
+    <h1>Lista Commesse</h1>
 
-<a href="/commesse/create">+ Nuova Commessa</a>
+    <form method="GET" action="/commesse" style="margin-bottom:15px;">
+        <input type="text" name="q" placeholder="Cerca cliente..." value="{{ request('q') }}">
 
-<br><br>
+        <button type="submit" class="btn btn-azione">
+            Cerca
+        </button>
 
-@if(session('success'))
-    <p style="color:green;">
-        {{ session('success') }}
-    </p>
-@endif
+        <a href="/commesse" class="btn btn-azione">
+            Reset
+        </a>
+    </form>
 
-@if(session('error'))
-    <p style="color:red;">
-        {{ session('error') }}
-    </p>
-@endif
+    <a href="/commesse/create" class="btn btn-azione">
+        + Nuova Commessa
+    </a>
 
-<table border="1" cellpadding="5" width="100%">
-    <tr>
-        <th>Cliente</th>
-        <th>Città intervento</th>
-        <th>Indirizzo intervento</th>
-        <th>Piano posa</th>
-        <th>Autoscala</th>
-        <th>Azioni</th>
-    </tr>
+    @if(session('success'))
+        <p style="color:green;">
+            {{ session('success') }}
+        </p>
+    @endif
 
-    @foreach($commesse as $commessa)
-    <tr>
+    @if(session('error'))
+        <p style="color:red;">
+            {{ session('error') }}
+        </p>
+    @endif
 
-        <td>
-            {{ $commessa->cliente ? $commessa->cliente->nome . ' ' . $commessa->cliente->cognome : '' }}
-        </td>
+    <table class="tabella-lista">
 
-        <td>{{ $commessa->citta_lavoro }}</td>
+        <tr>
+            <th>Cliente</th>
+            <th>Città intervento</th>
+            <th>Indirizzo intervento</th>
+            <th>Piano posa</th>
+            <th>Autoscala</th>
+            <th>Azioni</th>
+        </tr>
 
-        <td>{{ $commessa->indirizzo_lavoro }}</td>
+        @foreach($commesse as $commessa)
 
-        <td>{{ $commessa->piano_posa ?? '-' }}</td>
+            <tr>
 
-        <td>
-            @if($commessa->autoscala)
-                <span style="color:red;">Sì</span>
-            @else
-                No
-            @endif
-        </td>
+                <td>
+                    {{ $commessa->cliente ? $commessa->cliente->nome . ' ' . $commessa->cliente->cognome : '' }}
+                </td>
 
-        <td>
-            <a href="/commesse/{{ $commessa->id }}/edit">Modifica</a>
+                <td>
+                    {{ $commessa->citta_lavoro }}
+                </td>
 
-            <form action="/commesse/{{ $commessa->id }}" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" onclick="return confirm('Sei sicuro di voler eliminare questa commessa?')">
-                    Elimina
-                </button>
-            </form>
-        </td>
+                <td>
+                    {{ $commessa->indirizzo_lavoro }}
+                </td>
 
-    </tr>
-    @endforeach
-</table>
+                <td>
+                    {{ $commessa->piano_posa ?? '-' }}
+                </td>
+
+                <td>
+                    @if($commessa->autoscala)
+                        <span style="color:red;">Sì</span>
+                    @else
+                        No
+                    @endif
+                </td>
+
+                <td class="azioni">
+
+                    <div class="azioni-bottoni">
+
+                        <a href="/commesse/{{ $commessa->id }}/edit" class="btn btn-azione">
+                            Modifica
+                        </a>
+
+                        <form action="/commesse/{{ $commessa->id }}" method="POST" class="form-elimina">
+
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="btn btn-elimina"
+                                onclick="return confirm('Sei sicuro di voler eliminare questa commessa?')"
+                            >
+                                🗑️
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        @endforeach
+
+    </table>
+
+</div>

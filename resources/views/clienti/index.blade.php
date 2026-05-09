@@ -1,51 +1,95 @@
 @include('partials.menu')
 
-<h1>Lista Clienti</h1>
+<div class="container">
 
-<form method="GET" action="/clienti" style="margin-bottom:15px;">
-    <input type="text" name="q" placeholder="Cerca cliente..." value="{{ request('q') }}">
-    <button type="submit">Cerca</button>
-    <a href="/clienti">Reset</a>
-</form>
+    <h1>Lista Clienti</h1>
 
-<a href="/clienti/create">+ Nuovo Cliente</a>
+    <form method="GET" action="/clienti" style="margin-bottom:15px;">
+        <input type="text" name="q" placeholder="Cerca cliente..." value="{{ request('q') }}">
 
-<br><br>
+        <button type="submit" class="btn btn-azione">
+            Cerca
+        </button>
 
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Nome</th>
-        <th>Cognome</th>
-        <th>Indirizzo</th>
-        <th>Contatti</th>
-        <th>Azioni</th>
-    </tr>
+        <a href="/clienti" class="btn btn-azione">
+            Reset
+        </a>
+    </form>
 
-    @foreach($clienti as $cliente)
-    <tr>
-        <td>{{ $cliente->nome }}</td>
-        <td>{{ $cliente->cognome }}</td>
-        <td>
-            {{ $cliente->indirizzo }}<br>
-            {{ $cliente->cap }} {{ $cliente->citta }} ({{ $cliente->provincia }})
-        </td>
-        <td>
-            {{ $cliente->telefono }}<br>
-            {{ $cliente->email }}
-        </td>
-        <td>
-            <a href="/clienti/{{ $cliente->id }}">Visualizza</a> |
+    <a href="/clienti/create" class="btn btn-azione">
+        + Nuovo Cliente
+    </a>
 
-            <a href="/clienti/{{ $cliente->id }}/edit">Modifica</a>
+    <table class="tabella-lista">
 
-            <form action="/clienti/{{ $cliente->id }}" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" onclick="return confirm('Eliminare questo cliente?')">
-                    Elimina
-                </button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</table>
+        <tr>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Indirizzo</th>
+            <th>Contatti</th>
+            <th>Azioni</th>
+        </tr>
+
+        @foreach($clienti as $cliente)
+
+            <tr>
+
+                <td>
+                    {{ $cliente->nome }}
+                </td>
+
+                <td>
+                    {{ $cliente->cognome }}
+                </td>
+
+                <td>
+                    {{ $cliente->indirizzo }}<br>
+
+                    {{ $cliente->cap }}
+                    {{ $cliente->citta }}
+                    ({{ $cliente->provincia }})
+                </td>
+
+                <td>
+                    {{ $cliente->telefono }}<br>
+                    {{ $cliente->email }}
+                </td>
+
+                <td class="azioni">
+
+                    <div class="azioni-bottoni">
+
+                        <a href="/clienti/{{ $cliente->id }}" class="btn btn-azione">
+                            Visualizza
+                        </a>
+
+                        <a href="/clienti/{{ $cliente->id }}/edit" class="btn btn-azione">
+                            Modifica
+                        </a>
+
+                        <form action="/clienti/{{ $cliente->id }}" method="POST" class="form-elimina">
+
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="btn btn-elimina"
+                                onclick="return confirm('Eliminare questo cliente?')"
+                            >
+                                🗑️
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        @endforeach
+
+    </table>
+
+</div>

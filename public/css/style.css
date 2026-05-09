@@ -3,13 +3,14 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: #f5f7fa;
+    color: #111827;
 }
 
-/* BARRA BLU SUPERIORE */
+/* BARRA SUPERIORE */
 .topbar {
     background: linear-gradient(90deg, #0b3c88, #1e5bb8);
     color: white;
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-size: 18px;
     font-weight: bold;
 }
@@ -20,87 +21,334 @@ body {
     padding: 10px 20px;
 }
 
-/* BOTTONI MENU */
-.btn {
-    display: inline-block;
-    padding: 8px 14px;
-    margin-right: 8px;
-    background: #374151;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.btn:hover {
-    background: #2563eb;
-}
-
-/* ATTIVO */
-.active {
-    background: #2563eb;
-}
-
 /* CONTENUTO */
 .container {
     padding: 20px;
 }
 
-/* TABELLE */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
+/* TITOLI */
+h1,
+h2,
+h3 {
+    color: #111827;
 }
 
-table th {
-    background: #e5e7eb;
-    padding: 10px;
-    text-align: left;
-}
-
-table td {
-    padding: 10px;
-    border-top: 1px solid #ddd;
-}
-
-/* BOTTONI GENERICI */
-button {
-    padding: 6px 10px;
+/* BOTTONI BASE */
+.btn,
+button,
+a.btn {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 3px;
+    color: white;
+    text-decoration: none;
     border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: 0.2s;
+}
+
+/* BOTTONI AZIONE */
+.btn-azione,
+button:not(.btn-elimina),
+a.btn-azione {
+    background: #60a5fa;
+    color: white;
+}
+
+.btn-azione:hover,
+button:not(.btn-elimina):hover,
+a.btn-azione:hover {
     background: #2563eb;
     color: white;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
-button:hover {
-    background: #1e40af;
+/* BOTTONE ELIMINA */
+.btn-elimina {
+    background: #60a5fa;
+    width: 38px;
+    height: 36px;
+    padding: 0;
+    font-size: 16px;
+    line-height: 36px;
+    text-align: center;
 }
-table {
+
+.btn-elimina:hover {
+    background: #2563eb;
+}
+
+/* BOTTONI MENU */
+.navbar .btn {
+    background: #374151;
+    margin-right: 8px;
+}
+
+.navbar .btn:hover,
+.navbar .active {
+    background: #2563eb;
+}
+
+/* FORM INLINE */
+.form-elimina {
+    display: inline-block;
+    margin: 0;
+}
+
+/* TABELLE */
+table,
+.tabella-lista,
+.tabella-form,
+.tabella-dettaglio {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
     background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-table th {
-    background: #f2f2f2;
+/* HEADER TABELLE */
+table th,
+.tabella-lista th,
+.tabella-form th,
+.tabella-dettaglio th {
+    background: #e5e7eb;
     padding: 12px;
     text-align: left;
-    border-bottom: 2px solid #ccc;
+    border-bottom: 2px solid #d1d5db;
+    font-weight: bold;
 }
 
-table td {
+/* CELLE */
+table td,
+.tabella-lista td,
+.tabella-form td,
+.tabella-dettaglio td {
     padding: 12px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e5e7eb;
     vertical-align: top;
 }
 
-table tr:hover {
-    background: #f8f8f8;
+/* RIGHE ALTERNATE */
+table tr:nth-child(even),
+.tabella-lista tr:nth-child(even),
+.tabella-form tr:nth-child(even),
+.tabella-dettaglio tr:nth-child(even) {
+    background: #fafafa;
 }
 
-table tr:nth-child(even) {
-    background: #fcfcfc;
+/* HOVER RIGHE */
+table tr:hover,
+.tabella-lista tr:hover,
+.tabella-form tr:hover,
+.tabella-dettaglio tr:hover {
+    background: #f3f4f6;
+}
+
+/* ULTIMA RIGA */
+table tr:last-child td,
+.tabella-lista tr:last-child td,
+.tabella-form tr:last-child td,
+.tabella-dettaglio tr:last-child td {
+    border-bottom: none;
+}
+
+/* COLONNA AZIONI */
+td.azioni {
+    white-space: nowrap;
+}
+
+/* CONTENITORE BOTTONI AZIONI */
+.azioni-bottoni {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+/* BOTTONI DENTRO AZIONI */
+.azioni-bottoni .btn,
+.azioni-bottoni button {
+    margin: 0;
+    background: #60a5fa;
+}
+
+.azioni-bottoni .btn:hover,
+.azioni-bottoni button:hover {
+    background: #2563eb;
+}
+
+/* INPUT */
+input,
+select,
+textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* TEXTAREA */
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* LABEL */
+label {
+    font-weight: bold;
+}
+
+/* LINK RITORNO */
+.link-ritorno {
+    display: inline-block;
+    margin-top: 15px;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.link-ritorno:hover {
+    text-decoration: underline;
+}
+
+/* BADGE */
+.badge {
+    background: #dc2626;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+/* GRIGLIA FORM BASE */
+.griglia-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+}
+
+.griglia-form p {
+    margin: 0;
+}
+
+.griglia-form input,
+.griglia-form select,
+.griglia-form textarea {
+    max-width: none;
+}
+
+.campo-doppio {
+    grid-column: span 2;
+}
+
+.campo-triplo {
+    grid-column: span 3;
+}
+
+/* SEZIONI FORM */
+.form-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.form-section h3 {
+    margin-top: 0;
+}
+
+/* GRIGLIA FORM COMMESSE */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.form-field label,
+.form-field-full label {
+    font-weight: bold;
+}
+
+/* CAMPI FORM */
+.form-field input,
+.form-field select,
+.form-field textarea,
+.form-field-full input,
+.form-field-full select,
+.form-field-full textarea {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+/* CAMPO LARGO */
+.form-field-full {
+    grid-column: span 3;
+}
+
+/* CHECKBOX */
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 22px;
+}
+
+.form-checkbox input {
+    width: auto;
+    max-width: none;
+    margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+
+    .navbar .btn {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    table,
+    .tabella-lista,
+    .tabella-form,
+    .tabella-dettaglio {
+        font-size: 13px;
+    }
+
+    table th,
+    table td,
+    .tabella-lista th,
+    .tabella-lista td,
+    .tabella-form th,
+    .tabella-form td,
+    .tabella-dettaglio th,
+    .tabella-dettaglio td {
+        padding: 8px;
+    }
+
+    .azioni-bottoni {
+        flex-wrap: wrap;
+    }
+
+    .griglia-form,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-doppio,
+    .campo-triplo,
+    .form-field-full {
+        grid-column: span 1;
+    }
 }

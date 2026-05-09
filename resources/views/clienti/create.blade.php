@@ -1,82 +1,89 @@
 @include('partials.menu')
 
-<h1>Nuovo Cliente</h1>
+<div class="container">
 
-@if ($errors->any())
-    <div style="color:red;">
-        <ul>
-            @foreach ($errors->all() as $errore)
-                <li>{{ $errore }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+    <h1>Nuovo Cliente</h1>
 
-<form method="POST" action="/clienti">
-    @csrf
+    @if ($errors->any())
+        <div style="color:red;">
+            <ul>
+                @foreach ($errors->all() as $errore)
+                    <li>{{ $errore }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
+    <form method="POST" action="/clienti">
+        @csrf
 
-        <p>
-            Nome:<br>
-            <input type="text" name="nome" style="width:100%;">
-        </p>
+        <div class="griglia-form">
 
-        <p>
-            Cognome:<br>
-            <input type="text" name="cognome" style="width:100%;">
-        </p>
+            <p>
+                <label>Nome:</label><br>
+                <input type="text" name="nome" value="{{ old('nome') }}">
+            </p>
 
-        <p>
-            Telefono:<br>
-            <input type="text" name="telefono" style="width:100%;">
-        </p>
+            <p>
+                <label>Cognome:</label><br>
+                <input type="text" name="cognome" value="{{ old('cognome') }}">
+            </p>
 
-        <p>
-            Email:<br>
-            <input type="email" name="email" style="width:100%;">
-        </p>
+            <p>
+                <label>Telefono:</label><br>
+                <input type="text" name="telefono" value="{{ old('telefono') }}">
+            </p>
 
-        <p>
-            Codice fiscale:<br>
-            <input type="text" name="codice_fiscale" style="width:100%;">
-        </p>
+            <p>
+                <label>Email:</label><br>
+                <input type="email" name="email" value="{{ old('email') }}">
+            </p>
 
-        <p>
-            Partita IVA:<br>
-            <input type="text" name="partita_iva" style="width:100%;">
-        </p>
+            <p>
+                <label>Codice fiscale:</label><br>
+                <input type="text" name="codice_fiscale" value="{{ old('codice_fiscale') }}">
+            </p>
 
-        <p style="grid-column: span 2;">
-            Indirizzo:<br>
-            <input type="text" name="indirizzo" style="width:100%;">
-        </p>
+            <p>
+                <label>Partita IVA:</label><br>
+                <input type="text" name="partita_iva" value="{{ old('partita_iva') }}">
+            </p>
 
-        <p>
-            CAP:<br>
-            <input type="text" name="cap" style="width:100%;">
-        </p>
+            <p class="campo-doppio">
+                <label>Indirizzo:</label><br>
+                <input type="text" name="indirizzo" value="{{ old('indirizzo') }}">
+            </p>
 
-        <p>
-            Città:<br>
-            <input type="text" name="citta" style="width:100%;">
-        </p>
+            <p>
+                <label>CAP:</label><br>
+                <input type="text" name="cap" value="{{ old('cap') }}">
+            </p>
 
-        <p>
-            Provincia:<br>
-            <input type="text" name="provincia" style="width:100%;">
-        </p>
+            <p>
+                <label>Città:</label><br>
+                <input type="text" name="citta" value="{{ old('citta') }}">
+            </p>
 
-        <p style="grid-column: span 3;">
-            Note:<br>
-            <textarea name="note" rows="4" style="width:100%;"></textarea>
-        </p>
+            <p>
+                <label>Provincia:</label><br>
+                <input type="text" name="provincia" value="{{ old('provincia') }}">
+            </p>
 
-    </div>
+            <p class="campo-triplo">
+                <label>Note:</label><br>
+                <textarea name="note" rows="4">{{ old('note') }}</textarea>
+            </p>
 
-    <button type="submit">Salva Cliente</button>
-</form>
+        </div>
 
-<br>
+        <button type="submit" class="btn btn-azione">
+            Salva Cliente
+        </button>
 
-<a href="/clienti">← Torna ai clienti</a>
+        <a href="/clienti" class="btn btn-azione">
+            ← Torna ai clienti
+        </a>
+
+    </form>
+
+</div>
