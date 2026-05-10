@@ -12,7 +12,7 @@ class CommessaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Commessa::with('cliente');
+        $query = Commessa::with('cliente', 'tipoIntervento');
 
         if ($request->filled('q')) {
             $parole = explode(' ', trim($request->q));
@@ -24,6 +24,9 @@ class CommessaController extends Controller
                             ->orWhere('citta_lavoro', 'like', '%' . $parola . '%')
                             ->orWhere('tipo_detrazione', 'like', '%' . $parola . '%')
                             ->orWhere('tipo_lavoro', 'like', '%' . $parola . '%')
+                            ->orWhereHas('tipoIntervento', function ($tipoQuery) use ($parola) {
+                                $tipoQuery->where('nome', 'like', '%' . $parola . '%');
+                            })
                             ->orWhereHas('cliente', function ($clienteQuery) use ($parola) {
                                 $clienteQuery->where('nome', 'like', $parola . '%')
                                     ->orWhere('cognome', 'like', $parola . '%');
@@ -68,7 +71,7 @@ class CommessaController extends Controller
             'autoscala' => 'nullable|boolean',
 
             'tipologia_abitazione' => 'nullable|string|max:255',
-            'tipo_lavoro' => 'nullable|string|max:255',
+            'tipo_intervento_id' => 'nullable|exists:tipi_intervento,id',
             'tipo_detrazione' => 'nullable|string|max:255',
             'percentuale_detrazione' => 'nullable|numeric|min:0|max:100',
 
@@ -87,6 +90,12 @@ class CommessaController extends Controller
             'note' => 'nullable|string',
         ]);
 
+        $tipoIntervento = null;
+
+        if ($request->tipo_intervento_id) {
+            $tipoIntervento = TipoIntervento::find($request->tipo_intervento_id);
+        }
+
         $percentualeDetrazione = $this->calcolaPercentualeDetrazione($request->tipo_detrazione);
 
         Commessa::create([
@@ -102,7 +111,9 @@ class CommessaController extends Controller
             'autoscala' => $request->has('autoscala') ? 1 : 0,
 
             'tipologia_abitazione' => $request->tipologia_abitazione,
-            'tipo_lavoro' => $request->tipo_lavoro,
+            'tipo_intervento_id' => $request->tipo_intervento_id,
+            'tipo_lavoro' => $tipoIntervento ? $tipoIntervento->nome : null,
+
             'tipo_detrazione' => $request->tipo_detrazione,
             'percentuale_detrazione' => $percentualeDetrazione,
 
@@ -157,7 +168,7 @@ class CommessaController extends Controller
             'autoscala' => 'nullable|boolean',
 
             'tipologia_abitazione' => 'nullable|string|max:255',
-            'tipo_lavoro' => 'nullable|string|max:255',
+            'tipo_intervento_id' => 'nullable|exists:tipi_intervento,id',
             'tipo_detrazione' => 'nullable|string|max:255',
             'percentuale_detrazione' => 'nullable|numeric|min:0|max:100',
 
@@ -178,6 +189,12 @@ class CommessaController extends Controller
 
         $commessa = Commessa::findOrFail($id);
 
+        $tipoIntervento = null;
+
+        if ($request->tipo_intervento_id) {
+            $tipoIntervento = TipoIntervento::find($request->tipo_intervento_id);
+        }
+
         $percentualeDetrazione = $this->calcolaPercentualeDetrazione($request->tipo_detrazione);
 
         $commessa->update([
@@ -193,7 +210,9 @@ class CommessaController extends Controller
             'autoscala' => $request->has('autoscala') ? 1 : 0,
 
             'tipologia_abitazione' => $request->tipologia_abitazione,
-            'tipo_lavoro' => $request->tipo_lavoro,
+            'tipo_intervento_id' => $request->tipo_intervento_id,
+            'tipo_lavoro' => $tipoIntervento ? $tipoIntervento->nome : null,
+
             'tipo_detrazione' => $request->tipo_detrazione,
             'percentuale_detrazione' => $percentualeDetrazione,
 

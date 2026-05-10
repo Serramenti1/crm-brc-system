@@ -9,8 +9,8 @@ use App\Models\Fornitore;
 use App\Models\ProdottoFornitore;
 use App\Models\RigaPreventivoProdotto;
 use App\Models\Ordine;
-use App\Models\ImpostazioneIva;
 use App\Models\ServizioExtra;
+use App\Services\CalcoloIvaService;
 
 class PreventivoController extends Controller
 {
@@ -24,16 +24,16 @@ class PreventivoController extends Controller
             $query->whereHas('commessa.cliente', function ($q) use ($parole) {
                 foreach ($parole as $parola) {
                     $q->where(function ($sub) use ($parola) {
-                        $sub->where('nome', 'like', $parola.'%')
-                            ->orWhere('cognome', 'like', $parola.'%');
+                        $sub->where('nome', 'like', $parola . '%')
+                            ->orWhere('cognome', 'like', $parola . '%');
                     });
                 }
             });
         }
 
         $preventivi = $query
-        ->latest()
-        ->get();
+            ->latest()
+            ->get();
 
         return view('preventivi.index', compact('preventivi'));
     }
@@ -41,6 +41,7 @@ class PreventivoController extends Controller
     public function create()
     {
         $commesse = Commessa::with('cliente')->get();
+
         return view('preventivi.create', compact('commesse'));
     }
 
@@ -78,6 +79,8 @@ class PreventivoController extends Controller
     {
         $preventivo = Preventivo::with(
             'commessa.cliente',
+            'commessa.tipoIntervento.ivaPrincipale',
+            'commessa.tipoIntervento.ivaSecondaria',
             'righeProdotti.fornitore',
             'righeProdotti.servizi'
         )->findOrFail($id);
@@ -86,10 +89,10 @@ class PreventivoController extends Controller
         $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
 
         $serviziExtra = ServizioExtra::where('attivo', 1)
-        ->orderBy('nome')
-        ->get();
+            ->orderBy('nome')
+            ->get();
 
-return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore', 'serviziExtra'));
+        return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore', 'serviziExtra'));
     }
 
     public function destroy($id)
@@ -153,6 +156,7 @@ return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiForni
         $prezzoClienteUnitario = $costoNetto * (1 + ($ricarico / 100));
 
         $scontoClientePercentuale = 0;
+
         if ($prezzoListino > 0) {
             $scontoClientePercentuale = (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100;
         }
@@ -207,6 +211,7 @@ return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiForni
         $utileTotale = $totaleClienteFinale - $totaleCostoBrc;
 
         $scontoMedioCliente = 0;
+
         if ($totaleListinoProdotti > 0) {
             $scontoMedioCliente = (($totaleListinoProdotti - $totaleNettoProdotti) / $totaleListinoProdotti) * 100;
         }
@@ -221,132 +226,20 @@ return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiForni
             'utile_totale' => $utileTotale,
         ]);
     }
+
     public function visualizza($id)
-{
-    $preventivo = Preventivo::with(
-        'commessa.cliente',
-        'righeProdotti.fornitore',
-        'righeProdotti.servizi'
-    )->findOrFail($id);
+    {
+        $preventivo = Preventivo::with(
+            'commessa.cliente',
+            'commessa.tipoIntervento.ivaPrincipale',
+            'commessa.tipoIntervento.ivaSecondaria',
+            'righeProdotti.fornitore',
+            'righeProdotti.servizi'
+        )->findOrFail($id);
 
-    $calcoloIva = $this->calcolaIvaPreventivo($preventivo);
+        $calcoloIvaService = new CalcoloIvaService();
+        $calcoloIva = $calcoloIvaService->calcolaDaPreventivo($preventivo);
 
-    return view('preventivi.visualizza', compact('preventivo', 'calcoloIva'));
-}
-
-private function calcolaIvaPreventivo($preventivo)
-{
-    $ivaStandard = $this->prendiAliquotaIva(['standard'], 22);
-    $ivaPrimaCasa = $this->prendiAliquotaIva(['prima'], 4);
-    $ivaRistrutturazione = $this->prendiAliquotaIva(['ristrutturazione'], 10);
-    $ivaManutenzione = $this->prendiAliquotaIva(['manutenzione'], 10);
-
-    $totaleProdottiCliente = 0;
-    $totaleServiziCliente = 0;
-
-    $prodottiNonSignificativiCliente = 0;
-    $beniSignificativiCosto = 0;
-    $markupBeniSignificativi = 0;
-
-    foreach ($preventivo->righeProdotti as $riga) {
-        $quantita = (float) ($riga->quantita ?? 1);
-
-        $totaleProdottiCliente += (float) $riga->totale_cliente;
-
-        foreach ($riga->servizi as $servizio) {
-            $totaleServiziCliente += (float) $servizio->prezzo_cliente * $quantita;
-        }
-
-        if ($riga->bene_significativo) {
-            $costoBene = (float) $riga->totale_costo;
-            $prezzoClienteBene = (float) $riga->totale_cliente;
-
-            $beniSignificativiCosto += $costoBene;
-            $markupBeniSignificativi += max(0, $prezzoClienteBene - $costoBene);
-        } else {
-            $prodottiNonSignificativiCliente += (float) $riga->totale_cliente;
-        }
+        return view('preventivi.visualizza', compact('preventivo', 'calcoloIva'));
     }
-
-    $totaleCliente = $totaleProdottiCliente + $totaleServiziCliente;
-
-    $tipoLavoro = optional($preventivo->commessa)->tipo_lavoro;
-    $tipologiaAbitazione = optional($preventivo->commessa)->tipologia_abitazione;
-
-    $imponibile4 = 0;
-    $imponibile10 = 0;
-    $imponibile22 = 0;
-
-    $beniSignificativiAl10 = 0;
-    $beniSignificativiAl22 = 0;
-
-    if ($tipoLavoro == 'manutenzione') {
-        $quotaAgevolata = $totaleServiziCliente + $prodottiNonSignificativiCliente + $markupBeniSignificativi;
-
-        $beniSignificativiAl10 = min($beniSignificativiCosto, $quotaAgevolata);
-        $beniSignificativiAl22 = max(0, $beniSignificativiCosto - $quotaAgevolata);
-
-        $imponibile10 = $quotaAgevolata + $beniSignificativiAl10;
-        $imponibile22 = $beniSignificativiAl22;
-    } elseif ($tipologiaAbitazione == 'principale' && $tipoLavoro == 'prima_casa') {
-        $imponibile4 = $totaleCliente;
-    } elseif ($tipoLavoro == 'ristrutturazione' || $tipoLavoro == 'risparmio_energetico') {
-        $imponibile10 = $totaleCliente;
-    } else {
-        $imponibile22 = $totaleCliente;
-    }
-
-    $iva4 = $imponibile4 * ($ivaPrimaCasa / 100);
-    $iva10 = $imponibile10 * ($ivaManutenzione / 100);
-    $iva22 = $imponibile22 * ($ivaStandard / 100);
-
-    $totaleIva = $iva4 + $iva10 + $iva22;
-    $totaleConIva = $totaleCliente + $totaleIva;
-
-    return [
-        'iva_standard' => $ivaStandard,
-        'iva_prima_casa' => $ivaPrimaCasa,
-        'iva_ristrutturazione' => $ivaRistrutturazione,
-        'iva_manutenzione' => $ivaManutenzione,
-
-        'totale_prodotti_cliente' => $totaleProdottiCliente,
-        'totale_servizi_cliente' => $totaleServiziCliente,
-        'totale_cliente' => $totaleCliente,
-
-        'prodotti_non_significativi_cliente' => $prodottiNonSignificativiCliente,
-        'beni_significativi_costo' => $beniSignificativiCosto,
-        'markup_beni_significativi' => $markupBeniSignificativi,
-
-        'beni_significativi_al_10' => $beniSignificativiAl10,
-        'beni_significativi_al_22' => $beniSignificativiAl22,
-
-        'imponibile_4' => $imponibile4,
-        'imponibile_10' => $imponibile10,
-        'imponibile_22' => $imponibile22,
-
-        'iva_4' => $iva4,
-        'iva_10' => $iva10,
-        'iva_22' => $iva22,
-
-        'totale_iva' => $totaleIva,
-        'totale_con_iva' => $totaleConIva,
-    ];
-}
-
-private function prendiAliquotaIva($parole, $default)
-{
-    $query = ImpostazioneIva::where('attiva', 1);
-
-    foreach ($parole as $parola) {
-        $query->where('nome', 'like', '%' . $parola . '%');
-    }
-
-    $iva = $query->first();
-
-    if ($iva) {
-        return (float) $iva->aliquota;
-    }
-
-    return $default;
-}
 }

@@ -161,17 +161,26 @@
         </div>
 
         <div class="form-field">
-            <label>Tipo Intervento</label><br>
-            <select name="tipo_lavoro">
-                <option value="">-- Seleziona --</option>
+    <label>Tipo intervento</label><br>
 
-                @foreach($tipiIntervento as $tipo)
-                    <option value="{{ $tipo->nome }}">
-                        {{ $tipo->nome }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <select name="tipo_intervento_id">
+
+        <option value="">
+            -- Seleziona --
+        </option>
+
+        @foreach($tipiIntervento as $tipo)
+
+            <option value="{{ $tipo->id }}">
+
+                {{ $tipo->nome }}
+
+            </option>
+
+        @endforeach
+
+    </select>
+</div>
 
         <div class="form-field">
             <label>Tipo detrazione</label><br>

@@ -96,104 +96,124 @@ class ImpostazioneController extends Controller
 
         return redirect('/impostazioni/detrazioni')->with('success', 'Detrazione aggiornata');
     }
+
     public function servizi()
-{
-    $servizi = ServizioExtra::orderBy('nome')->get();
+    {
+        $servizi = ServizioExtra::orderBy('nome')->get();
 
-    return view('impostazioni.servizi', compact('servizi'));
-}
+        return view('impostazioni.servizi', compact('servizi'));
+    }
 
-public function storeServizio(Request $request)
-{
-    $request->validate([
-        'nome' => 'required|string|max:255',
-        'costo_brc' => 'nullable|numeric|min:0',
-        'ricarico_percentuale' => 'nullable|numeric|min:0',
-        'note' => 'nullable|string',
-    ]);
+    public function storeServizio(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'costo_brc' => 'nullable|numeric|min:0',
+            'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string',
+        ]);
 
-    $costo = (float) ($request->costo_brc ?? 0);
-    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-    $prezzoCliente = $costo * (1 + ($ricarico / 100));
+        $costo = (float) ($request->costo_brc ?? 0);
+        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+        $prezzoCliente = $costo * (1 + ($ricarico / 100));
 
-    ServizioExtra::create([
-        'nome' => $request->nome,
-        'costo_brc' => $costo,
-        'ricarico_percentuale' => $ricarico,
-        'prezzo_cliente' => $prezzoCliente,
-        'attivo' => $request->has('attivo') ? 1 : 0,
-        'note' => $request->note,
-    ]);
+        ServizioExtra::create([
+            'nome' => $request->nome,
+            'costo_brc' => $costo,
+            'ricarico_percentuale' => $ricarico,
+            'prezzo_cliente' => $prezzoCliente,
+            'attivo' => $request->has('attivo') ? 1 : 0,
+            'note' => $request->note,
+        ]);
 
-    return redirect('/impostazioni/servizi')->with('success', 'Servizio extra salvato');
-}
+        return redirect('/impostazioni/servizi')->with('success', 'Servizio extra salvato');
+    }
 
-public function updateServizio(Request $request, $id)
-{
-    $request->validate([
-        'nome' => 'required|string|max:255',
-        'costo_brc' => 'nullable|numeric|min:0',
-        'ricarico_percentuale' => 'nullable|numeric|min:0',
-        'note' => 'nullable|string',
-    ]);
+    public function updateServizio(Request $request, $id)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'costo_brc' => 'nullable|numeric|min:0',
+            'ricarico_percentuale' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string',
+        ]);
 
-    $servizio = ServizioExtra::findOrFail($id);
+        $servizio = ServizioExtra::findOrFail($id);
 
-    $costo = (float) ($request->costo_brc ?? 0);
-    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-    $prezzoCliente = $costo * (1 + ($ricarico / 100));
+        $costo = (float) ($request->costo_brc ?? 0);
+        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+        $prezzoCliente = $costo * (1 + ($ricarico / 100));
 
-    $servizio->update([
-        'nome' => $request->nome,
-        'costo_brc' => $costo,
-        'ricarico_percentuale' => $ricarico,
-        'prezzo_cliente' => $prezzoCliente,
-        'attivo' => $request->has('attivo') ? 1 : 0,
-        'note' => $request->note,
-    ]);
+        $servizio->update([
+            'nome' => $request->nome,
+            'costo_brc' => $costo,
+            'ricarico_percentuale' => $ricarico,
+            'prezzo_cliente' => $prezzoCliente,
+            'attivo' => $request->has('attivo') ? 1 : 0,
+            'note' => $request->note,
+        ]);
 
-    return redirect('/impostazioni/servizi')->with('success', 'Servizio extra aggiornato');
-}
-public function tipiIntervento()
-{
-    $tipiIntervento = TipoIntervento::orderBy('nome')->get();
+        return redirect('/impostazioni/servizi')->with('success', 'Servizio extra aggiornato');
+    }
 
-    return view('impostazioni.tipi_intervento', compact('tipiIntervento'));
-}
+    public function tipiIntervento()
+    {
+        $tipiIntervento = TipoIntervento::with('ivaPrincipale', 'ivaSecondaria')
+            ->orderBy('nome')
+            ->get();
 
-public function storeTipoIntervento(Request $request)
-{
-    $request->validate([
-        'nome' => 'required|string|max:255',
-        'note' => 'nullable|string',
-    ]);
+        $iva = ImpostazioneIva::where('attiva', 1)
+            ->orderBy('nome')
+            ->get();
 
-    TipoIntervento::create([
-        'nome' => $request->nome,
-        'attivo' => $request->has('attivo') ? 1 : 0,
-        'note' => $request->note,
-    ]);
+        return view('impostazioni.tipi_intervento', compact('tipiIntervento', 'iva'));
+    }
 
-    return redirect('/impostazioni/tipi-intervento')
-        ->with('success', 'Tipo intervento salvato');
-}
+    public function storeTipoIntervento(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'modalita_iva' => 'required|in:iva_unica,beni_significativi',
+            'impostazione_iva_id' => 'nullable|exists:impostazioni_iva,id',
+            'impostazione_iva_secondaria_id' => 'nullable|exists:impostazioni_iva,id',
+            'note' => 'nullable|string',
+        ]);
 
-public function updateTipoIntervento(Request $request, $id)
-{
-    $request->validate([
-        'nome' => 'required|string|max:255',
-        'note' => 'nullable|string',
-    ]);
+        TipoIntervento::create([
+            'nome' => $request->nome,
+            'attivo' => $request->has('attivo') ? 1 : 0,
+            'modalita_iva' => $request->modalita_iva,
+            'impostazione_iva_id' => $request->impostazione_iva_id,
+            'impostazione_iva_secondaria_id' => $request->impostazione_iva_secondaria_id,
+            'note' => $request->note,
+        ]);
 
-    $tipo = TipoIntervento::findOrFail($id);
+        return redirect('/impostazioni/tipi-intervento')
+            ->with('success', 'Tipo intervento salvato');
+    }
 
-    $tipo->update([
-        'nome' => $request->nome,
-        'attivo' => $request->has('attivo') ? 1 : 0,
-        'note' => $request->note,
-    ]);
+    public function updateTipoIntervento(Request $request, $id)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'modalita_iva' => 'required|in:iva_unica,beni_significativi',
+            'impostazione_iva_id' => 'nullable|exists:impostazioni_iva,id',
+            'impostazione_iva_secondaria_id' => 'nullable|exists:impostazioni_iva,id',
+            'note' => 'nullable|string',
+        ]);
 
-    return redirect('/impostazioni/tipi-intervento')
-        ->with('success', 'Tipo intervento aggiornato');
-}
+        $tipo = TipoIntervento::findOrFail($id);
+
+        $tipo->update([
+            'nome' => $request->nome,
+            'attivo' => $request->has('attivo') ? 1 : 0,
+            'modalita_iva' => $request->modalita_iva,
+            'impostazione_iva_id' => $request->impostazione_iva_id,
+            'impostazione_iva_secondaria_id' => $request->impostazione_iva_secondaria_id,
+            'note' => $request->note,
+        ]);
+
+        return redirect('/impostazioni/tipi-intervento')
+            ->with('success', 'Tipo intervento aggiornato');
+    }
 }

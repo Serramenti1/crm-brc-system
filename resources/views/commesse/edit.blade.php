@@ -95,14 +95,29 @@
                 </div>
 
                 <div class="form-field">
-                    <label>Tipo intervento</label>
-                    <select name="tipo_lavoro">
-                        <option value="">-- Seleziona --</option>
-                        <option value="manutenzione" {{ old('tipo_lavoro', $commessa->tipo_lavoro) == 'manutenzione' ? 'selected' : '' }}>Manutenzione</option>
-                        <option value="ristrutturazione" {{ old('tipo_lavoro', $commessa->tipo_lavoro) == 'ristrutturazione' ? 'selected' : '' }}>Ristrutturazione</option>
-                        <option value="risparmio_energetico" {{ old('tipo_lavoro', $commessa->tipo_lavoro) == 'risparmio_energetico' ? 'selected' : '' }}>Risparmio energetico</option>
-                    </select>
-                </div>
+
+    <label>Tipo intervento</label>
+
+    <select name="tipo_intervento_id">
+
+        <option value="">
+            -- Seleziona --
+        </option>
+
+        @foreach($tipiIntervento as $tipo)
+
+            <option value="{{ $tipo->id }}"
+                {{ old('tipo_intervento_id', $commessa->tipo_intervento_id) == $tipo->id ? 'selected' : '' }}>
+
+                {{ $tipo->nome }}
+
+            </option>
+
+        @endforeach
+
+    </select>
+
+</div>
 
                 <div class="form-field">
                     <label>Tipo detrazione</label>

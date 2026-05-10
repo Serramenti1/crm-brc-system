@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CalcoloIvaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Ordine;
@@ -60,77 +61,85 @@ class OrdineController extends Controller
     }
 
     public function creaDaPreventivo($preventivoId)
-    {
-        $preventivo = Preventivo::with('commessa.cliente', 'righeProdotti')->findOrFail($preventivoId);
+{
+    $preventivo = Preventivo::with(
+        'commessa.cliente',
+        'righeProdotti.servizi',
+        'righeProdotti.fornitore'
+    )->findOrFail($preventivoId);
 
-        if ($preventivo->ordine) {
-            return redirect('/ordini/' . $preventivo->ordine->id);
-        }
-
-        $impostazioni = Impostazione::first();
-
-        if (!$impostazioni) {
-            $impostazioni = Impostazione::create([
-                'iva_ordini' => 22,
-            ]);
-        }
-
-        $prossimoNumero = Ordine::max('id') + 1;
-        $numeroOrdine = 'ORD-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT);
-
-        $imponibile = 0;
-
-        foreach ($preventivo->righeProdotti as $riga) {
-            $imponibile += (float) $riga->totale_costo;
-        }
-
-        $ivaPercentuale = $impostazioni->iva_ordini;
-        $ivaImporto = $imponibile * ($ivaPercentuale / 100);
-        $totaleConIva = $imponibile + $ivaImporto;
-
-        $ordine = Ordine::create([
-            'preventivo_id' => $preventivo->id,
-            'commessa_id' => $preventivo->commessa_id,
-            'numero' => $numeroOrdine,
-            'imponibile' => $imponibile,
-            'iva_percentuale' => $ivaPercentuale,
-            'iva_importo' => $ivaImporto,
-            'totale_con_iva' => $totaleConIva,
-
-            'stato' => 'preparazione_contratto',
-
-            'contratto_firmato' => false,
-
-            'saldo_merce_ricevuto' => false,
-            'posa_effettuata' => false,
-            'fattura_saldo_posa_fatta' => false,
-
-            'saldo_finale_ricevuto' => false,
-            'invio_enea_effettuato' => false,
-
-            'ultimo_avanzamento_tipo' => null,
-            'ultimo_avanzamento_riga_id' => null,
-        ]);
-
-        foreach ($preventivo->righeProdotti as $riga) {
-            RigaOrdine::create([
-                'ordine_id' => $ordine->id,
-                'riga_preventivo_prodotto_id' => $riga->id,
-                'fornitore_id' => $riga->fornitore_id,
-                'descrizione' => $riga->descrizione,
-                'quantita' => $riga->quantita,
-                'imponibile' => $riga->totale_costo,
-                'inviato' => false,
-                'co_ricevuta' => false,
-                'in_produzione' => false,
-                'merce_arrivata' => false,
-                'pdf_path' => null,
-            ]);
-        }
-
-        return redirect('/ordini/' . $ordine->id)
-            ->with('success', 'Ordine creato correttamente. Stato: Preparazione contratto.');
+    if ($preventivo->ordine) {
+        return redirect('/ordini/' . $preventivo->ordine->id);
     }
+
+    $calcoloIvaService = new CalcoloIvaService();
+    $calcoloIva = $calcoloIvaService->calcolaDaPreventivo($preventivo);
+
+    $prossimoNumero = Ordine::max('id') + 1;
+    $numeroOrdine = 'ORD-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT);
+
+    $ordine = Ordine::create([
+        'preventivo_id' => $preventivo->id,
+        'commessa_id' => $preventivo->commessa_id,
+        'numero' => $numeroOrdine,
+
+        'imponibile' => $calcoloIva['totale_cliente'],
+        'imponibile_4' => $calcoloIva['imponibile_4'],
+        'imponibile_10' => $calcoloIva['imponibile_10'],
+        'imponibile_22' => $calcoloIva['imponibile_22'],
+
+        'iva_percentuale' => 0,
+        'iva_importo' => $calcoloIva['totale_iva'],
+        'iva_4' => $calcoloIva['iva_4'],
+        'iva_10' => $calcoloIva['iva_10'],
+        'iva_22' => $calcoloIva['iva_22'],
+        'totale_iva' => $calcoloIva['totale_iva'],
+        'totale_con_iva' => $calcoloIva['totale_con_iva'],
+
+        'stato' => 'preparazione_contratto',
+
+        'contratto_firmato' => false,
+
+        'saldo_merce_ricevuto' => false,
+        'posa_effettuata' => false,
+        'fattura_saldo_posa_fatta' => false,
+
+        'saldo_finale_ricevuto' => false,
+        'invio_enea_effettuato' => false,
+
+        'ultimo_avanzamento_tipo' => null,
+        'ultimo_avanzamento_riga_id' => null,
+    ]);
+
+    foreach ($preventivo->righeProdotti as $riga) {
+        $quantita = (float) ($riga->quantita ?? 1);
+
+        $totaleServiziRiga = 0;
+
+        foreach ($riga->servizi as $servizio) {
+            $totaleServiziRiga += (float) $servizio->prezzo_cliente * $quantita;
+        }
+
+        $imponibileRiga = (float) $riga->totale_cliente + $totaleServiziRiga;
+
+        RigaOrdine::create([
+            'ordine_id' => $ordine->id,
+            'riga_preventivo_prodotto_id' => $riga->id,
+            'fornitore_id' => $riga->fornitore_id,
+            'descrizione' => $riga->descrizione,
+            'quantita' => $riga->quantita,
+            'imponibile' => $imponibileRiga,
+            'inviato' => false,
+            'co_ricevuta' => false,
+            'in_produzione' => false,
+            'merce_arrivata' => false,
+            'pdf_path' => null,
+        ]);
+    }
+
+    return redirect('/ordini/' . $ordine->id)
+        ->with('success', 'Ordine creato correttamente. Stato: Preparazione contratto.');
+}
 
     public function aggiornaRiga(Request $request, $id)
     {

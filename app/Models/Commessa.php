@@ -24,6 +24,7 @@ class Commessa extends Model
         'autoscala',
 
         'tipologia_abitazione',
+        'tipo_intervento_id',
         'tipo_lavoro',
         'tipo_detrazione',
         'percentuale_detrazione',
@@ -53,5 +54,10 @@ class Commessa extends Model
     public function preventivi()
     {
         return $this->hasMany(Preventivo::class);
+    }
+
+    public function tipoIntervento()
+    {
+        return $this->belongsTo(TipoIntervento::class, 'tipo_intervento_id');
     }
 }

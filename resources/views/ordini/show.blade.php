@@ -200,6 +200,76 @@
 
 </table>
 
+<br>
+
+<h2>Riepilogo economico</h2>
+
+<div style="border:1px solid #ccc; padding:20px; margin-bottom:25px; background:#fff;">
+
+    <table class="tabella-dettaglio">
+
+        <tr>
+            <td><strong>Imponibile IVA 4%</strong></td>
+            <td>
+                {{ number_format($ordine->imponibile_4 ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>IVA 4%</strong></td>
+            <td>
+                {{ number_format($ordine->iva_4 ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Imponibile IVA 10%</strong></td>
+            <td>
+                {{ number_format($ordine->imponibile_10 ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>IVA 10%</strong></td>
+            <td>
+                {{ number_format($ordine->iva_10 ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Imponibile IVA 22%</strong></td>
+            <td>
+                {{ number_format($ordine->imponibile_22 ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>IVA 22%</strong></td>
+            <td>
+                {{ number_format($ordine->iva_22 ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Totale IVA</strong></td>
+            <td>
+                {{ number_format($ordine->totale_iva ?? 0, 2, ',', '.') }} €
+            </td>
+        </tr>
+
+        <tr style="background:#f3f4f6;">
+            <td><strong>Totale finale ordine</strong></td>
+            <td>
+                <strong>
+                    {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
+                </strong>
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
 @if(
     $ordine->stato == 'preparazione_contratto' ||
     $ordine->stato == 'attesa_saldo_merce' ||

@@ -29,6 +29,14 @@ class Ordine extends Model
 
         'ultimo_avanzamento_tipo',
         'ultimo_avanzamento_riga_id',
+
+        'imponibile_4',
+        'imponibile_10',
+        'imponibile_22',
+        'iva_4',
+        'iva_10',
+        'iva_22',
+        'totale_iva',
     ];
 
     public function preventivo()
