@@ -125,24 +125,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('focusin', function (e) {
+        let campo = e.target;
 
-    const campi = document.querySelectorAll(
-        'input[type="text"], input[type="number"], input[type="email"]'
-    );
-
-    campi.forEach(function (campo) {
-
-        campo.addEventListener('focus', function () {
-            this.select();
-        });
-
-        campo.addEventListener('mouseup', function (e) {
-            if (this.selectionStart !== this.selectionEnd) {
-                e.preventDefault();
-            }
-        });
-
+        if (
+            campo.matches('input[type="text"], input[type="number"], input[type="email"]')
+        ) {
+            setTimeout(function () {
+                campo.select();
+            }, 0);
+        }
     });
-
 });
 </script>

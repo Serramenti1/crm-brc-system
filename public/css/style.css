@@ -379,3 +379,13 @@ label input[type="checkbox"] {
     width: 320px;
     font-weight: bold;
 }
+/* CESTINO DISABILITATO */
+.btn-disabilitato {
+    background: #9ca3af !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-disabilitato:hover {
+    background: #9ca3af !important;
+}

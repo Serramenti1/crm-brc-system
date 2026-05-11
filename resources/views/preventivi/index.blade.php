@@ -1,129 +1,183 @@
 @include('partials.menu')
 
-<h1>Lista Preventivi</h1>
+<div class="container">
 
-<a href="/preventivi/create">+ Nuovo Preventivo</a>
+    <h1>Lista Preventivi</h1>
 
-<br><br>
+    <form method="GET" action="/preventivi" style="margin-bottom:15px;">
 
-<!-- 🔍 RICERCA -->
-<form method="GET" action="/preventivi">
-    <input type="text" name="cliente" placeholder="Cerca cliente..." value="{{ request('cliente') }}">
-    <button type="submit">Cerca</button>
-    <a href="/preventivi">Reset</a>
-</form>
+        <input
+            type="text"
+            name="cliente"
+            placeholder="Cerca cliente..."
+            value="{{ request('cliente') }}"
+        >
 
-<br>
+        <button type="submit" class="btn btn-azione">
+            Cerca
+        </button>
 
-<table border="1" cellpadding="5">
-    <tr>
-        
-        <th>Numero</th>
-        <th>Cliente</th>
-        <th>Commessa</th>
-        <th>Totale Cliente</th>
-        <th>Sconto Medio</th>
-        <th>Azioni</th>
-    </tr>
-
-    @foreach($preventivi as $preventivo)
-    <tr>
-
-    <td>
-        <strong>{{ $preventivo->numero }}</strong>
-    </td>
-
-    <td>
-        {{ $preventivo->commessa && $preventivo->commessa->cliente
-            ? $preventivo->commessa->cliente->nome . ' ' . $preventivo->commessa->cliente->cognome
-            : '' }}
-    </td>
-
-    <td>
-        @if($preventivo->commessa)
-
-        {{ $preventivo->commessa->titolo }}
-
-        <br>
-
-        <small>
-            {{ $preventivo->commessa->indirizzo_lavoro }}
-
-            @if($preventivo->commessa->citta_lavoro)
-                - {{ $preventivo->commessa->citta_lavoro }}
-            @endif
-        </small>
-
-    @endif
-    </td>
-
-    <td>
-        {{ number_format($preventivo->totale_cliente_finale, 2, ',', '.') }} €
-    </td>
-
-    <td>
-        {{ number_format($preventivo->sconto_medio_cliente, 2, ',', '.') }} %
-    </td>
-
-    <td>
-
-        <a href="/preventivi/{{ $preventivo->id }}">
-            Apri
+        <a href="/preventivi" class="btn btn-azione">
+            Reset
         </a>
 
-        |
+    </form>
 
-        <a href="/preventivi/{{ $preventivo->id }}/visualizza">
-            Visualizza
-        </a>
+    <a href="/preventivi/create" class="btn btn-azione">
+        + Nuovo Preventivo
+    </a>
 
-        @if($preventivo->ordine)
+    <table class="tabella-lista">
 
-            |
+        <tr>
 
-            <a href="/ordini/{{ $preventivo->ordine->id }}">
-                Ordine
-            </a>
+            <th>Numero</th>
+            <th>Cliente</th>
+            <th>Commessa</th>
+            <th>Totale Cliente</th>
+            <th>Sconto Medio</th>
+            <th>Azioni</th>
 
-        @else
+        </tr>
 
-            |
+        @foreach($preventivi as $preventivo)
 
-            <form action="/preventivi/{{ $preventivo->id }}/crea-ordine"
-                  method="POST"
-                  style="display:inline;">
+            <tr>
 
-                @csrf
+                <td>
+                    <strong>{{ $preventivo->numero }}</strong>
+                </td>
 
-                <button type="submit"
-                        onclick="return confirm('Creare ordine da questo preventivo?')">
+                <td>
 
-                    Crea ordine
+                    {{ $preventivo->commessa && $preventivo->commessa->cliente
+                        ? $preventivo->commessa->cliente->nome . ' ' . $preventivo->commessa->cliente->cognome
+                        : '' }}
 
-                </button>
+                </td>
 
-            </form>
+                <td>
 
-        @endif
+                    @if($preventivo->commessa)
 
-        <form action="/preventivi/{{ $preventivo->id }}"
-              method="POST"
-              style="display:inline;">
+                        {{ $preventivo->commessa->titolo }}
 
-            @csrf
-            @method('DELETE')
+                        <br>
 
-            <button type="submit"
-                    onclick="return confirm('Eliminare questo preventivo?')">
+                        <small>
 
-                Elimina
+                            {{ $preventivo->commessa->indirizzo_lavoro }}
 
-            </button>
+                            @if($preventivo->commessa->citta_lavoro)
+                                - {{ $preventivo->commessa->citta_lavoro }}
+                            @endif
 
-        </form>
+                        </small>
 
-    </td>
+                    @endif
 
-</tr>
-    @endforeach
-</table>
+                </td>
+
+                <td>
+                    {{ number_format($preventivo->totale_cliente_finale, 2, ',', '.') }} €
+                </td>
+
+                <td>
+                    {{ number_format($preventivo->sconto_medio_cliente, 2, ',', '.') }} %
+                </td>
+
+                <td class="azioni">
+
+                    <div class="azioni-bottoni">
+
+                        <a
+                            href="/preventivi/{{ $preventivo->id }}"
+                            class="btn btn-azione"
+                        >
+                            Modifica
+                        </a>
+
+                        <a
+                            href="/preventivi/{{ $preventivo->id }}/visualizza"
+                            class="btn btn-azione"
+                        >
+                            Visualizza
+                        </a>
+
+                        @if($preventivo->ordine)
+
+                            <a
+                                href="/ordini/{{ $preventivo->ordine->id }}"
+                                class="btn btn-azione"
+                            >
+                                Apri ordine
+                            </a>
+
+                        @else
+
+                            <form
+                                action="/preventivi/{{ $preventivo->id }}/crea-ordine"
+                                method="POST"
+                                class="form-elimina"
+                            >
+
+                                @csrf
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-azione"
+                                    onclick="return confirm('Creare ordine da questo preventivo?')"
+                                >
+                                    Crea ordine
+                                </button>
+
+                            </form>
+
+                        @endif
+
+                        @if($preventivo->ordine)
+
+    <button
+        type="button"
+        class="btn btn-elimina btn-disabilitato"
+        title="Preventivo non eliminabile: ordine collegato"
+    >
+        🗑️
+    </button>
+
+@else
+
+    <form
+        action="/preventivi/{{ $preventivo->id }}"
+        method="POST"
+        class="form-elimina"
+    >
+
+        @csrf
+        @method('DELETE')
+
+        <button
+            type="submit"
+            class="btn btn-elimina"
+            onclick="return confirm('Eliminare questo preventivo?')"
+        >
+            🗑️
+        </button>
+
+    </form>
+
+@endif
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        @endforeach
+
+    </table>
+
+</div>

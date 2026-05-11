@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Impostazione;
 use Illuminate\Http\Request;
 use App\Models\Preventivo;
 use App\Models\Commessa;
@@ -89,10 +90,25 @@ class PreventivoController extends Controller
         $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
 
         $serviziExtra = ServizioExtra::where('attivo', 1)
-            ->orderBy('nome')
-            ->get();
+    ->orderBy('nome')
+    ->get();
 
-        return view('preventivi.show', compact('preventivo', 'fornitori', 'prodottiFornitore', 'serviziExtra'));
+$impostazioni = Impostazione::first();
+
+if (!$impostazioni) {
+    $impostazioni = Impostazione::create([
+        'iva_ordini' => 22,
+        'ricarico_prodotti_default' => 50,
+    ]);
+}
+
+return view('preventivi.show', compact(
+    'preventivo',
+    'fornitori',
+    'prodottiFornitore',
+    'serviziExtra',
+    'impostazioni'
+));
     }
 
     public function destroy($id)

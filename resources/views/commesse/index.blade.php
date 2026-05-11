@@ -105,24 +105,38 @@
                             Modifica
                         </a>
 
-                        <form
-                            action="/commesse/{{ $commessa->id }}"
-                            method="POST"
-                            class="form-elimina"
-                        >
-
-                            @csrf
-                            @method('DELETE')
+                        @if($commessa->preventivi->count() > 0)
 
                             <button
-                                type="submit"
-                                class="btn btn-elimina"
-                                onclick="return confirm('Eliminare questa commessa?')"
+                                type="button"
+                                class="btn btn-elimina btn-disabilitato"
+                                title="Commessa non eliminabile: preventivi collegati"
                             >
                                 🗑️
                             </button>
 
-                        </form>
+                        @else
+
+                            <form
+                                action="/commesse/{{ $commessa->id }}"
+                                method="POST"
+                                class="form-elimina"
+                            >
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-elimina"
+                                    onclick="return confirm('Eliminare questa commessa?')"
+                                >
+                                    🗑️
+                                </button>
+
+                            </form>
+
+                        @endif
 
                     </div>
 

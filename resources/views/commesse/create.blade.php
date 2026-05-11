@@ -112,14 +112,24 @@
         </div>
 
         <div class="form-field">
-            <label>Piano di posa</label><br>
-            <input type="number" name="piano_posa" min="0">
-        </div>
+    <label>Piano di posa</label><br>
 
-        <div class="form-field form-checkbox">
-            <input type="checkbox" name="autoscala" value="1">
-            <label>Serve autoscala</label>
-        </div>
+    <input type="number"
+           id="piano_posa"
+           name="piano_posa"
+           min="0">
+</div>
+
+<div class="form-field form-checkbox">
+
+    <input type="checkbox"
+           id="autoscala"
+           name="autoscala"
+           value="1">
+
+    <label>Serve autoscala</label>
+
+</div>
     </div>
 </div>
 
@@ -311,4 +321,36 @@ function aggiornaPercentualeDetrazione() {
         }
     }
 }
+</script>
+
+<script>
+function aggiornaAutoscalaAutomatica() {
+
+    let piano = parseInt(
+        document.getElementById('piano_posa').value || 0
+    );
+
+    let autoscala = document.getElementById('autoscala');
+
+    if (piano >= 3) {
+        autoscala.checked = true;
+    } else {
+        autoscala.checked = false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    let piano = document.getElementById('piano_posa');
+
+    if (piano) {
+
+        piano.addEventListener(
+            'input',
+            aggiornaAutoscalaAutomatica
+        );
+
+    }
+
+});
 </script>

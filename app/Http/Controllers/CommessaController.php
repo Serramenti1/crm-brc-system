@@ -12,7 +12,7 @@ class CommessaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Commessa::with('cliente', 'tipoIntervento');
+        $query = Commessa::with('cliente', 'tipoIntervento', 'preventivi');
 
         if ($request->filled('q')) {
             $parole = explode(' ', trim($request->q));

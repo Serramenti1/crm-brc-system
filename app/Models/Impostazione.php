@@ -10,5 +10,6 @@ class Impostazione extends Model
 
     protected $fillable = [
         'iva_ordini',
+        'ricarico_prodotti_default',
     ];
 }
