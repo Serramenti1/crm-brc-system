@@ -66,15 +66,10 @@
 
 <button>Salva</button>
 
-</form>
-<input type="text" name="descrizione" value="{{ $prodotto->descrizione }}">
+<div style="margin-top:20px;">
 
-<input type="number" name="prezzo_listino" value="{{ $prodotto->prezzo_listino }}">
+    <a href="/prodotti-fornitore" class="btn btn-azione">
+        ← Torna ai prodotti fornitore
+    </a>
 
-<input type="number" name="sconto_1" value="{{ $prodotto->sconto_1 }}">
-<input type="number" name="sconto_2" value="{{ $prodotto->sconto_2 }}">
-<input type="number" name="sconto_3" value="{{ $prodotto->sconto_3 }}">
-
-<button>Salva</button>
-
-</form>
+</div>

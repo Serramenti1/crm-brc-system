@@ -1,83 +1,126 @@
 @include('partials.menu')
 
-<h1>Modifica Cliente</h1>
+<div class="container">
 
-@if ($errors->any())
-    <div style="color:red;">
-        <ul>
-            @foreach ($errors->all() as $errore)
-                <li>{{ $errore }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+    <h1>Modifica Cliente</h1>
 
-<form method="POST" action="/clienti/{{ $cliente->id }}">
-    @csrf
-    @method('PUT')
+    @if ($errors->any())
+        <div style="color:red;">
+            <ul>
+                @foreach ($errors->all() as $errore)
+                    <li>{{ $errore }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
+    <form method="POST" action="/clienti/{{ $cliente->id }}">
+        @csrf
+        @method('PUT')
 
-        <p>
-            Nome:<br>
-            <input type="text" name="nome" value="{{ $cliente->nome }}" style="width:100%;">
-        </p>
+        <table class="tabella-dettaglio">
 
-        <p>
-            Cognome:<br>
-            <input type="text" name="cognome" value="{{ $cliente->cognome }}" style="width:100%;">
-        </p>
+            <tr>
+                <th colspan="2">
+                    Dati cliente
+                </th>
+            </tr>
 
-        <p>
-            Telefono:<br>
-            <input type="text" name="telefono" value="{{ $cliente->telefono }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Nome</strong></td>
+                <td>
+                    <input type="text" name="nome" value="{{ $cliente->nome }}">
+                </td>
+            </tr>
 
-        <p>
-            Email:<br>
-            <input type="email" name="email" value="{{ $cliente->email }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Cognome</strong></td>
+                <td>
+                    <input type="text" name="cognome" value="{{ $cliente->cognome }}">
+                </td>
+            </tr>
 
-        <p>
-            Codice fiscale:<br>
-            <input type="text" name="codice_fiscale" value="{{ $cliente->codice_fiscale }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Telefono</strong></td>
+                <td>
+                    <input type="text" name="telefono" value="{{ $cliente->telefono }}">
+                </td>
+            </tr>
 
-        <p>
-            Partita IVA:<br>
-            <input type="text" name="partita_iva" value="{{ $cliente->partita_iva }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Email</strong></td>
+                <td>
+                    <input type="email" name="email" value="{{ $cliente->email }}">
+                </td>
+            </tr>
 
-        <p style="grid-column: span 2;">
-            Indirizzo:<br>
-            <input type="text" name="indirizzo" value="{{ $cliente->indirizzo }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Codice fiscale</strong></td>
+                <td>
+                    <input type="text" name="codice_fiscale" value="{{ $cliente->codice_fiscale }}">
+                </td>
+            </tr>
 
-        <p>
-            CAP:<br>
-            <input type="text" name="cap" value="{{ $cliente->cap }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Partita IVA</strong></td>
+                <td>
+                    <input type="text" name="partita_iva" value="{{ $cliente->partita_iva }}">
+                </td>
+            </tr>
 
-        <p>
-            Città:<br>
-            <input type="text" name="citta" value="{{ $cliente->citta }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>Indirizzo</strong></td>
+                <td>
+                    <input type="text" name="indirizzo" value="{{ $cliente->indirizzo }}">
+                </td>
+            </tr>
 
-        <p>
-            Provincia:<br>
-            <input type="text" name="provincia" value="{{ $cliente->provincia }}" style="width:100%;">
-        </p>
+            <tr>
+                <td><strong>CAP</strong></td>
+                <td>
+                    <input type="text" name="cap" value="{{ $cliente->cap }}">
+                </td>
+            </tr>
 
-        <p style="grid-column: span 3;">
-            Note:<br>
-            <textarea name="note" rows="4" style="width:100%;">{{ $cliente->note }}</textarea>
-        </p>
+            <tr>
+                <td><strong>Città</strong></td>
+                <td>
+                    <input type="text" name="citta" value="{{ $cliente->citta }}">
+                </td>
+            </tr>
 
-    </div>
+            <tr>
+                <td><strong>Provincia</strong></td>
+                <td>
+                    <input type="text" name="provincia" value="{{ $cliente->provincia }}">
+                </td>
+            </tr>
 
-    <button type="submit">Aggiorna Cliente</button>
-</form>
+            <tr>
+                <td><strong>Note</strong></td>
+                <td>
+                    <textarea name="note" rows="4">{{ $cliente->note }}</textarea>
+                </td>
+            </tr>
 
-<br>
+        </table>
 
-<a href="/clienti">← Torna ai clienti</a>
+        <div style="margin-top:20px;">
+
+            <button type="submit" class="btn btn-azione">
+                Aggiorna Cliente
+            </button>
+
+            <a href="/clienti" class="btn btn-azione">
+                ← Torna ai clienti
+            </a>
+
+            <a href="/clienti/{{ $cliente->id }}" class="btn btn-azione">
+                Visualizza cliente
+            </a>
+
+        </div>
+
+    </form>
+
+</div>

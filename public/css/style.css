@@ -352,3 +352,30 @@ label {
         grid-column: span 1;
     }
 }
+
+/* CHECKBOX GLOBALI */
+input[type="checkbox"] {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 6px 0 0 !important;
+    padding: 0 !important;
+}
+
+/* LABEL CHECKBOX */
+label input[type="checkbox"] {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* LABEL TABELLE */
+.tabella-dettaglio label,
+.tabella-lista label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+/* LARGHEZZA FISSA LABEL DETTAGLIO */
+.tabella-dettaglio td:first-child {
+    width: 320px;
+    font-weight: bold;
+}

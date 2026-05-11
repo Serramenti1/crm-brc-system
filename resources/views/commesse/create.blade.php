@@ -278,9 +278,15 @@
 </div>
 
 <div style="margin-top:20px; margin-bottom:30px; display:flex; gap:15px; align-items:center;">
-    <button type="submit">Salva Commessa</button>
 
-    <a href="/commesse">Torna alla lista</a>
+    <button type="submit" class="btn btn-azione">
+        Salva Commessa
+    </button>
+
+    <a href="/commesse" class="btn btn-azione">
+        Torna alla lista
+    </a>
+
 </div>
 
 </form>

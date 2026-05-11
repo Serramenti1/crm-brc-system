@@ -32,6 +32,13 @@ class ProdottoFornitoreController extends Controller
         return view('prodotti_fornitore.index', compact('prodotti'));
     }
 
+        public function show($id)
+    {
+        $prodotto = ProdottoFornitore::with('fornitore')->findOrFail($id);
+
+        return view('prodotti_fornitore.show', compact('prodotto'));
+    }
+
     public function create()
     {
         $fornitori = Fornitore::all();

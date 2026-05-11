@@ -135,6 +135,10 @@
                     <label>Percentuale detrazione</label>
                     <input type="number" id="percentuale_detrazione" name="percentuale_detrazione" min="0" max="100" step="0.01" value="{{ old('percentuale_detrazione', $commessa->percentuale_detrazione) }}" readonly>
                 </div>
+                <div class="form-field form-checkbox">
+                    <input type="checkbox" name="pratica_enea" value="1" {{ old('pratica_enea', $commessa->pratica_enea) ? 'checked' : '' }}>
+                    <label>Pratica ENEA</label>
+                </div>
             </div>
         </div>
 
@@ -193,10 +197,7 @@
                     <input type="text" name="pratica_edilizia_protocollo" value="{{ old('pratica_edilizia_protocollo', $commessa->pratica_edilizia_protocollo) }}">
                 </div>
 
-                <div class="form-field form-checkbox">
-                    <input type="checkbox" name="pratica_enea" value="1" {{ old('pratica_enea', $commessa->pratica_enea) ? 'checked' : '' }}>
-                    <label>Pratica ENEA</label>
-                </div>
+                
             </div>
         </div>
 

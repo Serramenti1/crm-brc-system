@@ -40,6 +40,16 @@ class CommessaController extends Controller
 
         return view('commesse.index', compact('commesse'));
     }
+        public function show($id)
+    {
+        $commessa = Commessa::with(
+        'cliente',
+        'preventivi'
+         )->findOrFail($id);
+
+        return view('commesse.show', compact('commessa'));
+    }
+
 
     public function create()
     {
@@ -264,4 +274,6 @@ class CommessaController extends Controller
 
         return $detrazione->percentuale;
     }
+
+    
 }

@@ -1,39 +1,121 @@
 @include('partials.menu')
 
-@if(session('error'))
-    <p style="color:red;">{{ session('error') }}</p>
-@endif
+<div class="container">
 
-@if(session('success'))
-    <p style="color:green;">{{ session('success') }}</p>
-@endif
+    <h1>Dettaglio Cliente</h1>
 
-<h1>Dettaglio Cliente</h1>
+    <div style="margin-bottom:20px;">
 
-<p><strong>Nome:</strong> {{ $cliente->nome }}</p>
-<p><strong>Cognome:</strong> {{ $cliente->cognome }}</p>
+        <a href="/clienti" class="btn btn-azione">
+            ← Torna ai clienti
+        </a>
 
-<p><strong>Indirizzo:</strong><br>
-{{ $cliente->indirizzo }}<br>
-{{ $cliente->cap }} {{ $cliente->citta }} ({{ $cliente->provincia }})
-</p>
+        <a href="/clienti/{{ $cliente->id }}/edit" class="btn btn-azione">
+            Modifica
+        </a>
 
-<p><strong>Telefono:</strong> {{ $cliente->telefono }}</p>
-<p><strong>Email:</strong> {{ $cliente->email }}</p>
+    </div>
 
-<hr>
+    <table class="tabella-dettaglio">
 
-<p><strong>Codice fiscale:</strong> {{ $cliente->codice_fiscale }}</p>
-<p><strong>Partita IVA:</strong> {{ $cliente->partita_iva }}</p>
+        <tr>
+            <th colspan="2">
+                {{ $cliente->nome }} {{ $cliente->cognome }}
+            </th>
+        </tr>
 
-@if($cliente->tipo_abitazione ?? false)
-<p><strong>Tipo abitazione:</strong> {{ $cliente->tipo_abitazione }}</p>
-@endif
+        <tr>
+            <td><strong>Indirizzo</strong></td>
+            <td>{{ $cliente->indirizzo }}</td>
+        </tr>
 
-@if($cliente->note ?? false)
-<p><strong>Note:</strong><br>{{ $cliente->note }}</p>
-@endif
+        <tr>
+            <td><strong>Città</strong></td>
+            <td>
+                {{ $cliente->cap }}
+                {{ $cliente->citta }}
+                ({{ $cliente->provincia }})
+            </td>
+        </tr>
 
-<br>
+        <tr>
+            <td><strong>Telefono</strong></td>
+            <td>{{ $cliente->telefono }}</td>
+        </tr>
 
-<a href="/clienti">← Torna alla lista</a>
+        <tr>
+            <td><strong>Email</strong></td>
+            <td>{{ $cliente->email }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Codice fiscale</strong></td>
+            <td>{{ $cliente->codice_fiscale }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Partita IVA</strong></td>
+            <td>{{ $cliente->partita_iva }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Note</strong></td>
+            <td>{!! nl2br(e($cliente->note)) !!}</td>
+        </tr>
+
+    </table>
+
+    <h2>Commesse collegate</h2>
+
+    <table class="tabella-lista">
+
+        <tr>
+            <th>Titolo</th>
+            <th>Indirizzo</th>
+            <th>Tipo intervento</th>
+            <th>Azioni</th>
+        </tr>
+
+        @forelse($cliente->commesse as $commessa)
+
+            <tr>
+
+                <td>
+                    {{ $commessa->titolo }}
+                </td>
+
+                <td>
+                    {{ $commessa->indirizzo_lavoro }}
+                </td>
+
+                <td>
+                    {{ $commessa->tipoIntervento?->nome }}
+                </td>
+
+                <td class="azioni">
+
+                    <div class="azioni-bottoni">
+
+                        <a href="/commesse/{{ $commessa->id }}" class="btn btn-azione">
+                            Apri commessa
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        @empty
+
+            <tr>
+                <td colspan="4">
+                    Nessuna commessa collegata.
+                </td>
+            </tr>
+
+        @endforelse
+
+    </table>
+
+</div>

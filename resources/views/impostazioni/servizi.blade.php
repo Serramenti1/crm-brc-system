@@ -111,4 +111,10 @@
 
 <br>
 
-<a href="/impostazioni">← Torna alle impostazioni</a>
+<div style="margin-top:20px;">
+
+    <a href="/impostazioni" class="btn btn-azione">
+        ← Torna alle impostazioni
+    </a>
+
+</div>

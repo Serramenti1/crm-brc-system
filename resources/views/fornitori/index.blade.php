@@ -1,51 +1,107 @@
 @include('partials.menu')
 
-<h1>Fornitori</h1>
+<div class="container">
 
-<form method="GET" action="/fornitori" style="margin-bottom:15px;">
-    <input 
-        type="text" 
-        name="q" 
-        placeholder="Cerca fornitore..." 
-        value="{{ request('q') }}"
-    >
+    <h1>Fornitori</h1>
 
-    <button type="submit">Cerca</button>
+    <form method="GET" action="/fornitori" style="margin-bottom:15px;">
 
-    <a href="/fornitori">Reset</a>
-</form>
+        <input
+            type="text"
+            name="q"
+            placeholder="Cerca fornitore..."
+            value="{{ request('q') }}"
+        >
 
-<a href="/fornitori/create">+ Nuovo Fornitore</a>
+        <button type="submit" class="btn btn-azione">
+            Cerca
+        </button>
 
-<br><br>
+        <a href="/fornitori" class="btn btn-azione">
+            Reset
+        </a>
 
-<table border="1">
-<tr>
-<th>Nome</th>
-<th>Referente</th>
-<th>Telefono</th>
-<th>Email</th>
-<th>Azioni</th>
-</tr>
+    </form>
 
-@foreach($fornitori as $f)
-<tr>
-<td>{{ $f->ragione_sociale }}</td>
-<td>{{ $f->referente }}</td>
-<td>{{ $f->telefono }}</td>
-<td>{{ $f->email }}</td>
-<td>
+    <a href="/fornitori/create" class="btn btn-azione">
+        + Nuovo Fornitore
+    </a>
 
-<a href="/fornitori/{{ $f->id }}/edit">Modifica</a>
+    <table class="tabella-lista">
 
-<form method="POST" action="/fornitori/{{ $f->id }}" style="display:inline;">
-@csrf
-@method('DELETE')
-<button>Elimina</button>
-</form>
+        <tr>
+            <th>Nome</th>
+            <th>Referente</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Azioni</th>
+        </tr>
 
-</td>
-</tr>
-@endforeach
+        @foreach($fornitori as $f)
 
-</table>
+            <tr>
+
+                <td>
+                    {{ $f->ragione_sociale }}
+                </td>
+
+                <td>
+                    {{ $f->referente }}
+                </td>
+
+                <td>
+                    {{ $f->telefono }}
+                </td>
+
+                <td>
+                    {{ $f->email }}
+                </td>
+
+                <td class="azioni">
+
+                    <div class="azioni-bottoni">
+
+                        <a href="/fornitori/{{ $f->id }}" class="btn btn-azione">
+                            Visualizza
+                        </a>
+
+                        <a href="/fornitori/{{ $f->id }}/edit" class="btn btn-azione">
+                            Modifica
+                        </a>
+
+                        <form method="POST"
+                              action="/fornitori/{{ $f->id }}"
+                              class="form-elimina">
+
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="btn btn-elimina"
+                                onclick="return confirm('Eliminare questo fornitore?')"
+                            >
+                                🗑️
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        @endforeach
+
+    </table>
+
+    <div style="margin-top:20px;">
+
+        <a href="/impostazioni" class="btn btn-azione">
+            ← Torna alle impostazioni
+        </a>
+
+    </div>
+
+</div>

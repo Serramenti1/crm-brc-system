@@ -1,149 +1,90 @@
 @include('partials.menu')
 
-<h1>Tipi intervento</h1>
+<div class="container">
 
-@if(session('success'))
-    <p style="color:green;">{{ session('success') }}</p>
-@endif
+    <h1>Tipi intervento</h1>
 
-@if($errors->any())
-    <div style="color:red;">
-        @foreach($errors->all() as $error)
-            <p>{{ $error }}</p>
-        @endforeach
-    </div>
-@endif
+    @if(session('success'))
+        <p style="color:green;">
+            {{ session('success') }}
+        </p>
+    @endif
 
-<h3>Aggiungi tipo intervento</h3>
+    @if($errors->any())
 
-<form method="POST" action="/impostazioni/tipi-intervento">
-    @csrf
+        <div style="color:red; margin-bottom:15px;">
 
-    <p>
-        Nome<br>
-        <input type="text"
-               name="nome"
-               placeholder="Esempio: Manutenzione"
-               required>
-    </p>
-
-    <p>
-        Modalità IVA<br>
-
-        <select name="modalita_iva" id="modalita_iva_create">
-            <option value="iva_unica">
-                IVA unica
-            </option>
-
-            <option value="beni_significativi">
-                IVA mista beni significativi
-            </option>
-        </select>
-    </p>
-
-    <p>
-        IVA principale<br>
-
-        <select name="impostazione_iva_id">
-            <option value="">
-                -- Seleziona IVA --
-            </option>
-
-            @foreach($iva as $ivaSingola)
-                <option value="{{ $ivaSingola->id }}">
-                    {{ $ivaSingola->nome }} - {{ $ivaSingola->aliquota }}%
-                </option>
+            @foreach($errors->all() as $error)
+                <p>{{ $error }}</p>
             @endforeach
-        </select>
-    </p>
 
-    <p>
-        IVA secondaria (solo beni significativi)<br>
+        </div>
 
-        <select name="impostazione_iva_secondaria_id">
-            <option value="">
-                -- Nessuna --
-            </option>
+    @endif
 
-            @foreach($iva as $ivaSingola)
-                <option value="{{ $ivaSingola->id }}">
-                    {{ $ivaSingola->nome }} - {{ $ivaSingola->aliquota }}%
-                </option>
-            @endforeach
-        </select>
-    </p>
+    <h3>Aggiungi tipo intervento</h3>
 
-    <p>
-        Note<br>
-        <textarea name="note"></textarea>
-    </p>
+    <form method="POST" action="/impostazioni/tipi-intervento">
 
-    <p>
-        <label>
-            <input type="checkbox"
-                   name="attivo"
-                   value="1"
-                   checked>
+        @csrf
 
-            Attivo
-        </label>
-    </p>
+        <table class="tabella-dettaglio">
 
-    <button type="submit">
-        Salva
-    </button>
-</form>
+            <tr>
+                <th colspan="2">
+                    Nuovo tipo intervento
+                </th>
+            </tr>
 
-<hr>
-
-<h3>Tipi intervento salvati</h3>
-
-<table border="1" cellpadding="5" width="100%">
-
-    <tr>
-        <th>Nome</th>
-        <th>Modalità IVA</th>
-        <th>IVA principale</th>
-        <th>IVA secondaria</th>
-        <th>Attivo</th>
-        <th>Note</th>
-        <th>Azioni</th>
-    </tr>
-
-    @forelse($tipiIntervento as $tipo)
-
-        <tr>
-
-            <form method="POST"
-                  action="/impostazioni/tipi-intervento/{{ $tipo->id }}">
-
-                @csrf
-                @method('PUT')
+            <tr>
 
                 <td>
-                    <input type="text"
-                           name="nome"
-                           value="{{ $tipo->nome }}"
-                           required>
+                    <strong>Nome</strong>
                 </td>
 
                 <td>
+
+                    <input type="text"
+                           name="nome"
+                           placeholder="Esempio: Manutenzione"
+                           required>
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <strong>Modalità IVA</strong>
+                </td>
+
+                <td>
+
                     <select name="modalita_iva">
 
-                        <option value="iva_unica"
-                            {{ $tipo->modalita_iva == 'iva_unica' ? 'selected' : '' }}>
+                        <option value="iva_unica">
                             IVA unica
                         </option>
 
-                        <option value="beni_significativi"
-                            {{ $tipo->modalita_iva == 'beni_significativi' ? 'selected' : '' }}>
+                        <option value="beni_significativi">
                             IVA mista beni significativi
                         </option>
 
                     </select>
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <strong>IVA principale</strong>
                 </td>
 
                 <td>
+
                     <select name="impostazione_iva_id">
 
                         <option value="">
@@ -152,19 +93,26 @@
 
                         @foreach($iva as $ivaSingola)
 
-                            <option value="{{ $ivaSingola->id }}"
-                                {{ $tipo->impostazione_iva_id == $ivaSingola->id ? 'selected' : '' }}>
-
+                            <option value="{{ $ivaSingola->id }}">
                                 {{ $ivaSingola->nome }} - {{ $ivaSingola->aliquota }}%
-
                             </option>
 
                         @endforeach
 
                     </select>
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <strong>IVA secondaria</strong>
                 </td>
 
                 <td>
+
                     <select name="impostazione_iva_secondaria_id">
 
                         <option value="">
@@ -173,53 +121,230 @@
 
                         @foreach($iva as $ivaSingola)
 
-                            <option value="{{ $ivaSingola->id }}"
-                                {{ $tipo->impostazione_iva_secondaria_id == $ivaSingola->id ? 'selected' : '' }}>
-
+                            <option value="{{ $ivaSingola->id }}">
                                 {{ $ivaSingola->nome }} - {{ $ivaSingola->aliquota }}%
-
                             </option>
 
                         @endforeach
 
                     </select>
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <strong>Note</strong>
                 </td>
 
                 <td>
-                    <input type="checkbox"
-                           name="attivo"
-                           value="1"
-                           {{ $tipo->attivo ? 'checked' : '' }}>
+
+                    <textarea name="note"></textarea>
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <strong>Attivo</strong>
                 </td>
 
                 <td>
-                    <textarea name="note">{{ $tipo->note }}</textarea>
+
+                    <label style="font-weight:normal;">
+
+                        <input type="checkbox"
+                               name="attivo"
+                               value="1"
+                               checked>
+
+                        Attivo
+
+                    </label>
+
                 </td>
 
-                <td>
-                    <button type="submit">
-                        Salva modifica
-                    </button>
-                </td>
+            </tr>
 
-            </form>
+        </table>
 
-        </tr>
+        <div style="margin-top:20px;">
 
-    @empty
+            <button type="submit" class="btn btn-azione">
+                Salva
+            </button>
+
+        </div>
+
+    </form>
+
+    <hr>
+
+    <h3>Tipi intervento salvati</h3>
+
+    <table class="tabella-lista">
 
         <tr>
-            <td colspan="7">
-                Nessun tipo intervento inserito.
-            </td>
+            <th>Nome</th>
+            <th>Modalità IVA</th>
+            <th>IVA principale</th>
+            <th>IVA secondaria</th>
+            <th>Attivo</th>
+            <th>Note</th>
+            <th>Azioni</th>
         </tr>
 
-    @endforelse
+        @forelse($tipiIntervento as $tipo)
 
-</table>
+            <tr>
 
-<br>
+                <form method="POST"
+                      action="/impostazioni/tipi-intervento/{{ $tipo->id }}">
 
-<a href="/impostazioni">
-    ← Torna alle impostazioni
-</a>
+                    @csrf
+                    @method('PUT')
+
+                    <td>
+
+                        <input type="text"
+                               name="nome"
+                               value="{{ $tipo->nome }}"
+                               required>
+
+                    </td>
+
+                    <td>
+
+                        <select name="modalita_iva">
+
+                            <option value="iva_unica"
+                                {{ $tipo->modalita_iva == 'iva_unica' ? 'selected' : '' }}>
+
+                                IVA unica
+
+                            </option>
+
+                            <option value="beni_significativi"
+                                {{ $tipo->modalita_iva == 'beni_significativi' ? 'selected' : '' }}>
+
+                                IVA mista beni significativi
+
+                            </option>
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <select name="impostazione_iva_id">
+
+                            <option value="">
+                                -- Seleziona IVA --
+                            </option>
+
+                            @foreach($iva as $ivaSingola)
+
+                                <option value="{{ $ivaSingola->id }}"
+                                    {{ $tipo->impostazione_iva_id == $ivaSingola->id ? 'selected' : '' }}>
+
+                                    {{ $ivaSingola->nome }} - {{ $ivaSingola->aliquota }}%
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <select name="impostazione_iva_secondaria_id">
+
+                            <option value="">
+                                -- Nessuna --
+                            </option>
+
+                            @foreach($iva as $ivaSingola)
+
+                                <option value="{{ $ivaSingola->id }}"
+                                    {{ $tipo->impostazione_iva_secondaria_id == $ivaSingola->id ? 'selected' : '' }}>
+
+                                    {{ $ivaSingola->nome }} - {{ $ivaSingola->aliquota }}%
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <label style="font-weight:normal;">
+
+                            <input type="checkbox"
+                                   name="attivo"
+                                   value="1"
+                                   {{ $tipo->attivo ? 'checked' : '' }}>
+
+                            Attivo
+
+                        </label>
+
+                    </td>
+
+                    <td>
+
+                        <textarea name="note">{{ $tipo->note }}</textarea>
+
+                    </td>
+
+                    <td class="azioni">
+
+                        <div class="azioni-bottoni">
+
+                            <button type="submit"
+                                    class="btn btn-azione">
+
+                                Salva modifica
+
+                            </button>
+
+                        </div>
+
+                    </td>
+
+                </form>
+
+            </tr>
+
+        @empty
+
+            <tr>
+
+                <td colspan="7">
+                    Nessun tipo intervento inserito.
+                </td>
+
+            </tr>
+
+        @endforelse
+
+    </table>
+
+    <div style="margin-top:20px;">
+
+        <a href="/impostazioni" class="btn btn-azione">
+            ← Torna alle impostazioni
+        </a>
+
+    </div>
+
+</div>
