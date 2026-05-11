@@ -122,3 +122,27 @@
 </a>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const campi = document.querySelectorAll(
+        'input[type="text"], input[type="number"], input[type="email"]'
+    );
+
+    campi.forEach(function (campo) {
+
+        campo.addEventListener('focus', function () {
+            this.select();
+        });
+
+        campo.addEventListener('mouseup', function (e) {
+            if (this.selectionStart !== this.selectionEnd) {
+                e.preventDefault();
+            }
+        });
+
+    });
+
+});
+</script>
