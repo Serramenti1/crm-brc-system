@@ -17,7 +17,11 @@ class PreventivoController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Preventivo::with('commessa.cliente', 'ordine');
+        $query = Preventivo::with(
+    'commessa.cliente',
+    'commessa.tipoIntervento.ivaPrincipale',
+    'ordine'
+);
 
         if ($request->filled('cliente')) {
             $parole = explode(' ', trim($request->cliente));
@@ -33,10 +37,25 @@ class PreventivoController extends Controller
         }
 
         $preventivi = $query
-            ->latest()
-            ->get();
+    ->with(
+        'commessa.tipoIntervento.ivaPrincipale',
+        'commessa.tipoIntervento.ivaSecondaria',
+        'righeProdotti.servizi'
+    )
+    ->latest()
+    ->get();
 
-        return view('preventivi.index', compact('preventivi'));
+$calcoloIvaService = new CalcoloIvaService();
+
+foreach ($preventivi as $preventivo) {
+
+    $calcoloIva = $calcoloIvaService->calcolaDaPreventivo($preventivo);
+
+    $preventivo->totale_ivato_lista =
+    $calcoloIva['totale_con_iva'] ?? $preventivo->totale_cliente_finale;
+}
+
+return view('preventivi.index', compact('preventivi'));
     }
 
     public function create()

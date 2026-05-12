@@ -10,7 +10,7 @@ class ClienteController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Cliente::query();
+        $query = Cliente::with('commesse');
 
         $query = SearchHelper::applyMultiWordSearch(
             $query,
@@ -54,35 +54,18 @@ class ClienteController extends Controller
     }
 
     public function destroy($id)
-    {
-        $cliente = Cliente::with('commesse.preventivi.ordine')->findOrFail($id);
+{
+    $cliente = Cliente::with('commesse.preventivi.ordine')->findOrFail($id);
 
-    foreach ($cliente->commesse as $commessa) {
-        foreach ($commessa->preventivi as $preventivo) {
+    if ($cliente->commesse->count() > 0) {
 
-            if ($preventivo->ordine) {
-                return redirect('/clienti/' . $cliente->id)
-                    ->with('error', 'Non puoi eliminare questo cliente perché ha ordini collegati.');
-            }
-        }
-    }
-
-    foreach ($cliente->commesse as $commessa) {
-        foreach ($commessa->preventivi as $preventivo) {
-
-            foreach ($preventivo->righeProdotti as $riga) {
-                $riga->servizi()->delete();
-                $riga->delete();
-            }
-
-            $preventivo->delete();
-        }
-
-        $commessa->delete();
+        return redirect('/clienti')
+            ->with('error', 'Non puoi eliminare questo cliente perché ha commesse collegate.');
     }
 
     $cliente->delete();
 
-    return redirect('/clienti')->with('success', 'Cliente eliminato');
-    }
+    return redirect('/clienti')
+        ->with('success', 'Cliente eliminato');
+}
 }

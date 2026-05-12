@@ -30,14 +30,11 @@
     <table class="tabella-lista">
 
         <tr>
-
             <th>Numero</th>
             <th>Cliente</th>
             <th>Commessa</th>
-            <th>Totale Cliente</th>
-            <th>Sconto Medio</th>
+            <th>Totale Cliente Ivato</th>
             <th>Azioni</th>
-
         </tr>
 
         @foreach($preventivi as $preventivo)
@@ -49,15 +46,12 @@
                 </td>
 
                 <td>
-
                     {{ $preventivo->commessa && $preventivo->commessa->cliente
                         ? $preventivo->commessa->cliente->nome . ' ' . $preventivo->commessa->cliente->cognome
                         : '' }}
-
                 </td>
 
                 <td>
-
                     @if($preventivo->commessa)
 
                         {{ $preventivo->commessa->titolo }}
@@ -65,51 +59,35 @@
                         <br>
 
                         <small>
-
                             {{ $preventivo->commessa->indirizzo_lavoro }}
 
                             @if($preventivo->commessa->citta_lavoro)
                                 - {{ $preventivo->commessa->citta_lavoro }}
                             @endif
-
                         </small>
 
                     @endif
-
                 </td>
 
                 <td>
-                    {{ number_format($preventivo->totale_cliente_finale, 2, ',', '.') }} €
-                </td>
-
-                <td>
-                    {{ number_format($preventivo->sconto_medio_cliente, 2, ',', '.') }} %
+                    {{ number_format($preventivo->totale_ivato_lista ?? $preventivo->totale_cliente_finale, 2, ',', '.') }} €
                 </td>
 
                 <td class="azioni">
 
                     <div class="azioni-bottoni">
 
-                        <a
-                            href="/preventivi/{{ $preventivo->id }}"
-                            class="btn btn-azione"
-                        >
+                        <a href="/preventivi/{{ $preventivo->id }}" class="btn btn-azione">
                             Modifica
                         </a>
 
-                        <a
-                            href="/preventivi/{{ $preventivo->id }}/visualizza"
-                            class="btn btn-azione"
-                        >
+                        <a href="/preventivi/{{ $preventivo->id }}/visualizza" class="btn btn-azione">
                             Visualizza
                         </a>
 
                         @if($preventivo->ordine)
 
-                            <a
-                                href="/ordini/{{ $preventivo->ordine->id }}"
-                                class="btn btn-azione"
-                            >
+                            <a href="/ordini/{{ $preventivo->ordine->id }}" class="btn btn-azione">
                                 Apri ordine
                             </a>
 
@@ -137,38 +115,36 @@
 
                         @if($preventivo->ordine)
 
-    <button
-        type="button"
-        class="btn btn-elimina btn-disabilitato"
-        title="Preventivo non eliminabile: ordine collegato"
-    >
-        🗑️
-    </button>
+                            <button
+                                type="button"
+                                class="btn btn-elimina btn-disabilitato"
+                                title="Preventivo non eliminabile: ordine collegato"
+                            >
+                                🗑️
+                            </button>
 
-@else
+                        @else
 
-    <form
-        action="/preventivi/{{ $preventivo->id }}"
-        method="POST"
-        class="form-elimina"
-    >
+                            <form
+                                action="/preventivi/{{ $preventivo->id }}"
+                                method="POST"
+                                class="form-elimina"
+                            >
 
-        @csrf
-        @method('DELETE')
+                                @csrf
+                                @method('DELETE')
 
-        <button
-            type="submit"
-            class="btn btn-elimina"
-            onclick="return confirm('Eliminare questo preventivo?')"
-        >
-            🗑️
-        </button>
+                                <button
+                                    type="submit"
+                                    class="btn btn-elimina"
+                                    onclick="return confirm('Eliminare questo preventivo?')"
+                                >
+                                    🗑️
+                                </button>
 
-    </form>
+                            </form>
 
-@endif
-
-                        </form>
+                        @endif
 
                     </div>
 

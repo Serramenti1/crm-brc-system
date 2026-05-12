@@ -67,20 +67,35 @@
                             Modifica
                         </a>
 
-                        <form action="/clienti/{{ $cliente->id }}" method="POST" class="form-elimina">
+                       @if($cliente->commesse->count() > 0)
 
-                            @csrf
-                            @method('DELETE')
+    <button
+        type="button"
+        class="btn btn-elimina"
+        style="background:#9ca3af; cursor:not-allowed;"
+        title="Cliente con commesse collegate"
+    >
+        🗑️
+    </button>
 
-                            <button
-                                type="submit"
-                                class="btn btn-elimina"
-                                onclick="return confirm('Eliminare questo cliente?')"
-                            >
-                                🗑️
-                            </button>
+@else
 
-                        </form>
+    <form action="/clienti/{{ $cliente->id }}" method="POST" class="form-elimina">
+
+        @csrf
+        @method('DELETE')
+
+        <button
+            type="submit"
+            class="btn btn-elimina"
+            onclick="return confirm('Eliminare questo cliente?')"
+        >
+            🗑️
+        </button>
+
+    </form>
+
+@endif
 
                     </div>
 
