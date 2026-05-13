@@ -14,7 +14,7 @@
         </div>
     @endif
 
-    <form method="POST" action="/clienti">
+    <form method="POST" action="/clienti" onsubmit="return bloccaDoppioInvio(this)">
         @csrf
 
         <div class="griglia-form">
@@ -85,5 +85,24 @@
         </a>
 
     </form>
+    
 
 </div>
+<script>
+function bloccaDoppioInvio(form) {
+    let bottone = form.querySelector('button[type="submit"]');
+
+    if (form.dataset.inviato === '1') {
+        return false;
+    }
+
+    form.dataset.inviato = '1';
+
+    if (bottone) {
+        bottone.disabled = true;
+        bottone.innerText = 'Salvataggio...';
+    }
+
+    return true;
+}
+</script>

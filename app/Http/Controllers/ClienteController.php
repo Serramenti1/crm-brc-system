@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Models\Cliente;
 use App\Helpers\SearchHelper;
@@ -29,10 +30,28 @@ class ClienteController extends Controller
     }
 
     public function store(Request $request)
-    {
-        Cliente::create($request->all());
-        return redirect('/clienti');
-    }
+{
+    $request->validate(
+
+        [
+            'email' => 'nullable|unique:clienti,email',
+            'codice_fiscale' => 'nullable|unique:clienti,codice_fiscale',
+        ],
+
+        [
+            'email.unique' => 'Esiste già un cliente con questa email.',
+
+            'codice_fiscale.unique' =>
+                'Esiste già un cliente con questo codice fiscale.',
+        ]
+
+    );
+
+    Cliente::create($request->all());
+
+    return redirect('/clienti')
+        ->with('success', 'Cliente creato correttamente.');
+}
 
     public function show($id)
     {
@@ -47,11 +66,34 @@ class ClienteController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $cliente = Cliente::findOrFail($id);
-        $cliente->update($request->all());
-        return redirect('/clienti');
-    }
+{
+    $cliente = Cliente::findOrFail($id);
+
+    $request->validate(
+
+        [
+            'email' =>
+                'nullable|unique:clienti,email,' . $cliente->id,
+
+            'codice_fiscale' =>
+                'nullable|unique:clienti,codice_fiscale,' . $cliente->id,
+        ],
+
+        [
+            'email.unique' =>
+                'Esiste già un cliente con questa email.',
+
+            'codice_fiscale.unique' =>
+                'Esiste già un cliente con questo codice fiscale.',
+        ]
+
+    );
+
+    $cliente->update($request->all());
+
+    return redirect('/clienti')
+        ->with('success', 'Cliente aggiornato correttamente.');
+}
 
     public function destroy($id)
 {
