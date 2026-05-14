@@ -33,6 +33,7 @@
             <th>Numero</th>
             <th>Cliente</th>
             <th>Commessa</th>
+            <th>Tipo intervento</th>
             <th>Totale Cliente Ivato</th>
             <th>Azioni</th>
         </tr>
@@ -67,6 +68,9 @@
                         </small>
 
                     @endif
+                </td>
+                <td>
+                     {{ $preventivo->commessa?->tipoIntervento?->nome }}
                 </td>
 
                 <td>
@@ -155,5 +159,11 @@
         @endforeach
 
     </table>
+
+    <div style="margin-top:20px; display:flex; justify-content:center;">
+
+    {{ $preventivi->links('pagination::bootstrap-4') }}
+
+</div>
 
 </div>

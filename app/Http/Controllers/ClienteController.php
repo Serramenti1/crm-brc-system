@@ -19,7 +19,10 @@ class ClienteController extends Controller
             $request->q
         );
 
-        $clienti = $query->get();
+        $clienti = $query
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
         return view('clienti.index', compact('clienti'));
     }

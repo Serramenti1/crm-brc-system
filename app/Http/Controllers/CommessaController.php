@@ -36,7 +36,10 @@ class CommessaController extends Controller
             });
         }
 
-        $commesse = $query->orderBy('id', 'desc')->get();
+        $commesse = $query
+        ->orderBy('id', 'desc')
+        ->paginate(10)
+        ->withQueryString();
 
         return view('commesse.index', compact('commesse'));
     }

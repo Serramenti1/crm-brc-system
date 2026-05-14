@@ -389,3 +389,49 @@ label input[type="checkbox"] {
 .btn-disabilitato:hover {
     background: #9ca3af !important;
 }
+.pagination {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #1e3a8a;
+    background: white;
+    font-size: 14px;
+}
+
+.pagination .active span {
+    background: #1e5bb8;
+    color: white;
+    border-color: #1e5bb8;
+}
+
+.pagination a:hover {
+    background: #eff6ff;
+}
+/* PAGINAZIONE */
+.pagination {
+    list-style: none;
+    padding-left: 0;
+    margin: 20px 0;
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination li {
+    list-style: none;
+}
+
+.pagination li::marker {
+    content: "";
+}

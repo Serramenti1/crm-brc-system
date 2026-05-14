@@ -27,10 +27,24 @@
             @csrf
 
             <p>
+                Fornitore<br>
+
+                <select id="fornitore_select" onchange="filtraProdottiPerFornitore()">
+                    <option value="">-- Seleziona fornitore --</option>
+
+                    @foreach($fornitori as $fornitore)
+                        <option value="{{ $fornitore->id }}">
+                            {{ $fornitore->ragione_sociale }}
+                        </option>
+                    @endforeach
+                </select>
+            </p>
+
+            <p>
                 Prodotto da listino fornitore<br>
 
-                <select id="prodotto_fornitore_select" onchange="compilaProdottoFornitore()">
-                    <option value="">-- Seleziona prodotto fornitore --</option>
+                <select id="prodotto_fornitore_select" onchange="compilaProdottoFornitore()" disabled>
+                    <option value="">-- Prima seleziona un fornitore --</option>
 
                     @foreach($prodottiFornitore as $prodotto)
                         <option
@@ -42,9 +56,8 @@
                             data-sconto2="{{ $prodotto->sconto_2 }}"
                             data-sconto3="{{ $prodotto->sconto_3 }}"
                             data-bene-significativo="{{ $prodotto->bene_significativo ? 1 : 0 }}"
+                            style="display:none;"
                         >
-                            {{ $prodotto->fornitore->ragione_sociale }}
-                            -
                             {{ $prodotto->descrizione }}
                         </option>
                     @endforeach
@@ -66,26 +79,36 @@
             <p>
                 Tipo prezzo<br>
 
-                <label>
-                    <input
-                        type="radio"
-                        name="modalita_calcolo"
-                        value="da_listino"
-                        checked
-                        onclick="cambiaPrezzo()"
-                    >
-                    Listino
-                </label>
+                <div style="display:flex; gap:25px; align-items:center;">
 
-                <label>
-                    <input
-                        type="radio"
-                        name="modalita_calcolo"
-                        value="da_costo_netto"
-                        onclick="cambiaPrezzo()"
-                    >
-                    Scontato
-                </label>
+                    <label style="display:flex; align-items:center; gap:8px; width:auto;">
+
+                        <input
+                            type="radio"
+                            name="modalita_calcolo"
+                            value="da_listino"
+                            checked
+                            onclick="cambiaPrezzo()"
+                        >
+
+                        Listino
+
+                    </label>
+
+                    <label style="display:flex; align-items:center; gap:8px; width:auto;">
+
+                        <input
+                            type="radio"
+                            name="modalita_calcolo"
+                            value="da_costo_netto"
+                            onclick="cambiaPrezzo()"
+                        >
+
+                        Scontato
+
+                    </label>
+
+                </div>
             </p>
 
             <p id="label_prezzo">
@@ -437,12 +460,74 @@ function cambiaPrezzo(){
     }
 }
 
+function filtraProdottiPerFornitore(){
+
+    let fornitoreSelect = document.getElementById('fornitore_select');
+    let prodottoSelect = document.getElementById('prodotto_fornitore_select');
+
+    let fornitoreId = fornitoreSelect.value;
+
+    prodottoSelect.innerHTML = '';
+
+    if(fornitoreId === ''){
+
+        let optionVuota = document.createElement('option');
+        optionVuota.value = '';
+        optionVuota.text = '-- Prima seleziona un fornitore --';
+
+        prodottoSelect.appendChild(optionVuota);
+        prodottoSelect.disabled = true;
+
+        document.getElementById('fornitore_id').value = '';
+        document.getElementById('descrizione').value = '';
+        document.getElementById('input_prezzo').value = '';
+        document.getElementById('sconto_fornitore_1').value = 0;
+        document.getElementById('sconto_fornitore_2').value = 0;
+        document.getElementById('sconto_fornitore_3').value = 0;
+        document.getElementById('bene_significativo').checked = false;
+
+        return;
+    }
+
+    let optionDefault = document.createElement('option');
+    optionDefault.value = '';
+    optionDefault.text = '-- Seleziona prodotto --';
+
+    prodottoSelect.appendChild(optionDefault);
+
+    let prodotti = @json($prodottiFornitore);
+
+    prodotti.forEach(function(prodotto){
+
+        if(prodotto.fornitore_id == fornitoreId){
+
+            let option = document.createElement('option');
+
+            option.value = prodotto.id;
+            option.text = prodotto.descrizione;
+
+            option.dataset.fornitore = prodotto.fornitore_id;
+            option.dataset.descrizione = prodotto.descrizione;
+            option.dataset.listino = prodotto.prezzo_listino;
+            option.dataset.sconto1 = prodotto.sconto_1;
+            option.dataset.sconto2 = prodotto.sconto_2;
+            option.dataset.sconto3 = prodotto.sconto_3;
+            option.dataset.beneSignificativo = prodotto.bene_significativo ? 1 : 0;
+
+            prodottoSelect.appendChild(option);
+        }
+
+    });
+
+    prodottoSelect.disabled = false;
+}
+
 function compilaProdottoFornitore(){
 
     let select = document.getElementById('prodotto_fornitore_select');
     let option = select.options[select.selectedIndex];
 
-    if(option.value === ''){
+    if(!option || option.value === ''){
         return;
     }
 

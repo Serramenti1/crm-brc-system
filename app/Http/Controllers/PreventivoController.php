@@ -43,7 +43,8 @@ class PreventivoController extends Controller
         'righeProdotti.servizi'
     )
     ->latest()
-    ->get();
+    ->paginate(10)
+    ->withQueryString();
 
 $calcoloIvaService = new CalcoloIvaService();
 

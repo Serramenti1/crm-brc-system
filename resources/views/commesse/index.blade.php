@@ -148,4 +148,10 @@
 
     </table>
 
+    <div style="margin-top:20px; display:flex; justify-content:center;">
+
+    {{ $commesse->links('pagination::bootstrap-4') }}
+
+</div>
+
 </div>
