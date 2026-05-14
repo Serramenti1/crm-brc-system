@@ -11,6 +11,8 @@ use App\Http\Controllers\FornitoreController;
 use App\Http\Controllers\OrdineController;
 use App\Http\Controllers\ImpostazioneController;
 use App\Models\Ordine;
+use App\Http\Controllers\RigaOrdineController;
+use App\Http\Controllers\RigaOrdineServizioController;
 
 Route::get('/', function () {
     $conteggiOrdini = [
@@ -63,6 +65,13 @@ Route::post('/impostazioni/servizi', [ImpostazioneController::class, 'storeServi
 Route::put('/impostazioni/servizi/{id}', [ImpostazioneController::class, 'updateServizio']);
 Route::post('/ordini/{id}/stato-precedente', [OrdineController::class, 'tornaStatoPrecedente'])
     ->name('ordini.tornaStatoPrecedente');
+Route::put('/righe-ordine-prodotto/{id}', [RigaOrdineController::class, 'update']);
+Route::delete('/righe-ordine-prodotto/{id}', [RigaOrdineController::class, 'destroy']);
+Route::post('/ordini/{ordineId}/righe-prodotti', [RigaOrdineController::class, 'store']);
+
+Route::post('/righe-ordine/{rigaOrdineId}/servizi', [RigaOrdineServizioController::class, 'store']);
+Route::put('/servizi-riga-ordine/{id}', [RigaOrdineServizioController::class, 'update']);
+Route::delete('/servizi-riga-ordine/{id}', [RigaOrdineServizioController::class, 'destroy']);   
 Route::get('/impostazioni/tipi-intervento', [ImpostazioneController::class, 'tipiIntervento']);
 Route::post('/impostazioni/tipi-intervento', [ImpostazioneController::class, 'storeTipoIntervento']);
 Route::put('/impostazioni/tipi-intervento/{id}', [ImpostazioneController::class, 'updateTipoIntervento']);

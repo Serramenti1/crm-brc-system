@@ -12,281 +12,640 @@
     </div>
 @endif
 
-<div style="margin-bottom:20px;">
-    <a href="/ordini/stato/{{ $ordine->stato }}">
-        ← Torna alla lista ordini
-    </a>
-</div>
+<div class="container">
 
-<h1>Ordine {{ $ordine->numero }}</h1>
+    <div style="margin-bottom:20px;">
+        <a href="/ordini/stato/{{ $ordine->stato }}" class="btn btn-azione">
+            ← Torna alla lista ordini
+        </a>
+    </div>
 
-<div style="margin-bottom:20px; border:1px solid #ccc; padding:15px;">
+    <h1>Ordine {{ $ordine->numero }}</h1>
 
-    <p>
-        <strong>Cliente:</strong>
-        {{ $ordine->commessa && $ordine->commessa->cliente
-            ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
-            : '' }}
-    </p>
+    <table class="tabella-dettaglio">
 
-    <p>
-        <strong>Commessa:</strong>
-        {{ $ordine->commessa ? $ordine->commessa->titolo : '' }}
-    </p>
+        <tr>
+            <th colspan="2">Dettagli ordine</th>
+        </tr>
 
-    <p>
-        <strong>Indirizzo intervento:</strong>
-        {{ $ordine->commessa ? $ordine->commessa->indirizzo_lavoro : '' }}
-    </p>
+        <tr>
+            <td><strong>Cliente</strong></td>
+            <td>
+                {{ $ordine->commessa && $ordine->commessa->cliente
+                    ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
+                    : '' }}
+            </td>
+        </tr>
 
-    <p>
-        <strong>Stato:</strong>
+        <tr>
+            <td><strong>Commessa</strong></td>
+            <td>{{ $ordine->commessa ? $ordine->commessa->titolo : '' }}</td>
+        </tr>
 
-        @if($ordine->stato == 'preparazione_contratto')
-            Preparazione contratto
-        @elseif($ordine->stato == 'in_lavorazione')
-            In lavorazione
-        @elseif($ordine->stato == 'completo_attesa_merce')
-            Completo - attesa merce
-        @elseif($ordine->stato == 'attesa_saldo_merce')
-            Attesa saldo merce
-        @elseif($ordine->stato == 'programmare_posa')
-            Programmare posa
-        @elseif($ordine->stato == 'concluso')
-            Concluso
-        @elseif($ordine->stato == 'archiviato')
-            Archiviato
-        @endif
-    </p>
+        <tr>
+            <td><strong>Indirizzo lavoro</strong></td>
+            <td>{{ $ordine->commessa ? $ordine->commessa->indirizzo_lavoro : '' }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Stato</strong></td>
+            <td>
+
+                @if($ordine->stato == 'preparazione_contratto')
+                    Preparazione contratto
+                @elseif($ordine->stato == 'in_lavorazione')
+                    In lavorazione
+                @elseif($ordine->stato == 'completo_attesa_merce')
+                    Completo - attesa merce
+                @elseif($ordine->stato == 'attesa_saldo_merce')
+                    Attesa saldo merce
+                @elseif($ordine->stato == 'programmare_posa')
+                    Programmare posa
+                @elseif($ordine->stato == 'concluso')
+                    Concluso
+                @elseif($ordine->stato == 'archiviato')
+                    Archiviato
+                @endif
+
+            </td>
+        </tr>
+
+    </table>
 
     @if($ordine->stato != 'preparazione_contratto')
+
         <form method="POST"
               action="/ordini/{{ $ordine->id }}/stato-precedente"
-              style="margin-top:10px;"
+              style="margin-top:15px;"
               onsubmit="return confermaRitornoStato()">
 
             @csrf
 
-            <button type="submit">
+            <button type="submit" class="btn btn-azione">
                 ← Torna allo stato precedente
             </button>
+
         </form>
+
     @endif
 
-</div>
+    <br>
 
-<h2>Righe ordine</h2>
+    <h2>Prodotti e servizi</h2>
 
-<table border="1" cellpadding="5" width="100%">
+    @if($ordine->stato == 'preparazione_contratto')
 
-    <tr>
-    <th>Prodotto</th>
-    <th>Fornitore</th>
-    <th>Quantità</th>
-    <th>Imponibile</th>
-    <th>Servizi</th>
-    <th>Stati</th>
-    <th>PDF</th>
-    <th>Azioni</th>
-</tr>
+        <details style="margin-bottom:20px;">
 
-    @foreach($ordine->righe as $riga)
+            <summary>
+                <strong>+ Aggiungi prodotto</strong>
+            </summary>
+
+            <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
+
+                <form method="POST"
+                      action="/ordini/{{ $ordine->id }}/righe-prodotti">
+
+                    @csrf
+
+                    <p>
+                        Fornitore<br>
+
+                        <select name="fornitore_id"
+                                id="fornitore_select_nuovo"
+                                onchange="caricaProdottiNuovo()">
+
+                            <option value="">
+                                -- Seleziona --
+                            </option>
+
+                            @foreach($fornitori as $fornitore)
+
+                                <option value="{{ $fornitore->id }}">
+                                    {{ $fornitore->ragione_sociale }}
+                                </option>
+
+                            @endforeach
+
+                        </select>
+                    </p>
+
+                    <p>
+                        Prodotto fornitore<br>
+
+                        <select id="prodotto_select_nuovo"
+                                onchange="compilaProdottoNuovo()">
+
+                            <option value="">
+                                -- Seleziona --
+                            </option>
+
+                            @foreach($prodottiFornitore as $prodotto)
+
+                                <option
+                                    value="{{ $prodotto->id }}"
+                                    data-fornitore="{{ $prodotto->fornitore_id }}"
+                                    data-descrizione="{{ $prodotto->descrizione }}"
+                                    data-listino="{{ $prodotto->prezzo_listino }}"
+                                    data-s1="{{ $prodotto->sconto_1 }}"
+                                    data-s2="{{ $prodotto->sconto_2 }}"
+                                    data-s3="{{ $prodotto->sconto_3 }}"
+                                    data-bene="{{ $prodotto->bene_significativo }}">
+                                    {{ $prodotto->descrizione }}
+                                </option>
+
+                            @endforeach
+
+                        </select>
+                    </p>
+
+                    <p>
+                        Descrizione<br>
+
+                        <input type="text"
+                               name="descrizione"
+                               id="descrizione_nuovo"
+                               required>
+                    </p>
+
+                    <p>
+                        Quantità<br>
+
+                        <input type="number"
+                               name="quantita"
+                               value="1"
+                               step="0.01">
+                    </p>
+
+                    <p>
+
+                        <strong>Tipo prezzo</strong>
+
+                        <div style="display:flex; gap:25px; margin-top:10px;">
+
+                            <label>
+                                <input type="radio"
+                                       name="modalita_calcolo"
+                                       value="da_listino"
+                                       checked
+                                       onclick="cambiaPrezzoNuovo()">
+
+                                Listino
+                            </label>
+
+                            <label>
+                                <input type="radio"
+                                       name="modalita_calcolo"
+                                       value="da_costo_netto"
+                                       onclick="cambiaPrezzoNuovo()">
+
+                                Scontato
+                            </label>
+
+                        </div>
+
+                    </p>
+
+                    <p id="label_prezzo_nuovo">
+                        Prezzo listino
+                    </p>
+
+                    <input type="number"
+                           id="input_prezzo_nuovo"
+                           name="prezzo_listino"
+                           step="0.01">
+
+                    <p>
+                        Sconto 1 %<br>
+
+                        <input type="number"
+                               name="sconto_fornitore_1"
+                               id="s1_nuovo"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Sconto 2 %<br>
+
+                        <input type="number"
+                               name="sconto_fornitore_2"
+                               id="s2_nuovo"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Sconto 3 %<br>
+
+                        <input type="number"
+                               name="sconto_fornitore_3"
+                               id="s3_nuovo"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Ricarico %<br>
+
+                        <input type="number"
+                               name="ricarico_percentuale"
+                               value="{{ $impostazioni->ricarico_prodotti ?? 0 }}"
+                               step="0.01">
+                    </p>
+
+                    <p>
+
+                        <label>
+
+                            <input type="checkbox"
+                                   name="bene_significativo"
+                                   id="bene_nuovo"
+                                   value="1">
+
+                            Bene significativo
+
+                        </label>
+
+                    </p>
+
+                    <p>
+                        Note<br>
+
+                        <textarea name="note"></textarea>
+                    </p>
+
+                    <button type="submit" class="btn btn-azione">
+                        Salva prodotto
+                    </button>
+
+                </form>
+
+            </div>
+
+        </details>
+
+    @endif
+
+    <table class="tabella-lista">
+
+        <tr>
+            <th>Prodotto</th>
+            <th>Prezzi</th>
+            <th>Azioni</th>
+            <th>Servizi</th>
+            <th>Stati / PDF</th>
+        </tr>
+
+        @foreach($ordine->righe as $riga)
+
+            <tr>
+
+                <td>
+
+                    <strong>{{ $riga->descrizione }}</strong><br>
+
+                    Fornitore:
+                    {{ $riga->fornitore ? $riga->fornitore->ragione_sociale : '-' }}
+                    <br>
+
+                    Quantità:
+                    {{ $riga->quantita }}
+                    <br>
+
+                    Bene significativo:
+                    {{ $riga->bene_significativo ? 'Sì' : 'No' }}
+
+                </td>
+
+                <td>
+
+                    Listino:
+                    {{ number_format($riga->prezzo_listino ?? 0, 2, ',', '.') }} €
+                    <br>
+
+                    Scontato:
+                    {{ number_format($riga->costo_netto ?? 0, 2, ',', '.') }} €
+                    <br>
+
+                    Cliente unitario:
+                    {{ number_format($riga->prezzo_cliente_unitario ?? 0, 2, ',', '.') }} €
+                    <br>
+
+                    Totale:
+                    {{ number_format($riga->totale_cliente ?? 0, 2, ',', '.') }} €
+
+                </td>
+
+                <td>
+
+                    @if($ordine->stato == 'preparazione_contratto')
+
+                        <button type="button"
+                                class="btn btn-azione"
+                                onclick="apriModificaRigaOrdine({{ $riga->id }})">
+                            Modifica
+                        </button>
+
+                        <form method="POST"
+                              action="/righe-ordine-prodotto/{{ $riga->id }}"
+                              style="display:inline;">
+
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit"
+                                    class="btn btn-elimina"
+                                    onclick="return confirm('Eliminare questo prodotto?')">
+                                🗑️
+                            </button>
+
+                        </form>
+
+                    @else
+                        -
+                    @endif
+
+                </td>
+
+                <td>
+
+                    @foreach($riga->servizi as $servizio)
+
+                        <div style="border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px;">
+
+                            <strong>{{ $servizio->tipo_servizio }}</strong><br>
+
+                            {{ $servizio->descrizione }}<br>
+
+                            Prezzo:
+                            {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }} €
+
+                            @if($ordine->stato == 'preparazione_contratto')
+
+                                <div style="margin-top:10px;">
+
+                                    <button type="button"
+                                            class="btn btn-azione"
+                                            onclick="apriModificaServizioOrdine({{ $servizio->id }})">
+                                        Modifica
+                                    </button>
+
+                                    <form method="POST"
+                                          action="/servizi-riga-ordine/{{ $servizio->id }}"
+                                          style="display:inline;">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                                class="btn btn-elimina"
+                                                onclick="return confirm('Eliminare servizio?')">
+                                            🗑️
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                                <div id="edit_servizio_ordine_{{ $servizio->id }}"
+                                     style="display:none; margin-top:15px; border:1px solid #ccc; padding:15px;">
+
+                                    <form method="POST"
+                                          action="/servizi-riga-ordine/{{ $servizio->id }}">
+
+                                        @csrf
+                                        @method('PUT')
+
+                                        <p>
+                                            Tipo servizio<br>
+
+                                            <input type="text"
+                                                   name="tipo_servizio"
+                                                   value="{{ $servizio->tipo_servizio }}">
+                                        </p>
+
+                                        <p>
+                                            Descrizione<br>
+
+                                            <input type="text"
+                                                   name="descrizione"
+                                                   value="{{ $servizio->descrizione }}">
+                                        </p>
+
+                                        <p>
+                                            Costo BRC<br>
+
+                                            <input type="number"
+                                                   name="costo_brc"
+                                                   value="{{ $servizio->costo_brc }}"
+                                                   step="0.01">
+                                        </p>
+
+                                        <p>
+                                            Ricarico %<br>
+
+                                            <input type="number"
+                                                   name="ricarico_percentuale"
+                                                   value="{{ $servizio->ricarico_percentuale }}"
+                                                   step="0.01">
+                                        </p>
+
+                                        <button type="submit" class="btn btn-azione">
+                                            Salva servizio
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            @endif
+
+                        </div>
+
+                    @endforeach
+
+                    @if($ordine->stato == 'preparazione_contratto')
+
+                        <details>
+
+                            <summary>
+                                <strong>+ Servizio</strong>
+                            </summary>
+
+                            <form method="POST"
+                                  action="/righe-ordine/{{ $riga->id }}/servizi"
+                                  style="margin-top:15px;">
+
+                                @csrf
+
+                                <p>
+                                    Tipo servizio<br>
+
+                                    <input type="text"
+                                           name="tipo_servizio"
+                                           required>
+                                </p>
+
+                                <p>
+                                    Descrizione<br>
+
+                                    <input type="text"
+                                           name="descrizione">
+                                </p>
+
+                                <p>
+                                    Costo BRC<br>
+
+                                    <input type="number"
+                                           name="costo_brc"
+                                           step="0.01">
+                                </p>
+
+                                <p>
+                                    Ricarico %<br>
+
+                                    <input type="number"
+                                           name="ricarico_percentuale"
+                                           step="0.01">
+                                </p>
+
+                                <button type="submit" class="btn btn-azione">
+                                    Salva servizio
+                                </button>
+
+                            </form>
+
+                        </details>
+
+                    @endif
+
+                </td>
+
+                <td>
+
+    @if($ordine->stato == 'preparazione_contratto')
+
+        In attesa contratto
+
+    @elseif($ordine->stato == 'in_lavorazione')
 
         <form id="form_riga_{{ $riga->id }}"
               method="POST"
               action="/righe-ordine/{{ $riga->id }}/aggiorna"
               enctype="multipart/form-data"
               onsubmit="return confermaAvanzamentoRiga(this)">
+
             @csrf
+
+            <label>
+                <input type="checkbox"
+                       class="chk-inviato"
+                       name="inviato"
+                       value="1"
+                       {{ $riga->inviato ? 'checked' : '' }}>
+                Inviato
+            </label>
+
+            <br>
+
+            <label>
+                <input type="checkbox"
+                       class="chk-co"
+                       name="co_ricevuta"
+                       value="1"
+                       {{ $riga->co_ricevuta ? 'checked' : '' }}>
+                Conferma ordine ricevuta
+            </label>
+
+            <br>
+
+            <label>
+                <input type="checkbox"
+                       class="chk-produzione"
+                       name="in_produzione"
+                       value="1"
+                       {{ $riga->in_produzione ? 'checked' : '' }}>
+                In produzione
+            </label>
+
+            <br><br>
+
+            @if($riga->pdf_path)
+                <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
+                    Apri PDF
+                </a>
+                <br>
+            @endif
+
+            <input type="file"
+                   name="pdf"
+                   accept="application/pdf">
+
+            <br><br>
+
+            <button type="submit" class="btn btn-azione">
+                Salva
+            </button>
+
         </form>
 
-        <tr>
-            <td>{{ $riga->descrizione }}</td>
+    @elseif($ordine->stato == 'completo_attesa_merce')
 
-            <td>
-                {{ $riga->fornitore ? $riga->fornitore->ragione_sociale : '' }}
-            </td>
+        <form id="form_riga_{{ $riga->id }}"
+              method="POST"
+              action="/righe-ordine/{{ $riga->id }}/aggiorna"
+              enctype="multipart/form-data"
+              onsubmit="return confermaAvanzamentoRiga(this)">
 
-            <td>{{ $riga->quantita }}</td>
+            @csrf
 
-            <td>
-                {{ number_format($riga->imponibile, 2, ',', '.') }} €
-            </td>
-            <td>
-    @forelse($riga->servizi as $servizio)
+            <label>
+                <input type="checkbox"
+                       class="chk-merce"
+                       name="merce_arrivata"
+                       value="1"
+                       {{ $riga->merce_arrivata ? 'checked' : '' }}>
+                Merce arrivata
+            </label>
 
-        <div style="border-bottom:1px solid #ddd; margin-bottom:6px; padding-bottom:6px;">
-            <strong>{{ $servizio->tipo_servizio }}</strong><br>
+            <br><br>
 
-            {{ $servizio->descrizione }}<br>
+            @if($riga->pdf_path)
+                <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
+                    Apri PDF
+                </a>
+                <br>
+            @endif
 
-            Prezzo:
-            {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }} €
-        </div>
+            <input type="file"
+                   name="pdf"
+                   accept="application/pdf">
 
-    @empty
-        -
-    @endforelse
+            <br><br>
+
+            <button type="submit" class="btn btn-azione">
+                Salva
+            </button>
+
+        </form>
+
+    @else
+
+        @if($riga->pdf_path)
+            <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
+                Apri PDF
+            </a>
+        @else
+            -
+        @endif
+
+    @endif
+
 </td>
 
-            <td>
-                @if($ordine->stato == 'preparazione_contratto')
-                    In attesa contratto firmato
+            </tr>
 
-                @elseif($ordine->stato == 'in_lavorazione')
-
-                    <label>
-                        <input type="checkbox"
-                               class="chk-inviato"
-                               form="form_riga_{{ $riga->id }}"
-                               name="inviato"
-                               value="1"
-                               {{ $riga->inviato ? 'checked' : '' }}>
-                        Inviato
-                    </label>
-
-                    <br>
-
-                    <label>
-                        <input type="checkbox"
-                               class="chk-co"
-                               form="form_riga_{{ $riga->id }}"
-                               name="co_ricevuta"
-                               value="1"
-                               {{ $riga->co_ricevuta ? 'checked' : '' }}>
-                        Conferma ordine ricevuta
-                    </label>
-
-                    <br>
-
-                    <label>
-                        <input type="checkbox"
-                               class="chk-produzione"
-                               form="form_riga_{{ $riga->id }}"
-                               name="in_produzione"
-                               value="1"
-                               {{ $riga->in_produzione ? 'checked' : '' }}>
-                        In produzione
-                    </label>
-
-                @elseif($ordine->stato == 'completo_attesa_merce')
-
-                    <label>
-                        <input type="checkbox"
-                               class="chk-merce"
-                               form="form_riga_{{ $riga->id }}"
-                               name="merce_arrivata"
-                               value="1"
-                               {{ $riga->merce_arrivata ? 'checked' : '' }}>
-                        Merce arrivata
-                    </label>
-
-                @else
-                    -
-                @endif
-            </td>
-
-            <td>
-                @if($riga->pdf_path)
-                    <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
-                        Apri PDF
-                    </a>
-                    <br>
-                @endif
-
-                @if($ordine->stato != 'concluso' && $ordine->stato != 'archiviato')
-                    <input type="file"
-                           form="form_riga_{{ $riga->id }}"
-                           name="pdf"
-                           accept="application/pdf">
-                @endif
-            </td>
-
-            <td>
-                @if($ordine->stato == 'in_lavorazione' || $ordine->stato == 'completo_attesa_merce')
-                    <button type="submit" form="form_riga_{{ $riga->id }}">
-                        Salva
-                    </button>
-                @else
-                    -
-                @endif
-            </td>
-        </tr>
-
-    @endforeach
-
-</table>
-
-<br>
-
-<h2>Riepilogo economico</h2>
-
-<div style="border:1px solid #ccc; padding:20px; margin-bottom:25px; background:#fff;">
-
-    <table class="tabella-dettaglio">
-
-        <tr>
-            <td><strong>Imponibile IVA 4%</strong></td>
-            <td>
-                {{ number_format($ordine->imponibile_4 ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr>
-            <td><strong>IVA 4%</strong></td>
-            <td>
-                {{ number_format($ordine->iva_4 ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr>
-            <td><strong>Imponibile IVA 10%</strong></td>
-            <td>
-                {{ number_format($ordine->imponibile_10 ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr>
-            <td><strong>IVA 10%</strong></td>
-            <td>
-                {{ number_format($ordine->iva_10 ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr>
-            <td><strong>Imponibile IVA 22%</strong></td>
-            <td>
-                {{ number_format($ordine->imponibile_22 ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr>
-            <td><strong>IVA 22%</strong></td>
-            <td>
-                {{ number_format($ordine->iva_22 ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr>
-            <td><strong>Totale IVA</strong></td>
-            <td>
-                {{ number_format($ordine->totale_iva ?? 0, 2, ',', '.') }} €
-            </td>
-        </tr>
-
-        <tr style="background:#f3f4f6;">
-            <td><strong>Totale finale ordine</strong></td>
-            <td>
-                <strong>
-                    {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
-                </strong>
-            </td>
-        </tr>
+        @endforeach
 
     </table>
-
-</div>
-
 @if(
     $ordine->stato == 'preparazione_contratto' ||
     $ordine->stato == 'attesa_saldo_merce' ||
@@ -297,52 +656,53 @@
     <br>
 
     <h2>Stato avanzato ordine</h2>
+
     <form id="form_stato_avanzato"
-      method="POST"
-      action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato"
-      onsubmit="return confermaAvanzamentoAvanzato(this)">
+          method="POST"
+          action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato"
+          onsubmit="return confermaAvanzamentoAvanzato(this)">
 
-    @csrf
+        @csrf
 
-    @if($ordine->stato == 'preparazione_contratto')
+        @if($ordine->stato == 'preparazione_contratto')
 
-    <p>
-        <label>
-            <input type="checkbox"
-                   id="rilievo_effettuato"
-                   name="rilievo_effettuato"
-                   value="1"
-                   {{ $ordine->rilievo_effettuato ? 'checked' : '' }}>
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="rilievo_effettuato"
+                           name="rilievo_effettuato"
+                           value="1"
+                           {{ $ordine->rilievo_effettuato ? 'checked' : '' }}>
 
-            Rilievo effettuato
-        </label>
-    </p>
+                    Rilievo effettuato
+                </label>
+            </p>
 
-    <p>
-        <label>
-            <input type="checkbox"
-                   id="contratto_firmato"
-                   name="contratto_firmato"
-                   value="1"
-                   {{ $ordine->contratto_firmato ? 'checked' : '' }}>
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="contratto_firmato"
+                           name="contratto_firmato"
+                           value="1"
+                           {{ $ordine->contratto_firmato ? 'checked' : '' }}>
 
-            Contratto firmato dal cliente
-        </label>
-    </p>
+                    Contratto firmato dal cliente
+                </label>
+            </p>
 
-    <p>
-        <label>
-            <input type="checkbox"
-                   id="acconto_versato"
-                   name="acconto_versato"
-                   value="1"
-                   {{ $ordine->acconto_versato ? 'checked' : '' }}>
+            <p>
+                <label>
+                    <input type="checkbox"
+                           id="acconto_versato"
+                           name="acconto_versato"
+                           value="1"
+                           {{ $ordine->acconto_versato ? 'checked' : '' }}>
 
-            Acconto versato
-        </label>
-    </p>
+                    Acconto versato
+                </label>
+            </p>
 
-@endif
+        @endif
 
         @if($ordine->stato == 'attesa_saldo_merce')
 
@@ -403,6 +763,7 @@
             </p>
 
             @if($ordine->commessa && $ordine->commessa->pratica_enea)
+
                 <p>
                     <label>
                         <input type="checkbox"
@@ -414,11 +775,12 @@
                         Invio ENEA effettuato
                     </label>
                 </p>
+
             @endif
 
         @endif
 
-        <button type="submit">
+        <button type="submit" class="btn btn-azione">
             Salva stato avanzato
         </button>
 
@@ -426,9 +788,90 @@
 
 @endif
 
-<script>
-let statoOrdine = "{{ $ordine->stato }}";
 
+</div>
+
+<script>
+
+    let statoOrdine = "{{ $ordine->stato }}";
+
+
+function caricaProdottiNuovo(){
+
+    let fornitoreId = document.getElementById('fornitore_select_nuovo').value;
+    let select = document.getElementById('prodotto_select_nuovo');
+
+    for(let i = 0; i < select.options.length; i++){
+
+        let option = select.options[i];
+
+        if(option.value === ''){
+            option.style.display = 'block';
+            continue;
+        }
+
+        if(option.dataset.fornitore === fornitoreId){
+            option.style.display = 'block';
+        } else {
+            option.style.display = 'none';
+        }
+    }
+
+    select.value = '';
+}
+
+function compilaProdottoNuovo(){
+
+    let option = document.getElementById('prodotto_select_nuovo').selectedOptions[0];
+
+    if(!option || option.value === ''){
+        return;
+    }
+
+    document.getElementById('descrizione_nuovo').value = option.dataset.descrizione;
+
+    document.getElementById('input_prezzo_nuovo').value = option.dataset.listino;
+
+    document.getElementById('s1_nuovo').value = option.dataset.s1;
+    document.getElementById('s2_nuovo').value = option.dataset.s2;
+    document.getElementById('s3_nuovo').value = option.dataset.s3;
+
+    document.getElementById('bene_nuovo').checked =
+        option.dataset.bene == 1;
+}
+
+function cambiaPrezzoNuovo(){
+
+    let radio = document.querySelector('input[name="modalita_calcolo"]:checked');
+
+    let input = document.getElementById('input_prezzo_nuovo');
+    let label = document.getElementById('label_prezzo_nuovo');
+
+    if(radio.value === 'da_listino'){
+
+        input.name = 'prezzo_listino';
+        label.innerHTML = 'Prezzo listino';
+
+    } else {
+
+        input.name = 'costo_netto';
+        label.innerHTML = 'Prezzo scontato';
+    }
+}
+
+function apriModificaRigaOrdine(id){
+    document.getElementById('edit_riga_ordine_' + id).style.display = 'table-row';
+}
+
+function apriModificaServizioOrdine(id){
+    document.getElementById('edit_servizio_ordine_' + id).style.display = 'block';
+}
+
+function confermaRitornoStato() {
+    return confirm(
+        'L ordine verrà riportato allo stato precedente. Confermi?'
+    );
+}
 function tutteSpuntate(selector) {
     let elementi = document.querySelectorAll(selector);
 
@@ -453,14 +896,9 @@ function confermaAvanzamentoRiga(form) {
         let tutteProduzione = tutteSpuntate('.chk-produzione');
 
         if (tutteInviato && tutteCo && tutteProduzione) {
-            let conferma = confirm(
+            return confirm(
                 'Tutte le righe risultano complete.\n\nL ordine verrà spostato in: Completo - attesa merce.\n\nConfermi?'
             );
-
-            if (!conferma) {
-                form.reset();
-                return false;
-            }
         }
     }
 
@@ -468,110 +906,16 @@ function confermaAvanzamentoRiga(form) {
         let tuttaMerceArrivata = tutteSpuntate('.chk-merce');
 
         if (tuttaMerceArrivata) {
-            let conferma = confirm(
+            return confirm(
                 'Tutta la merce risulta arrivata.\n\nL ordine verrà spostato in: Attesa saldo merce.\n\nConfermi?'
             );
-
-            if (!conferma) {
-                form.reset();
-                return false;
-            }
         }
     }
 
     return true;
 }
 
-function confermaAvanzamentoAvanzato(form) {
 
-    if (statoOrdine === 'preparazione_contratto') {
-    let rilievo = document.getElementById('rilievo_effettuato');
-    let contratto = document.getElementById('contratto_firmato');
-    let acconto = document.getElementById('acconto_versato');
-
-    if (
-        rilievo && contratto && acconto &&
-        rilievo.checked &&
-        contratto.checked &&
-        acconto.checked
-    ) {
-        let conferma = confirm(
-            'Rilievo effettuato, contratto firmato e acconto versato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
-        );
-
-        if (!conferma) {
-            form.reset();
-            return false;
-        }
-    }
-}
-
-    if (statoOrdine === 'attesa_saldo_merce') {
-        let saldo = document.getElementById('saldo_merce_ricevuto');
-
-        if (saldo && saldo.checked) {
-            let conferma = confirm(
-                'Il saldo merce risulta ricevuto.\n\nL ordine verrà spostato in: Programmare posa.\n\nConfermi?'
-            );
-
-            if (!conferma) {
-                form.reset();
-                return false;
-            }
-        }
-    }
-
-    if (statoOrdine === 'programmare_posa') {
-        let posa = document.getElementById('posa_effettuata');
-        let fattura = document.getElementById('fattura_saldo_posa_fatta');
-
-        if (posa && fattura && posa.checked && fattura.checked) {
-            let conferma = confirm(
-                'Posa effettuata e fattura saldo posa fatta.\n\nL ordine verrà spostato in: Concluso.\n\nConfermi?'
-            );
-
-            if (!conferma) {
-                form.reset();
-                return false;
-            }
-        }
-    }
-
-    if (statoOrdine === 'concluso') {
-        let saldoFinale = document.getElementById('saldo_finale_ricevuto');
-        let enea = document.getElementById('invio_enea_effettuato');
-
-        if (saldoFinale && saldoFinale.checked) {
-            if (enea) {
-                if (enea.checked) {
-                    let conferma = confirm(
-                        'Saldo finale ricevuto e invio ENEA effettuato.\n\nL ordine verrà spostato in: Archiviato.\n\nConfermi?'
-                    );
-
-                    if (!conferma) {
-                        form.reset();
-                        return false;
-                    }
-                }
-            } else {
-                let conferma = confirm(
-                    'Saldo finale ricevuto.\n\nL ordine verrà spostato in: Archiviato.\n\nConfermi?'
-                );
-
-                if (!conferma) {
-                    form.reset();
-                    return false;
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
-function confermaRitornoStato() {
-    return confirm(
-        'L ordine verrà riportato allo stato precedente e sarà rimossa solo la spunta che aveva causato l avanzamento.\n\nConfermi il ritorno?'
-    );
-}
 </script>
+
+

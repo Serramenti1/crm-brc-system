@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Ordine;
 use App\Models\RigaOrdine;
 use App\Models\Preventivo;
+use App\Models\Fornitore;
+use App\Models\ProdottoFornitore;
+use App\Models\Impostazione;
 
 class OrdineController extends Controller
 {
@@ -53,17 +56,28 @@ class OrdineController extends Controller
     }
 
     public function show($id)
-    {
-        $ordine = Ordine::with(
-    'commessa.cliente',
-    'commessa.tipoIntervento',
-    'preventivo',
-    'righe.fornitore',
-    'righe.servizi'
-)->findOrFail($id);
+{
+    $ordine = Ordine::with(
+        'commessa.cliente',
+        'commessa.tipoIntervento',
+        'preventivo',
+        'righe.fornitore',
+        'righe.servizi'
+    )->findOrFail($id);
 
-        return view('ordini.show', compact('ordine'));
-    }
+    $fornitori = Fornitore::all();
+
+    $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
+
+    $impostazioni = Impostazione::first();
+
+    return view('ordini.show', compact(
+        'ordine',
+        'fornitori',
+        'prodottiFornitore',
+        'impostazioni'
+    ));
+}
 
     public function creaDaPreventivo($preventivoId)
     {
@@ -136,6 +150,18 @@ class OrdineController extends Controller
     'descrizione' => $riga->descrizione,
     'quantita' => $riga->quantita,
     'imponibile' => $imponibileRiga,
+    'modalita_calcolo' => $riga->modalita_calcolo,
+'prezzo_listino' => $riga->prezzo_listino,
+'costo_netto' => $riga->costo_netto,
+'sconto_fornitore_1' => $riga->sconto_fornitore_1,
+'sconto_fornitore_2' => $riga->sconto_fornitore_2,
+'sconto_fornitore_3' => $riga->sconto_fornitore_3,
+'ricarico_percentuale' => $riga->ricarico_percentuale,
+'bene_significativo' => $riga->bene_significativo,
+'prezzo_cliente_unitario' => $riga->prezzo_cliente_unitario,
+'totale_cliente' => $riga->totale_cliente,
+'totale_costo' => $riga->totale_costo,
+'note' => $riga->note,
     'inviato' => false,
     'co_ricevuta' => false,
     'in_produzione' => false,

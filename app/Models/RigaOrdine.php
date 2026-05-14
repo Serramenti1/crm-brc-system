@@ -20,6 +20,18 @@ class RigaOrdine extends Model
         'in_produzione',
         'merce_arrivata',
         'pdf_path',
+        'modalita_calcolo',
+        'prezzo_listino',
+        'costo_netto',
+        'sconto_fornitore_1',
+        'sconto_fornitore_2',
+        'sconto_fornitore_3',
+        'ricarico_percentuale',
+        'bene_significativo',
+        'prezzo_cliente_unitario',
+        'totale_cliente',
+        'totale_costo',
+        'note',
     ];
 
     public function ordine()
