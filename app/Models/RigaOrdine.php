@@ -27,6 +27,11 @@ class RigaOrdine extends Model
         return $this->belongsTo(Ordine::class);
     }
 
+    public function servizi()
+{
+    return $this->hasMany(RigaOrdineServizio::class, 'riga_ordine_id');
+}
+
     public function fornitore()
     {
         return $this->belongsTo(Fornitore::class);

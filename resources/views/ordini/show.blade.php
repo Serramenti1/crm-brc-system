@@ -80,14 +80,15 @@
 <table border="1" cellpadding="5" width="100%">
 
     <tr>
-        <th>Prodotto</th>
-        <th>Fornitore</th>
-        <th>Quantità</th>
-        <th>Imponibile</th>
-        <th>Stati</th>
-        <th>PDF</th>
-        <th>Azioni</th>
-    </tr>
+    <th>Prodotto</th>
+    <th>Fornitore</th>
+    <th>Quantità</th>
+    <th>Imponibile</th>
+    <th>Servizi</th>
+    <th>Stati</th>
+    <th>PDF</th>
+    <th>Azioni</th>
+</tr>
 
     @foreach($ordine->righe as $riga)
 
@@ -111,6 +112,22 @@
             <td>
                 {{ number_format($riga->imponibile, 2, ',', '.') }} €
             </td>
+            <td>
+    @forelse($riga->servizi as $servizio)
+
+        <div style="border-bottom:1px solid #ddd; margin-bottom:6px; padding-bottom:6px;">
+            <strong>{{ $servizio->tipo_servizio }}</strong><br>
+
+            {{ $servizio->descrizione }}<br>
+
+            Prezzo:
+            {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }} €
+        </div>
+
+    @empty
+        -
+    @endforelse
+</td>
 
             <td>
                 @if($ordine->stato == 'preparazione_contratto')
@@ -280,29 +297,52 @@
     <br>
 
     <h2>Stato avanzato ordine</h2>
-
     <form id="form_stato_avanzato"
-          method="POST"
-          action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato"
-          onsubmit="return confermaAvanzamentoAvanzato(this)">
+      method="POST"
+      action="/ordini/{{ $ordine->id }}/aggiorna-stato-avanzato"
+      onsubmit="return confermaAvanzamentoAvanzato(this)">
 
-        @csrf
+    @csrf
 
-        @if($ordine->stato == 'preparazione_contratto')
+    @if($ordine->stato == 'preparazione_contratto')
 
-            <p>
-                <label>
-                    <input type="checkbox"
-                           id="contratto_firmato"
-                           name="contratto_firmato"
-                           value="1"
-                           {{ $ordine->contratto_firmato ? 'checked' : '' }}>
+    <p>
+        <label>
+            <input type="checkbox"
+                   id="rilievo_effettuato"
+                   name="rilievo_effettuato"
+                   value="1"
+                   {{ $ordine->rilievo_effettuato ? 'checked' : '' }}>
 
-                    Contratto firmato dal cliente
-                </label>
-            </p>
+            Rilievo effettuato
+        </label>
+    </p>
 
-        @endif
+    <p>
+        <label>
+            <input type="checkbox"
+                   id="contratto_firmato"
+                   name="contratto_firmato"
+                   value="1"
+                   {{ $ordine->contratto_firmato ? 'checked' : '' }}>
+
+            Contratto firmato dal cliente
+        </label>
+    </p>
+
+    <p>
+        <label>
+            <input type="checkbox"
+                   id="acconto_versato"
+                   name="acconto_versato"
+                   value="1"
+                   {{ $ordine->acconto_versato ? 'checked' : '' }}>
+
+            Acconto versato
+        </label>
+    </p>
+
+@endif
 
         @if($ordine->stato == 'attesa_saldo_merce')
 
@@ -445,19 +485,26 @@ function confermaAvanzamentoRiga(form) {
 function confermaAvanzamentoAvanzato(form) {
 
     if (statoOrdine === 'preparazione_contratto') {
-        let contratto = document.getElementById('contratto_firmato');
+    let rilievo = document.getElementById('rilievo_effettuato');
+    let contratto = document.getElementById('contratto_firmato');
+    let acconto = document.getElementById('acconto_versato');
 
-        if (contratto && contratto.checked) {
-            let conferma = confirm(
-                'Contratto firmato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
-            );
+    if (
+        rilievo && contratto && acconto &&
+        rilievo.checked &&
+        contratto.checked &&
+        acconto.checked
+    ) {
+        let conferma = confirm(
+            'Rilievo effettuato, contratto firmato e acconto versato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
+        );
 
-            if (!conferma) {
-                form.reset();
-                return false;
-            }
+        if (!conferma) {
+            form.reset();
+            return false;
         }
     }
+}
 
     if (statoOrdine === 'attesa_saldo_merce') {
         let saldo = document.getElementById('saldo_merce_ricevuto');

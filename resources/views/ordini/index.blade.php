@@ -2,111 +2,157 @@
 
 @php
     $titoliStato = [
+        'preparazione_contratto' => 'Preparazione contratto',
         'in_lavorazione' => 'Ordini in lavorazione',
         'completo_attesa_merce' => 'Ordini in attesa merce',
         'attesa_saldo_merce' => 'Ordini in attesa saldo merce',
         'programmare_posa' => 'Ordini da programmare posa',
         'concluso' => 'Ordini conclusi',
+        'archiviato' => 'Ordini archiviati',
     ];
 
-    $statoCorrente = $stato ?? 'in_lavorazione';
+    $statoCorrente = $stato ?? 'preparazione_contratto';
 @endphp
 
-<h1>{{ $titoliStato[$statoCorrente] ?? 'Lista Ordini' }}</h1>
+<div class="container">
 
-@if(session('success'))
-    <p style="color:green;">{{ session('success') }}</p>
-@endif
+    <h1>{{ $titoliStato[$statoCorrente] ?? 'Lista Ordini' }}</h1>
 
-@if(session('error'))
-    <p style="color:red;">{{ session('error') }}</p>
-@endif
+    @if(session('success'))
+        <p style="color:green;">{{ session('success') }}</p>
+    @endif
 
-<table border="1" cellpadding="5" width="100%">
-    <tr>
-        <th>Cliente</th>
-        <th>Commessa</th>
-        <th>Costo a noi</th>
-        <th>Stato</th>
-        <th>Stati righe</th>
-        <th>Azioni</th>
-    </tr>
+    @if(session('error'))
+        <p style="color:red;">{{ session('error') }}</p>
+    @endif
 
-    @forelse($ordini as $ordine)
+    <table class="tabella-lista">
+
         <tr>
-            <td>
-                {{ optional(optional($ordine->commessa)->cliente)->nome }}
-                {{ optional(optional($ordine->commessa)->cliente)->cognome }}
-            </td>
+            <th>Numero</th>
+            <th>Cliente</th>
+            <th>Commessa</th>
+            <th>Tipo intervento</th>
+            <th>Totale Cliente Ivato</th>
+            <th>Stato</th>
+            <th>Azioni</th>
+        </tr>
 
-            <td>
-                {{ optional($ordine->commessa)->titolo }}
-                <br>
-                {{ optional($ordine->commessa)->indirizzo_lavoro }}
-            </td>
+        @forelse($ordini as $ordine)
 
-            <td>
-                {{ number_format($ordine->imponibile, 2, ',', '.') }} €
-            </td>
+            <tr>
 
-            <td>
-                @if($ordine->stato == 'in_lavorazione')
-                    In lavorazione
-                @elseif($ordine->stato == 'completo_attesa_merce')
-                    Attesa merce
-                @elseif($ordine->stato == 'attesa_saldo_merce')
-                    Attesa saldo merce
-                @elseif($ordine->stato == 'programmare_posa')
-                    Programmare posa
-                @elseif($ordine->stato == 'concluso')
-                    Concluso
-                @else
-                    {{ $ordine->stato }}
-                @endif
-            </td>
+                <td>
+                    <strong>{{ $ordine->numero }}</strong>
+                </td>
 
-            <td>
-                @foreach($ordine->righe as $riga)
-                    <div style="margin-bottom:8px; border-bottom:1px solid #ddd; padding-bottom:5px;">
-                        <strong>{{ $riga->descrizione }}</strong><br>
+                <td>
+                    {{ $ordine->commessa && $ordine->commessa->cliente
+                        ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
+                        : '' }}
+                </td>
 
-                        @if($ordine->stato == 'in_lavorazione')
-                            Inviato:
-                            {{ $riga->inviato ? 'Sì' : 'No' }}
+                <td>
+                    @if($ordine->commessa)
+
+                        {{ $ordine->commessa->titolo }}
+
+                        <br>
+
+                        <small>
+                            {{ $ordine->commessa->indirizzo_lavoro }}
+
+                            @if($ordine->commessa->citta_lavoro)
+                                - {{ $ordine->commessa->citta_lavoro }}
+                            @endif
+                        </small>
+
+                    @endif
+                </td>
+
+                <td>
+                    {{ $ordine->commessa?->tipoIntervento?->nome }}
+                </td>
+
+                <td>
+                    {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
+                </td>
+
+                <td>
+                    @if($ordine->stato == 'preparazione_contratto')
+                        Preparazione contratto
+                    @elseif($ordine->stato == 'in_lavorazione')
+                        In lavorazione
+                    @elseif($ordine->stato == 'completo_attesa_merce')
+                        Attesa merce
+                    @elseif($ordine->stato == 'attesa_saldo_merce')
+                        Attesa saldo merce
+                    @elseif($ordine->stato == 'programmare_posa')
+                        Programmare posa
+                    @elseif($ordine->stato == 'concluso')
+                        Concluso
+                    @elseif($ordine->stato == 'archiviato')
+                        Archiviato
+                    @else
+                        {{ $ordine->stato }}
+                    @endif
+
+                    @if($ordine->stato == 'preparazione_contratto')
+                        <br>
+                        <small>
+                            Rilievo:
+                            {{ $ordine->rilievo_effettuato ? 'Sì' : 'No' }}
                             |
-                            CO:
-                            {{ $riga->co_ricevuta ? 'Sì' : 'No' }}
+                            Contratto:
+                            {{ $ordine->contratto_firmato ? 'Sì' : 'No' }}
                             |
-                            Produzione:
-                            {{ $riga->in_produzione ? 'Sì' : 'No' }}
+                            Acconto:
+                            {{ $ordine->acconto_versato ? 'Sì' : 'No' }}
+                        </small>
+                    @endif
+                </td>
 
-                        @elseif($ordine->stato == 'completo_attesa_merce')
-                            Merce arrivata:
-                            {{ $riga->merce_arrivata ? 'Sì' : 'No' }}
+                <td class="azioni">
 
-                        @else
-                            -
-                        @endif
+                    <div class="azioni-bottoni">
+
+                        <a href="/ordini/{{ $ordine->id }}" class="btn btn-azione">
+                            Apri
+                        </a>
+
+                        <form
+                            action="/ordini/{{ $ordine->id }}"
+                            method="POST"
+                            class="form-elimina"
+                        >
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="btn btn-elimina"
+                                onclick="return confirm('Eliminare questo ordine?')"
+                            >
+                                🗑️
+                            </button>
+                        </form>
+
                     </div>
-                @endforeach
-            </td>
 
-            <td>
-                <a href="/ordini/{{ $ordine->id }}">Apri</a>
+                </td>
 
-                <form action="/ordini/{{ $ordine->id }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
+            </tr>
 
-                    <button type="submit" onclick="return confirm('Eliminare questo ordine?')">
-                        Elimina
-                    </button>
-                </form>
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="6">Nessun ordine in questa sezione.</td>
-        </tr>
-    @endforelse
-</table>
+        @empty
+
+            <tr>
+                <td colspan="7">
+                    Nessun ordine in questa sezione.
+                </td>
+            </tr>
+
+        @endforelse
+
+    </table>
+
+</div>

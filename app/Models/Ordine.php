@@ -18,7 +18,9 @@ class Ordine extends Model
         'totale_con_iva',
         'stato',
 
+        'rilievo_effettuato',
         'contratto_firmato',
+        'acconto_versato',
 
         'saldo_merce_ricevuto',
         'posa_effettuata',

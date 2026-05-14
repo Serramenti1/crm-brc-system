@@ -10,11 +10,17 @@
 
 <div class="container">
 
-    <div style="margin-bottom:15px;">
-        <a href="/preventivi" class="btn btn-azione">
-            ← Torna ai preventivi
-        </a>
-    </div>
+    <div style="margin-bottom:15px; display:flex; gap:10px;">
+
+    <a href="/preventivi" class="btn btn-azione">
+        ← Torna ai preventivi
+    </a>
+
+    <a href="/preventivi/{{ $preventivo->id }}/visualizza" class="btn btn-azione">
+        Visualizza
+    </a>
+
+</div>
 
     <h2>Prodotti</h2>
 
