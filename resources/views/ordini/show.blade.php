@@ -18,6 +18,11 @@
         <a href="/ordini/stato/{{ $ordine->stato }}" class="btn btn-azione">
             ← Torna alla lista ordini
         </a>
+
+        <a href="/ordini/{{ $ordine->id }}/visualizza" class="btn btn-azione">
+            Visualizza
+        </a>
+
     </div>
 
     <h1>Ordine {{ $ordine->numero }}</h1>
@@ -642,7 +647,144 @@
 </td>
 
             </tr>
+            
+@if($ordine->stato == 'preparazione_contratto')
 
+    <tr id="edit_riga_ordine_{{ $riga->id }}" style="display:none;">
+
+        <td colspan="5">
+
+            <div style="border:1px solid #ccc; padding:15px; background:#fff;">
+
+                <h3>Modifica prodotto</h3>
+
+                <form method="POST" action="/righe-ordine-prodotto/{{ $riga->id }}">
+
+                    @csrf
+                    @method('PUT')
+
+                    <p>
+                        Quantità<br>
+                        <input type="number"
+                               name="quantita"
+                               value="{{ $riga->quantita }}"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Tipo prezzo<br>
+
+                        <div style="display:flex; gap:25px; align-items:center;">
+
+                            <label style="display:flex; align-items:center; gap:8px; width:auto;">
+
+                                <input type="radio"
+                                       name="modalita_calcolo_{{ $riga->id }}"
+                                       value="da_listino"
+                                       {{ $riga->modalita_calcolo == 'da_listino' ? 'checked' : '' }}
+                                       onclick="cambiaPrezzoOrdine({{ $riga->id }})">
+
+                                Listino
+
+                            </label>
+
+                            <label style="display:flex; align-items:center; gap:8px; width:auto;">
+
+                                <input type="radio"
+                                       name="modalita_calcolo_{{ $riga->id }}"
+                                       value="da_costo_netto"
+                                       {{ $riga->modalita_calcolo == 'da_costo_netto' ? 'checked' : '' }}
+                                       onclick="cambiaPrezzoOrdine({{ $riga->id }})">
+
+                                Scontato
+
+                            </label>
+
+                        </div>
+                    </p>
+
+                    <input type="hidden"
+                           id="modalita_calcolo_hidden_{{ $riga->id }}"
+                           name="modalita_calcolo"
+                           value="{{ $riga->modalita_calcolo }}">
+
+                    <p id="label_prezzo_ordine_{{ $riga->id }}">
+                        Prezzo
+                    </p>
+
+                    <input type="number"
+                           id="input_prezzo_ordine_{{ $riga->id }}"
+                           step="0.01"
+                           data-listino="{{ $riga->prezzo_listino }}"
+                           data-costo="{{ $riga->costo_netto }}">
+
+                    <p>
+                        Sconto 1 %<br>
+                        <input type="number"
+                               name="sconto_fornitore_1"
+                               value="{{ $riga->sconto_fornitore_1 }}"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Sconto 2 %<br>
+                        <input type="number"
+                               name="sconto_fornitore_2"
+                               value="{{ $riga->sconto_fornitore_2 }}"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Sconto 3 %<br>
+                        <input type="number"
+                               name="sconto_fornitore_3"
+                               value="{{ $riga->sconto_fornitore_3 }}"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        Ricarico %<br>
+                        <input type="number"
+                               name="ricarico_percentuale"
+                               value="{{ $riga->ricarico_percentuale }}"
+                               step="0.01">
+                    </p>
+
+                    <p>
+                        <label>
+                            <input type="checkbox"
+                                   name="bene_significativo"
+                                   value="1"
+                                   {{ $riga->bene_significativo ? 'checked' : '' }}>
+
+                            Bene significativo
+                        </label>
+                    </p>
+
+                    <p>
+                        Note<br>
+                        <textarea name="note">{{ $riga->note }}</textarea>
+                    </p>
+
+                    <button type="submit" class="btn btn-azione">
+                        Salva prodotto
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-azione"
+                            onclick="chiudiModificaRigaOrdine({{ $riga->id }})">
+                        Annulla
+                    </button>
+
+                </form>
+
+            </div>
+
+        </td>
+
+    </tr>
+
+@endif
         @endforeach
 
     </table>
@@ -861,8 +1003,36 @@ function cambiaPrezzoNuovo(){
 
 function apriModificaRigaOrdine(id){
     document.getElementById('edit_riga_ordine_' + id).style.display = 'table-row';
+    cambiaPrezzoOrdine(id);
 }
 
+function chiudiModificaRigaOrdine(id){
+    document.getElementById('edit_riga_ordine_' + id).style.display = 'none';
+}
+
+function cambiaPrezzoOrdine(id){
+
+    let radioSelezionato = document.querySelector('input[name="modalita_calcolo_' + id + '"]:checked');
+
+    let input = document.getElementById('input_prezzo_ordine_' + id);
+    let label = document.getElementById('label_prezzo_ordine_' + id);
+    let hidden = document.getElementById('modalita_calcolo_hidden_' + id);
+
+    if(radioSelezionato.value === 'da_listino'){
+
+        input.name = 'prezzo_listino';
+        input.value = input.dataset.listino;
+        label.innerHTML = 'Prezzo listino';
+        hidden.value = 'da_listino';
+
+    } else {
+
+        input.name = 'costo_netto';
+        input.value = input.dataset.costo;
+        label.innerHTML = 'Prezzo scontato';
+        hidden.value = 'da_costo_netto';
+    }
+}
 function apriModificaServizioOrdine(id){
     document.getElementById('edit_servizio_ordine_' + id).style.display = 'block';
 }
@@ -908,6 +1078,30 @@ function confermaAvanzamentoRiga(form) {
         if (tuttaMerceArrivata) {
             return confirm(
                 'Tutta la merce risulta arrivata.\n\nL ordine verrà spostato in: Attesa saldo merce.\n\nConfermi?'
+            );
+        }
+    }
+
+    return true;
+}
+function confermaAvanzamentoAvanzato(form) {
+
+    if (statoOrdine === 'preparazione_contratto') {
+
+        let rilievo = document.getElementById('rilievo_effettuato');
+        let contratto = document.getElementById('contratto_firmato');
+        let acconto = document.getElementById('acconto_versato');
+
+        if (
+            rilievo &&
+            contratto &&
+            acconto &&
+            rilievo.checked &&
+            contratto.checked &&
+            acconto.checked
+        ) {
+            return confirm(
+                'Rilievo effettuato, contratto firmato e acconto versato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
             );
         }
     }

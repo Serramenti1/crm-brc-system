@@ -555,4 +555,17 @@ foreach ($riga->servizi as $servizio) {
         return redirect('/ordini/stato/preparazione_contratto')
             ->with('success', 'Ordine eliminato correttamente.');
     }
+    
+    public function visualizza($id)
+{
+    $ordine = Ordine::with(
+        'commessa.cliente',
+        'commessa.tipoIntervento',
+        'preventivo',
+        'righe.fornitore',
+        'righe.servizi'
+    )->findOrFail($id);
+
+    return view('ordini.visualizza', compact('ordine'));
+}
 }

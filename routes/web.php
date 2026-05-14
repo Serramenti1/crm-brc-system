@@ -36,6 +36,7 @@ Route::resource('fornitori', FornitoreController::class);
 Route::get('/ordini', [OrdineController::class, 'index']);
 Route::get('/ordini-completi', [OrdineController::class, 'completi']);
 Route::get('/ordini/stato/{stato}', [OrdineController::class, 'perStato'])->name('ordini.perStato');
+Route::get('/ordini/{id}/visualizza', [OrdineController::class, 'visualizza']);
 Route::get('/ordini/{id}', [OrdineController::class, 'show']);
 Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);
 
