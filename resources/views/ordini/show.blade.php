@@ -374,157 +374,197 @@
 
                     @foreach($riga->servizi as $servizio)
 
-                        <div style="border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px;">
+                        <div style="border-bottom:1px solid #ccc; margin-bottom:10px; padding-bottom:10px;">
 
-                            <strong>{{ $servizio->tipo_servizio }}</strong><br>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px;">
 
-                            {{ $servizio->descrizione }}<br>
+        <div>
+            <strong>{{ $servizio->tipo_servizio }}</strong>
+            -
+            € {{ number_format($servizio->prezzo_cliente, 2, ',', '.') }}
+            ( x {{ $riga->quantita }} )
+            =
+            € {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }}
+        </div>
 
-                            Prezzo:
-                            {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }} €
+        @if($ordine->stato == 'preparazione_contratto')
 
-                            @if($ordine->stato == 'preparazione_contratto')
+            <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
 
-                                <div style="margin-top:10px;">
+                <form method="POST"
+                      action="/servizi-riga-ordine/{{ $servizio->id }}"
+                      class="form-elimina">
 
-                                    <button type="button"
-                                            class="btn btn-azione"
-                                            onclick="apriModificaServizioOrdine({{ $servizio->id }})">
-                                        Modifica
-                                    </button>
+                    @csrf
+                    @method('DELETE')
 
-                                    <form method="POST"
-                                          action="/servizi-riga-ordine/{{ $servizio->id }}"
-                                          style="display:inline;">
+                    <button type="submit"
+                            class="btn btn-elimina"
+                            onclick="return confirm('Eliminare servizio?')">
+                        🗑️
+                    </button>
 
-                                        @csrf
-                                        @method('DELETE')
+                </form>
 
-                                        <button type="submit"
-                                                class="btn btn-elimina"
-                                                onclick="return confirm('Eliminare servizio?')">
-                                            🗑️
-                                        </button>
+                <button type="button"
+                        class="btn btn-azione"
+                        onclick="apriModificaServizioOrdine({{ $servizio->id }})">
+                    Modifica
+                </button>
 
-                                    </form>
+            </div>
 
-                                </div>
+        @endif
 
-                                <div id="edit_servizio_ordine_{{ $servizio->id }}"
-                                     style="display:none; margin-top:15px; border:1px solid #ccc; padding:15px;">
+    </div>
 
-                                    <form method="POST"
-                                          action="/servizi-riga-ordine/{{ $servizio->id }}">
+    @if($ordine->stato == 'preparazione_contratto')
 
-                                        @csrf
-                                        @method('PUT')
+        <div id="edit_servizio_ordine_{{ $servizio->id }}"
+             style="display:none; margin-top:15px; border:1px solid #ccc; padding:15px;">
 
-                                        <p>
-                                            Tipo servizio<br>
+            <form method="POST"
+                  action="/servizi-riga-ordine/{{ $servizio->id }}">
 
-                                            <input type="text"
-                                                   name="tipo_servizio"
-                                                   value="{{ $servizio->tipo_servizio }}">
-                                        </p>
+                @csrf
+                @method('PUT')
 
-                                        <p>
-                                            Descrizione<br>
+                <p>
+                    Tipo servizio<br>
+                    <input type="text"
+                           name="tipo_servizio"
+                           value="{{ $servizio->tipo_servizio }}">
+                </p>
 
-                                            <input type="text"
-                                                   name="descrizione"
-                                                   value="{{ $servizio->descrizione }}">
-                                        </p>
+                <p>
+                    Descrizione<br>
+                    <input type="text"
+                           name="descrizione"
+                           value="{{ $servizio->descrizione }}">
+                </p>
 
-                                        <p>
-                                            Costo BRC<br>
+                <p>
+                    Costo BRC<br>
+                    <input type="number"
+                           name="costo_brc"
+                           value="{{ $servizio->costo_brc }}"
+                           step="0.01">
+                </p>
 
-                                            <input type="number"
-                                                   name="costo_brc"
-                                                   value="{{ $servizio->costo_brc }}"
-                                                   step="0.01">
-                                        </p>
+                <p>
+                    Ricarico %<br>
+                    <input type="number"
+                           name="ricarico_percentuale"
+                           value="{{ $servizio->ricarico_percentuale }}"
+                           step="0.01">
+                </p>
 
-                                        <p>
-                                            Ricarico %<br>
+                <button type="submit" class="btn btn-azione">
+                    Salva servizio
+                </button>
 
-                                            <input type="number"
-                                                   name="ricarico_percentuale"
-                                                   value="{{ $servizio->ricarico_percentuale }}"
-                                                   step="0.01">
-                                        </p>
+            </form>
 
-                                        <button type="submit" class="btn btn-azione">
-                                            Salva servizio
-                                        </button>
+        </div>
 
-                                    </form>
+    @endif
 
-                                </div>
+</div>
+          @endforeach
+                 @endforeach
 
-                            @endif
+@if($ordine->stato == 'preparazione_contratto')
 
-                        </div>
+    <details>
+
+        <summary>
+            <strong>+ Servizio</strong>
+        </summary>
+
+        <form method="POST"
+              action="/righe-ordine/{{ $riga->id }}/servizi"
+              style="margin-top:15px;">
+
+            @csrf
+
+            <p>
+                Servizio da impostazioni<br>
+
+                <select id="servizio_extra_ordine_{{ $riga->id }}"
+                        onchange="compilaServizioExtraOrdine({{ $riga->id }})">
+
+                    <option value="">
+                        -- Seleziona servizio extra --
+                    </option>
+
+                    @foreach($serviziExtra as $servizioExtra)
+
+                        <option
+                            value="{{ $servizioExtra->id }}"
+                            data-nome="{{ $servizioExtra->nome }}"
+                            data-costo="{{ $servizioExtra->costo_brc }}"
+                            data-ricarico="{{ $servizioExtra->ricarico_percentuale }}">
+
+                            {{ $servizioExtra->nome }}
+                            -
+                            costo {{ number_format($servizioExtra->costo_brc,2,',','.') }} €
+                            -
+                            ricarico {{ number_format($servizioExtra->ricarico_percentuale,2,',','.') }}%
+
+                        </option>
 
                     @endforeach
 
-                    @if($ordine->stato == 'preparazione_contratto')
+                </select>
+            </p>
 
-                        <details>
+            <p>
+                Tipo servizio<br>
+                <input type="text"
+                       name="tipo_servizio"
+                       id="tipo_servizio_ordine_{{ $riga->id }}"
+                       required>
+            </p>
 
-                            <summary>
-                                <strong>+ Servizio</strong>
-                            </summary>
+            <p>
+                Descrizione<br>
+                <input type="text"
+                       name="descrizione"
+                       id="descrizione_servizio_ordine_{{ $riga->id }}">
+            </p>
 
-                            <form method="POST"
-                                  action="/righe-ordine/{{ $riga->id }}/servizi"
-                                  style="margin-top:15px;">
+            <p>
+                Costo BRC<br>
+                <input type="number"
+                       name="costo_brc"
+                       id="costo_brc_ordine_{{ $riga->id }}"
+                       step="0.01">
+            </p>
 
-                                @csrf
+            <p>
+                Ricarico %<br>
+                <input type="number"
+                       name="ricarico_percentuale"
+                       id="ricarico_servizio_ordine_{{ $riga->id }}"
+                       step="0.01">
+            </p>
 
-                                <p>
-                                    Tipo servizio<br>
+            <button type="submit" class="btn btn-azione">
+                Salva servizio
+            </button>
 
-                                    <input type="text"
-                                           name="tipo_servizio"
-                                           required>
-                                </p>
+        </form>
 
-                                <p>
-                                    Descrizione<br>
+    </details>
 
-                                    <input type="text"
-                                           name="descrizione">
-                                </p>
+@endif
 
-                                <p>
-                                    Costo BRC<br>
+</td>
 
-                                    <input type="number"
-                                           name="costo_brc"
-                                           step="0.01">
-                                </p>
 
-                                <p>
-                                    Ricarico %<br>
+                
 
-                                    <input type="number"
-                                           name="ricarico_percentuale"
-                                           step="0.01">
-                                </p>
-
-                                <button type="submit" class="btn btn-azione">
-                                    Salva servizio
-                                </button>
-
-                            </form>
-
-                        </details>
-
-                    @endif
-
-                </td>
-
-                <td>
+ <td>
 
     @if($ordine->stato == 'preparazione_contratto')
 
@@ -785,7 +825,7 @@
     </tr>
 
 @endif
-        @endforeach
+       
 
     </table>
 @if(
@@ -1107,6 +1147,28 @@ function confermaAvanzamentoAvanzato(form) {
     }
 
     return true;
+}
+
+function compilaServizioExtraOrdine(rigaId){
+
+    let select = document.getElementById('servizio_extra_ordine_' + rigaId);
+    let option = select.options[select.selectedIndex];
+
+    if(option.value === ''){
+        return;
+    }
+
+    document.getElementById('tipo_servizio_ordine_' + rigaId).value =
+        option.dataset.nome;
+
+    document.getElementById('descrizione_servizio_ordine_' + rigaId).value =
+        option.dataset.nome;
+
+    document.getElementById('costo_brc_ordine_' + rigaId).value =
+        option.dataset.costo;
+
+    document.getElementById('ricarico_servizio_ordine_' + rigaId).value =
+        option.dataset.ricarico;
 }
 
 

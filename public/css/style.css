@@ -435,3 +435,50 @@ label input[type="checkbox"] {
 .pagination li::marker {
     content: "";
 }
+/* BOTTONI SERVIZI ORDINE */
+.bottoni-servizio-ordine {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    margin-top: 10px !important;
+}
+
+.bottoni-servizio-ordine form {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.bottoni-servizio-ordine button,
+.bottoni-servizio-ordine .btn {
+    width: auto !important;
+    margin: 0 !important;
+}
+/* BOTTONI MODIFICA / ELIMINA SERVIZI ORDINE */
+.tabella-lista .bottoni-servizio-ordine {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: fit-content !important;
+}
+
+.tabella-lista .bottoni-servizio-ordine .form-bottone-servizio {
+    display: flex !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.tabella-lista .bottoni-servizio-ordine .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    margin: 0 !important;
+}

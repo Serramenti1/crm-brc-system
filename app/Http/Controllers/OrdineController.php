@@ -11,6 +11,7 @@ use App\Models\Preventivo;
 use App\Models\Fornitore;
 use App\Models\ProdottoFornitore;
 use App\Models\Impostazione;
+use App\Models\ServizioExtra;
 
 class OrdineController extends Controller
 {
@@ -65,17 +66,24 @@ class OrdineController extends Controller
         'righe.servizi'
     )->findOrFail($id);
 
-    $fornitori = Fornitore::all();
+    $fornitori = \App\Models\Fornitore::orderBy('ragione_sociale')->get();
 
-    $prodottiFornitore = ProdottoFornitore::with('fornitore')->get();
+    $prodottiFornitore = \App\Models\ProdottoFornitore::with('fornitore')
+        ->orderBy('descrizione')
+        ->get();
 
-    $impostazioni = Impostazione::first();
+    $impostazioni = \App\Models\Impostazione::first();
+
+    $serviziExtra = ServizioExtra::where('attivo', 1)
+        ->orderBy('nome')
+        ->get();
 
     return view('ordini.show', compact(
         'ordine',
         'fornitori',
         'prodottiFornitore',
-        'impostazioni'
+        'impostazioni',
+        'serviziExtra'
     ));
 }
 

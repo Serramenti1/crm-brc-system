@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ time() }}">
+<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=999">
 
 <div class="topbar">
     CRM BRC SYSTEM
