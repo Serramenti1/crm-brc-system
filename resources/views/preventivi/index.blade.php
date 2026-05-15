@@ -82,7 +82,7 @@
                     <div class="azioni-bottoni">
 
                         <a href="/preventivi/{{ $preventivo->id }}" class="btn btn-azione">
-                            Modifica
+                            Apri
                         </a>
 
                         <a href="/preventivi/{{ $preventivo->id }}/visualizza" class="btn btn-azione">

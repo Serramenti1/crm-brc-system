@@ -837,7 +837,7 @@
 
     <br>
 
-    <h2>Stato avanzato ordine</h2>
+    <h2>Stato avanzamento ordine</h2>
 
     <form id="form_stato_avanzato"
           method="POST"

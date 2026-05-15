@@ -98,18 +98,29 @@
                     @endif
 
                     @if($ordine->stato == 'preparazione_contratto')
-                        <br>
-                        <small>
-                            Rilievo:
-                            {{ $ordine->rilievo_effettuato ? 'Sì' : 'No' }}
-                            |
-                            Contratto:
-                            {{ $ordine->contratto_firmato ? 'Sì' : 'No' }}
-                            |
-                            Acconto:
-                            {{ $ordine->acconto_versato ? 'Sì' : 'No' }}
-                        </small>
-                    @endif
+
+    <br>
+
+    <div style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
+
+        <small style="color:{{ $ordine->rilievo_effettuato ? 'green' : 'red' }}; font-weight:bold;">
+            RILIEVO EFFETTUATO:
+            {{ $ordine->rilievo_effettuato ? 'Sì' : 'No' }}
+        </small>
+
+        <small style="color:{{ $ordine->contratto_firmato ? 'green' : 'red' }}; font-weight:bold;">
+            CONTRATTO FIRMATO :
+            {{ $ordine->contratto_firmato ? 'Sì' : 'No' }}
+        </small>
+
+        <small style="color:{{ $ordine->acconto_versato ? 'green' : 'red' }}; font-weight:bold;">
+            ACCONTO VERSATO:
+            {{ $ordine->acconto_versato ? 'Sì' : 'No' }}
+        </small>
+
+    </div>
+
+@endif
                 </td>
 
                 <td class="azioni">
@@ -118,6 +129,10 @@
 
                         <a href="/ordini/{{ $ordine->id }}" class="btn btn-azione">
                             Apri
+                        </a>
+                        <a href="/ordini/{{ $ordine->id }}/visualizza"
+                           class="btn btn-azione">
+                           Visualizza
                         </a>
 
                         <form
