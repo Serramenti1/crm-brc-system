@@ -73,7 +73,7 @@
             (isset($ordine) && $ordine->stato == 'attesa_saldo_merce')
             ? 'active' : ''
        }}">
-        Attesa saldo
+        Saldo a merce pronta
 
         @if(($conteggiOrdini['attesa_saldo_merce'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">

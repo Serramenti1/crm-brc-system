@@ -65,23 +65,29 @@
                     <input type="text" name="cap_lavoro" value="{{ old('cap_lavoro', $commessa->cap_lavoro) }}">
                 </div>
 
-                <div class="form-field">
+               <div class="form-field">
     <label>Piano di posa</label><br>
 
     <input type="number"
            id="piano_posa"
            name="piano_posa"
-           min="0">
+           min="0"
+           value="{{ old('piano_posa', $commessa->piano_posa) }}">
 </div>
 
+<div class="form-field form-checkbox">
 <div class="form-field form-checkbox">
 
     <input type="checkbox"
            id="autoscala"
            name="autoscala"
-           value="1">
+           value="1"
+           {{ old('autoscala', $commessa->autoscala) ? 'checked' : '' }}>
 
     <label>Serve autoscala</label>
+
+</div>
+    
 
 </div>
             </div>

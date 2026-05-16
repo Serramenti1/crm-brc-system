@@ -33,7 +33,11 @@
             <th>Cliente</th>
             <th>Commessa</th>
             <th>Tipo intervento</th>
+             @if($statoCorrente == 'programmare_posa')
+            <th>Autoscala</th>
+             @else
             <th>Totale Cliente Ivato</th>
+             @endif
             <th>Stato</th>
             <th>Azioni</th>
         </tr>
@@ -74,9 +78,31 @@
                     {{ $ordine->commessa?->tipoIntervento?->nome }}
                 </td>
 
-                <td>
-                    {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
-                </td>
+                @if($statoCorrente == 'programmare_posa')
+
+    <td>
+        @if($ordine->commessa && $ordine->commessa->autoscala)
+
+    <span style="color:red; font-weight:bold;">
+        SI
+    </span>
+
+@else
+
+    <span style="color:green; font-weight:bold;">
+        NO
+    </span>
+
+@endif
+    </td>
+
+@else
+
+    <td>
+        {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
+    </td>
+
+@endif
 
                 <td>
                     @if($ordine->stato == 'preparazione_contratto')

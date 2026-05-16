@@ -292,15 +292,14 @@ foreach ($riga->servizi as $servizio) {
         }
 
         if ($ordine->stato == 'programmare_posa') {
-            $primaFattura = $ordine->fattura_saldo_posa_fatta;
+    $primaPosa = $ordine->posa_effettuata;
 
-            $ordine->posa_effettuata = $request->has('posa_effettuata') ? 1 : 0;
-            $ordine->fattura_saldo_posa_fatta = $request->has('fattura_saldo_posa_fatta') ? 1 : 0;
+    $ordine->posa_effettuata = $request->has('posa_effettuata') ? 1 : 0;
 
-            if (!$primaFattura && $ordine->fattura_saldo_posa_fatta) {
-                $ultimoTipo = 'fattura_saldo_posa_fatta';
-            }
-        }
+    if (!$primaPosa && $ordine->posa_effettuata) {
+        $ultimoTipo = 'posa_effettuata';
+    }
+}
 
         if ($ordine->stato == 'concluso') {
             $primaSaldoFinale = $ordine->saldo_finale_ricevuto;
@@ -415,17 +414,17 @@ foreach ($riga->servizi as $servizio) {
         }
 
         if ($ordine->stato == 'programmare_posa') {
-            if ($ordine->posa_effettuata && $ordine->fattura_saldo_posa_fatta) {
-                $ordine->stato = 'concluso';
-                $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                $ordine->ultimo_avanzamento_riga_id = null;
-                $ordine->save();
+    if ($ordine->posa_effettuata) {
+        $ordine->stato = 'concluso';
+        $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+        $ordine->ultimo_avanzamento_riga_id = null;
+        $ordine->save();
 
-                return 'Posa effettuata e fattura saldo posa fatta. L’ordine è stato concluso.';
-            }
+        return 'Posa programmata. L’ordine è stato spostato in: Concluso.';
+    }
 
-            return null;
-        }
+    return null;
+}
 
         if ($ordine->stato == 'concluso') {
             $serveEnea = $ordine->commessa && $ordine->commessa->pratica_enea;

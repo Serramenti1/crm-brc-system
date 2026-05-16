@@ -944,21 +944,11 @@
                            value="1"
                            {{ $ordine->posa_effettuata ? 'checked' : '' }}>
 
-                    Posa effettuata
+                    Posa programmata
                 </label>
             </p>
 
-            <p>
-                <label>
-                    <input type="checkbox"
-                           id="fattura_saldo_posa_fatta"
-                           name="fattura_saldo_posa_fatta"
-                           value="1"
-                           {{ $ordine->fattura_saldo_posa_fatta ? 'checked' : '' }}>
-
-                    Fattura saldo posa fatta
-                </label>
-            </p>
+            
 
         @endif
 
@@ -1174,6 +1164,17 @@ function confermaAvanzamentoAvanzato(form) {
         ) {
             return confirm(
                 'Rilievo effettuato, contratto firmato e acconto versato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
+            );
+        }
+    }
+
+    if (statoOrdine === 'programmare_posa') {
+
+        let posa = document.getElementById('posa_effettuata');
+
+        if (posa && posa.checked) {
+            return confirm(
+                'Posa programmata.\n\nL ordine verrà spostato in: Concluso.\n\nConfermi?'
             );
         }
     }
