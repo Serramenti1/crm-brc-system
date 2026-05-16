@@ -67,7 +67,7 @@
                 @elseif($ordine->stato == 'programmare_posa')
                     Programmare posa
                 @elseif($ordine->stato == 'concluso')
-                    Concluso
+                    Posa in corso
                 @elseif($ordine->stato == 'archiviato')
                     Archiviato
                 @endif
@@ -1174,7 +1174,7 @@ function confermaAvanzamentoAvanzato(form) {
 
         if (posa && posa.checked) {
             return confirm(
-                'Posa programmata.\n\nL ordine verrà spostato in: Concluso.\n\nConfermi?'
+                'Posa programmata.\n\nL ordine verrà spostato in: posa in corso.\n\nConfermi?'
             );
         }
     }

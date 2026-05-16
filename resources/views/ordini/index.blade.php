@@ -116,7 +116,7 @@
                     @elseif($ordine->stato == 'programmare_posa')
                         Programmare posa
                     @elseif($ordine->stato == 'concluso')
-                        Concluso
+                        Posa in corso
                     @elseif($ordine->stato == 'archiviato')
                         Archiviato
                     @else
