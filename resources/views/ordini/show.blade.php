@@ -292,12 +292,16 @@
     <table class="tabella-lista">
 
         <tr>
-            <th>Prodotto</th>
-            <th>Prezzi</th>
-            <th>Azioni</th>
-            <th>Servizi</th>
-            <th>Stati / PDF</th>
-        </tr>
+           <th>Prodotto</th>
+           <th>Prezzi</th>
+
+            @if($ordine->stato == 'preparazione_contratto')
+           <th>Azioni</th>
+           <th>Servizi</th>
+    @endif
+
+    <th>Stati / PDF</th>
+</tr>
 
         @foreach($ordine->righe as $riga)
 
@@ -339,40 +343,43 @@
 
                 </td>
 
+        @if($ordine->stato == 'preparazione_contratto')
+
+    <td>
+
+        <button type="button"
+                class="btn btn-azione"
+                onclick="apriModificaRigaOrdine({{ $riga->id }})">
+            Modifica
+        </button>
+
+        <form method="POST"
+              action="/righe-ordine-prodotto/{{ $riga->id }}"
+              style="display:inline;">
+
+            @csrf
+            @method('DELETE')
+
+            <button type="submit"
+                    class="btn btn-elimina"
+                    onclick="return confirm('Eliminare questo prodotto?')">
+                🗑️
+            </button>
+
+        </form>
+
+    </td>
+
+@endif
+
+                @if($ordine->stato == 'preparazione_contratto')
+
+
                 <td>
 
-                    @if($ordine->stato == 'preparazione_contratto')
+@if($ordine->stato == 'preparazione_contratto')
 
-                        <button type="button"
-                                class="btn btn-azione"
-                                onclick="apriModificaRigaOrdine({{ $riga->id }})">
-                            Modifica
-                        </button>
-
-                        <form method="POST"
-                              action="/righe-ordine-prodotto/{{ $riga->id }}"
-                              style="display:inline;">
-
-                            @csrf
-                            @method('DELETE')
-
-                            <button type="submit"
-                                    class="btn btn-elimina"
-                                    onclick="return confirm('Eliminare questo prodotto?')">
-                                🗑️
-                            </button>
-
-                        </form>
-
-                    @else
-                        -
-                    @endif
-
-                </td>
-
-                <td>
-
-                    @foreach($riga->servizi as $servizio)
+    @foreach($riga->servizi as $servizio)
 
                         <div style="border-bottom:1px solid #ccc; margin-bottom:10px; padding-bottom:10px;">
 
@@ -470,8 +477,11 @@
     @endif
 
 </div>
-          @endforeach
-                 @endforeach
+        @endforeach
+
+
+                @endif
+
 
 @if($ordine->stato == 'preparazione_contratto')
 
@@ -561,78 +571,99 @@
 
 </td>
 
-
+@endif
                 
 
  <td>
 
     @if($ordine->stato == 'preparazione_contratto')
 
-        In attesa contratto
+    In attesa contratto
 
-    @elseif($ordine->stato == 'in_lavorazione')
+@elseif($ordine->stato == 'in_lavorazione')
 
-        <form id="form_riga_{{ $riga->id }}"
-              method="POST"
-              action="/righe-ordine/{{ $riga->id }}/aggiorna"
-              enctype="multipart/form-data"
-              onsubmit="return confermaAvanzamentoRiga(this)">
+    <form id="form_riga_{{ $riga->id }}"
+          method="POST"
+          action="/righe-ordine/{{ $riga->id }}/aggiorna"
+          enctype="multipart/form-data"
+          onsubmit="return confermaAvanzamentoRiga(this)">
 
-            @csrf
+        @csrf
 
-            <label>
-                <input type="checkbox"
-                       class="chk-inviato"
-                       name="inviato"
-                       value="1"
-                       {{ $riga->inviato ? 'checked' : '' }}>
-                Inviato
-            </label>
+        <label>
+            <input type="checkbox"
+                   class="chk-inviato"
+                   name="inviato"
+                   value="1"
+                   {{ $riga->inviato ? 'checked' : '' }}>
+            Inviato
+        </label>
 
-            <br>
+        <br>
 
-            <label>
-                <input type="checkbox"
-                       class="chk-co"
-                       name="co_ricevuta"
-                       value="1"
-                       {{ $riga->co_ricevuta ? 'checked' : '' }}>
-                Conferma ordine ricevuta
-            </label>
+        <label>
+            <input type="checkbox"
+                   class="chk-co"
+                   name="co_ricevuta"
+                   value="1"
+                   {{ $riga->co_ricevuta ? 'checked' : '' }}>
+            Conferma ordine ricevuta
+        </label>
 
-            <br>
+        <br>
 
-            <label>
-                <input type="checkbox"
-                       class="chk-produzione"
-                       name="in_produzione"
-                       value="1"
-                       {{ $riga->in_produzione ? 'checked' : '' }}>
-                In produzione
-            </label>
+        <label>
+            <input type="checkbox"
+                   class="chk-produzione"
+                   name="in_produzione"
+                   value="1"
+                   {{ $riga->in_produzione ? 'checked' : '' }}>
+            In produzione
+        </label>
+
+        <br><br>
+
+        <button type="submit" class="btn btn-azione">
+            Salva stati
+        </button>
+
+    </form>
+
+</td>
+
+<td>
+
+    <form method="POST"
+          action="/righe-ordine/{{ $riga->id }}/aggiorna"
+          enctype="multipart/form-data">
+
+        @csrf
+
+        @if($riga->pdf_path)
+
+            <a href="{{ asset('storage/' . $riga->pdf_path) }}"
+               target="_blank"
+               class="btn btn-azione">
+                Apri PDF
+            </a>
 
             <br><br>
 
-            @if($riga->pdf_path)
-                <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
-                    Apri PDF
-                </a>
-                <br>
-            @endif
+        @endif
 
-            <input type="file"
-                   name="pdf"
-                   accept="application/pdf">
+        <input type="file"
+               name="pdf"
+               accept="application/pdf">
 
-            <br><br>
+        <br><br>
 
-            <button type="submit" class="btn btn-azione">
-                Salva
-            </button>
+        <button type="submit" class="btn btn-azione">
+            Salva PDF
+        </button>
 
-        </form>
+    </form>
 
-    @elseif($ordine->stato == 'completo_attesa_merce')
+@elseif($ordine->stato == 'completo_attesa_merce')
 
         <form id="form_riga_{{ $riga->id }}"
               method="POST"
@@ -825,7 +856,8 @@
     </tr>
 
 @endif
-       
+
+     @endforeach
 
     </table>
 @if(
