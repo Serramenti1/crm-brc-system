@@ -30,7 +30,17 @@ class AppServiceProvider extends ServiceProvider
             'attesa_saldo_merce' => Ordine::where('stato', 'attesa_saldo_merce')->count(),
             'programmare_posa' => Ordine::where('stato', 'programmare_posa')->count(),
             'concluso' => Ordine::where('stato', 'concluso')->count(),
-            'archiviato' => Ordine::where('stato', 'archiviato')->count(),
+            'archiviato' => Ordine::where('stato', 'archiviato')
+    ->where(function ($query) {
+        $query->where('archivio_saldo_ricevuto', 0)
+              ->orWhere(function ($q) {
+                  $q->where('archivio_pratica_enea_inviata', 0)
+                    ->whereHas('commessa', function ($c) {
+                        $c->where('pratica_enea', 1);
+                    });
+              });
+    })
+    ->count(),
         ];
 
         $view->with('conteggiOrdini', $conteggiOrdini);

@@ -864,9 +864,9 @@
     $ordine->stato == 'preparazione_contratto' ||
     $ordine->stato == 'attesa_saldo_merce' ||
     $ordine->stato == 'programmare_posa' ||
-    $ordine->stato == 'concluso'
+    $ordine->stato == 'concluso' ||
+    $ordine->stato == 'archiviato'
 )
-
     <br>
 
     <h2>Stato avanzamento ordine</h2>
@@ -952,37 +952,56 @@
 
         @endif
 
-        @if($ordine->stato == 'concluso')
+       @if($ordine->stato == 'concluso')
 
-            <p>
-                <label>
-                    <input type="checkbox"
-                           id="saldo_finale_ricevuto"
-                           name="saldo_finale_ricevuto"
-                           value="1"
-                           {{ $ordine->saldo_finale_ricevuto ? 'checked' : '' }}>
+    <p>
+        <label>
+            <input type="checkbox"
+                   id="saldo_finale_ricevuto"
+                   name="saldo_finale_ricevuto"
+                   value="1"
+                   {{ $ordine->saldo_finale_ricevuto ? 'checked' : '' }}>
 
-                    Saldo finale ricevuto dal cliente
-                </label>
-            </p>
+            Eseguito chiusura cantiere
+        </label>
+    </p>
 
-            @if($ordine->commessa && $ordine->commessa->pratica_enea)
 
-                <p>
-                    <label>
-                        <input type="checkbox"
-                               id="invio_enea_effettuato"
-                               name="invio_enea_effettuato"
-                               value="1"
-                               {{ $ordine->invio_enea_effettuato ? 'checked' : '' }}>
 
-                        Invio ENEA effettuato
-                    </label>
-                </p>
+@endif
 
-            @endif
 
-        @endif
+@if($ordine->stato == 'archiviato')
+
+    <p>
+        <label>
+            <input type="checkbox"
+                   id="archivio_saldo_ricevuto"
+                   name="archivio_saldo_ricevuto"
+                   value="1"
+                   {{ $ordine->archivio_saldo_ricevuto ? 'checked' : '' }}>
+
+            Ricevuto saldo
+        </label>
+    </p>
+
+    @if($ordine->commessa && $ordine->commessa->pratica_enea)
+
+        <p>
+            <label>
+                <input type="checkbox"
+                       id="archivio_pratica_enea_inviata"
+                       name="archivio_pratica_enea_inviata"
+                       value="1"
+                       {{ $ordine->archivio_pratica_enea_inviata ? 'checked' : '' }}>
+
+                Pratica ENEA inviata
+            </label>
+        </p>
+
+    @endif
+
+@endif
 
         <button type="submit" class="btn btn-azione">
             Salva stato avanzato
@@ -1178,6 +1197,17 @@ function confermaAvanzamentoAvanzato(form) {
             );
         }
     }
+
+    if (statoOrdine === 'concluso') {
+
+    let chiusuraCantiere = document.getElementById('saldo_finale_ricevuto');
+
+    if (chiusuraCantiere && chiusuraCantiere.checked) {
+        return confirm(
+            'Chiusura cantiere eseguita.\n\nL ordine verrà spostato in: Conclusi / Archiviati.\n\nConfermi?'
+        );
+    }
+}
 
     return true;
 }

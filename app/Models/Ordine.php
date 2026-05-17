@@ -28,6 +28,8 @@ class Ordine extends Model
 
         'saldo_finale_ricevuto',
         'invio_enea_effettuato',
+        'archivio_saldo_ricevuto',
+        'archivio_pratica_enea_inviata',
 
         'ultimo_avanzamento_tipo',
         'ultimo_avanzamento_riga_id',

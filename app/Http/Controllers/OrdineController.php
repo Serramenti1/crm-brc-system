@@ -302,25 +302,24 @@ foreach ($riga->servizi as $servizio) {
 }
 
         if ($ordine->stato == 'concluso') {
-            $primaSaldoFinale = $ordine->saldo_finale_ricevuto;
-            $primaEnea = $ordine->invio_enea_effettuato;
+    $primaSaldoFinale = $ordine->saldo_finale_ricevuto;
 
-            $ordine->saldo_finale_ricevuto = $request->has('saldo_finale_ricevuto') ? 1 : 0;
+    $ordine->saldo_finale_ricevuto = $request->has('saldo_finale_ricevuto') ? 1 : 0;
 
-            if ($ordine->commessa && $ordine->commessa->pratica_enea) {
-                $ordine->invio_enea_effettuato = $request->has('invio_enea_effettuato') ? 1 : 0;
-            } else {
-                $ordine->invio_enea_effettuato = 0;
-            }
+    if (!$primaSaldoFinale && $ordine->saldo_finale_ricevuto) {
+        $ultimoTipo = 'saldo_finale_ricevuto';
+    }
+}
 
-            if (!$primaSaldoFinale && $ordine->saldo_finale_ricevuto) {
-                $ultimoTipo = 'saldo_finale_ricevuto';
-            }
+        if ($ordine->stato == 'archiviato') {
+    $ordine->archivio_saldo_ricevuto = $request->has('archivio_saldo_ricevuto') ? 1 : 0;
 
-            if (!$primaEnea && $ordine->invio_enea_effettuato) {
-                $ultimoTipo = 'invio_enea_effettuato';
-            }
-        }
+    if ($ordine->commessa && $ordine->commessa->pratica_enea) {
+        $ordine->archivio_pratica_enea_inviata = $request->has('archivio_pratica_enea_inviata') ? 1 : 0;
+    } else {
+        $ordine->archivio_pratica_enea_inviata = 0;
+    }
+}
 
         $ordine->save();
 
@@ -427,30 +426,17 @@ foreach ($riga->servizi as $servizio) {
 }
 
         if ($ordine->stato == 'concluso') {
-            $serveEnea = $ordine->commessa && $ordine->commessa->pratica_enea;
+    if ($ordine->saldo_finale_ricevuto) {
+        $ordine->stato = 'archiviato';
+        $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
+        $ordine->ultimo_avanzamento_riga_id = null;
+        $ordine->save();
 
-            if ($serveEnea) {
-                if ($ordine->saldo_finale_ricevuto && $ordine->invio_enea_effettuato) {
-                    $ordine->stato = 'archiviato';
-                    $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                    $ordine->ultimo_avanzamento_riga_id = null;
-                    $ordine->save();
+        return 'Chiusura cantiere eseguita. L’ordine è stato spostato in: Conclusi / Archiviati.';
+    }
 
-                    return 'Saldo finale ricevuto e invio ENEA effettuato. L’ordine è stato archiviato.';
-                }
-            } else {
-                if ($ordine->saldo_finale_ricevuto) {
-                    $ordine->stato = 'archiviato';
-                    $ordine->ultimo_avanzamento_tipo = $ultimoTipo;
-                    $ordine->ultimo_avanzamento_riga_id = null;
-                    $ordine->save();
-
-                    return 'Saldo finale ricevuto. L’ordine è stato archiviato.';
-                }
-            }
-
-            return null;
-        }
+    return null;
+}
 
         return null;
     }
@@ -515,25 +501,22 @@ foreach ($riga->servizi as $servizio) {
 
         } elseif ($ordine->stato == 'concluso') {
 
-            if ($ordine->ultimo_avanzamento_tipo == 'fattura_saldo_posa_fatta') {
-                $ordine->fattura_saldo_posa_fatta = 0;
-            }
+    if ($ordine->ultimo_avanzamento_tipo == 'posa_effettuata') {
+        $ordine->posa_effettuata = 0;
+    }
 
-            $ordine->stato = 'programmare_posa';
-            $messaggio = 'Ordine riportato in programmare posa. Rimossa la spunta fattura saldo posa fatta.';
+    $ordine->stato = 'programmare_posa';
+    $messaggio = 'Ordine riportato in programmare posa. Rimossa la spunta posa programmata.';
 
         } elseif ($ordine->stato == 'archiviato') {
 
-            if ($ordine->ultimo_avanzamento_tipo == 'invio_enea_effettuato') {
-                $ordine->invio_enea_effettuato = 0;
-            } elseif ($ordine->ultimo_avanzamento_tipo == 'saldo_finale_ricevuto') {
-                $ordine->saldo_finale_ricevuto = 0;
-            }
+    $ordine->saldo_finale_ricevuto = 0;
+    $ordine->invio_enea_effettuato = 0;
 
-            $ordine->stato = 'concluso';
-            $messaggio = 'Ordine riportato in conclusi. Rimossa la spunta che aveva causato l’archiviazione.';
+    $ordine->stato = 'concluso';
 
-        } else {
+    $messaggio = 'Ordine riportato in posa in corso. Rimossa la spunta chiusura cantiere.';
+    } else {
             return redirect('/ordini/' . $ordine->id)
                 ->with('error', 'Questo ordine non può tornare a uno stato precedente.');
         }

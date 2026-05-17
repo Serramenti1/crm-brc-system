@@ -118,7 +118,13 @@
         (isset($ordine) && $ordine->stato == 'archiviato')
         ? 'active' : ''
    }}">
-    Archiviati
+    Conclusi / Archiviati
+
+@if(($conteggiOrdini['archiviato'] ?? 0) > 0)
+    <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+        {{ $conteggiOrdini['archiviato'] }}
+    </span>
+@endif
 </a>
 
 </div>

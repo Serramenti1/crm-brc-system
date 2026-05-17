@@ -91,10 +91,10 @@
     @if(($conteggiOrdini['concluso'] ?? 0) > 0)
         <a href="/ordini/stato/concluso"
            style="border:1px solid #ccc; padding:20px; text-decoration:none; width:230px; color:black; border-radius:8px;">
-            <h3>Conclusi</h3>
+            <h3>Posa in corso</h3>
 
             <p>
-                Ordini da saldare / ENEA / archiviare
+                Attesa chiusura cantiere
             </p>
 
             <strong style="font-size:28px; color:red;">
@@ -102,5 +102,24 @@
             </strong>
         </a>
     @endif
+
+    @if(($conteggiOrdini['archiviato'] ?? 0) > 0)
+
+    <a href="/ordini/stato/archiviato"
+       style="border:1px solid #ccc; padding:20px; text-decoration:none; width:230px; color:black; border-radius:8px;">
+
+        <h3>Conclusi / Archiviati</h3>
+
+        <p>
+            Ordini con saldo o pratica ENEA da completare
+        </p>
+
+        <strong style="font-size:28px; color:red;">
+            {{ $conteggiOrdini['archiviato'] }}
+        </strong>
+
+    </a>
+
+@endif
 
 </div>
