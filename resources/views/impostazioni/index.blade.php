@@ -29,6 +29,12 @@
         <h3>Utenti</h3>
         <p>Gestione utenti e permessi</p>
     </a>
+    <a href="/impostazioni/backup"
+       style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
+       <h3>Backup / Salvataggi</h3>
+       <p>Crea un backup completo di database, PDF e configurazione</p>
+    </a>
+
 
     <a href="/fornitori"
        style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
@@ -45,6 +51,9 @@
    style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
     <h3>Tipi intervento</h3>
     <p>Nuovo, manutenzione, ristrutturazione e altri tipi lavoro</p>
+
+    
 </a>
+
 
 </div>

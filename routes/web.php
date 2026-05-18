@@ -13,6 +13,7 @@ use App\Http\Controllers\ImpostazioneController;
 use App\Models\Ordine;
 use App\Http\Controllers\RigaOrdineController;
 use App\Http\Controllers\RigaOrdineServizioController;
+use App\Http\Controllers\BackupController;
 
 Route::get('/', function () {
     $conteggiOrdini = [
@@ -76,3 +77,6 @@ Route::delete('/servizi-riga-ordine/{id}', [RigaOrdineServizioController::class,
 Route::get('/impostazioni/tipi-intervento', [ImpostazioneController::class, 'tipiIntervento']);
 Route::post('/impostazioni/tipi-intervento', [ImpostazioneController::class, 'storeTipoIntervento']);
 Route::put('/impostazioni/tipi-intervento/{id}', [ImpostazioneController::class, 'updateTipoIntervento']);
+
+Route::get('/impostazioni/backup', [BackupController::class, 'index']);
+Route::post('/impostazioni/backup/crea', [BackupController::class, 'creaBackupCompleto']);
