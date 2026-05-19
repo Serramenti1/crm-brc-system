@@ -97,6 +97,7 @@
     <br>
 
     <h2>Prodotti e servizi</h2>
+    
 
     @if($ordine->stato == 'preparazione_contratto')
 
@@ -860,7 +861,236 @@
      @endforeach
 
     </table>
+
+    @if($ordine->stato == 'preparazione_contratto')
+
+    <details style="margin-bottom:20px;">
+
+        <summary>
+            <strong>+ Documenti ordine</strong>
+        </summary>
+
+        <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
+
+            <form method="POST"
+                  action="/ordini/{{ $ordine->id }}/documenti"
+                  enctype="multipart/form-data">
+
+                @csrf
+
+                <table class="tabella-dettaglio">
+
+                    <tr>
+                        <th>Documento</th>
+                        <th>PDF attuale</th>
+                        <th>Carica nuovo PDF</th>
+                    </tr>
+
+                    <tr>
+                        <td>Foglio smaltimento</td>
+
+                        <td>
+                            @if($ordine->pdf_foglio_smaltimento)
+
+                                <a href="{{ asset('storage/' . $ordine->pdf_foglio_smaltimento) }}"
+                                   target="_blank"
+                                   class="btn btn-azione">
+                                    Apri PDF
+                                </a>
+
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <input type="file"
+                                   name="pdf_foglio_smaltimento"
+                                   accept="application/pdf">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Contratto copia posatori</td>
+
+                        <td>
+                            @if($ordine->pdf_contratto_posatori)
+
+                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_posatori) }}"
+                                   target="_blank"
+                                   class="btn btn-azione">
+                                    Apri PDF
+                                </a>
+
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <input type="file"
+                                   name="pdf_contratto_posatori"
+                                   accept="application/pdf">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Contratto vendita</td>
+
+                        <td>
+                            @if($ordine->pdf_contratto_vendita)
+
+                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_vendita) }}"
+                                   target="_blank"
+                                   class="btn btn-azione">
+                                    Apri PDF
+                                </a>
+
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <input type="file"
+                                   name="pdf_contratto_vendita"
+                                   accept="application/pdf">
+                        </td>
+                    </tr>
+
+                </table>
+
+                <br>
+
+                <button type="submit" class="btn btn-azione">
+                    Salva documenti ordine
+                </button>
+
+            </form>
+
+        </div>
+
+    </details>
+
+@endif
+
+@if($ordine->stato == 'preparazione_contratto')
+
+    <br>
+
+    <h2>Documenti ordine</h2>
+
+    <details style="margin-bottom:20px;">
+
+        <summary>
+            <strong>+ Gestisci documenti</strong>
+        </summary>
+
+        <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
+
+            <form method="POST"
+                  action="/ordini/{{ $ordine->id }}/documenti"
+                  enctype="multipart/form-data">
+
+                @csrf
+
+                <table class="tabella-dettaglio">
+
+                    <tr>
+                        <th>Documento</th>
+                        <th>PDF attuale</th>
+                        <th>Carica nuovo PDF</th>
+                    </tr>
+
+                    <tr>
+                        <td>Foglio smaltimento</td>
+
+                        <td>
+                            @if($ordine->pdf_foglio_smaltimento)
+
+                                <a href="{{ asset('storage/' . $ordine->pdf_foglio_smaltimento) }}"
+                                   target="_blank"
+                                   class="btn btn-azione">
+                                    Apri PDF
+                                </a>
+
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <input type="file"
+                                   name="pdf_foglio_smaltimento"
+                                   accept="application/pdf">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Contratto copia posatori</td>
+
+                        <td>
+                            @if($ordine->pdf_contratto_posatori)
+
+                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_posatori) }}"
+                                   target="_blank"
+                                   class="btn btn-azione">
+                                    Apri PDF
+                                </a>
+
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <input type="file"
+                                   name="pdf_contratto_posatori"
+                                   accept="application/pdf">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Contratto vendita</td>
+
+                        <td>
+                            @if($ordine->pdf_contratto_vendita)
+
+                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_vendita) }}"
+                                   target="_blank"
+                                   class="btn btn-azione">
+                                    Apri PDF
+                                </a>
+
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <input type="file"
+                                   name="pdf_contratto_vendita"
+                                   accept="application/pdf">
+                        </td>
+                    </tr>
+
+                </table>
+
+                <br>
+
+                <button type="submit" class="btn btn-azione">
+                    Salva documenti ordine
+                </button>
+
+            </form>
+
+        </div>
+
+    </details>
+
+@endif
 @if(
+
     $ordine->stato == 'preparazione_contratto' ||
     $ordine->stato == 'attesa_saldo_merce' ||
     $ordine->stato == 'programmare_posa' ||

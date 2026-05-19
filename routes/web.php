@@ -44,6 +44,8 @@ Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);
 Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPreventivo']);
 Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);
 
+Route::post('/ordini/{id}/documenti', [OrdineController::class, 'aggiornaDocumenti']);
+
 Route::post('/preventivi/{id}/aggiungi-riga-prodotto', [PreventivoController::class, 'aggiungiRigaProdotto']);
 
 Route::post('/righe-prodotti/{riga_prodotto_id}/servizi', [RigaPreventivoServizioController::class, 'store']);

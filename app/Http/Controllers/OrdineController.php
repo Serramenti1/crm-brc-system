@@ -529,6 +529,45 @@ foreach ($riga->servizi as $servizio) {
             ->with('success', $messaggio);
     }
 
+    public function aggiornaDocumenti(Request $request, $id)
+{
+    $ordine = Ordine::findOrFail($id);
+
+    $request->validate([
+        'pdf_foglio_smaltimento' => 'nullable|mimes:pdf|max:10240',
+        'pdf_contratto_posatori' => 'nullable|mimes:pdf|max:10240',
+        'pdf_contratto_vendita' => 'nullable|mimes:pdf|max:10240',
+    ]);
+
+    $campi = [
+        'pdf_foglio_smaltimento',
+        'pdf_contratto_posatori',
+        'pdf_contratto_vendita',
+    ];
+
+    foreach ($campi as $campo) {
+
+        if ($request->hasFile($campo)) {
+
+            if (
+                $ordine->$campo &&
+                Storage::disk('public')->exists($ordine->$campo)
+            ) {
+                Storage::disk('public')->delete($ordine->$campo);
+            }
+
+            $ordine->$campo = $request
+                ->file($campo)
+                ->store('ordini_documenti', 'public');
+        }
+    }
+
+    $ordine->save();
+
+    return redirect('/ordini/' . $ordine->id)
+        ->with('success', 'Documenti ordine aggiornati correttamente.');
+}
+
     public function destroy($id)
     {
         $ordine = Ordine::with('righe')->findOrFail($id);

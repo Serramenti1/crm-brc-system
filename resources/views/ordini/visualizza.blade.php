@@ -71,7 +71,79 @@
         </tr>
 
     </table>
+    
+<h2>Documenti ordine</h2>
 
+<table class="tabella-dettaglio">
+
+    <tr>
+        <th>Documento</th>
+        <th>PDF</th>
+    </tr>
+
+    <tr>
+        <td>Foglio smaltimento</td>
+
+        <td>
+
+            @if($ordine->pdf_foglio_smaltimento)
+
+                <a href="{{ asset('storage/' . $ordine->pdf_foglio_smaltimento) }}"
+                   target="_blank"
+                   class="btn btn-azione">
+                    Apri PDF
+                </a>
+
+            @else
+                -
+            @endif
+
+        </td>
+    </tr>
+
+    <tr>
+        <td>Contratto copia posatori</td>
+
+        <td>
+
+            @if($ordine->pdf_contratto_posatori)
+
+                <a href="{{ asset('storage/' . $ordine->pdf_contratto_posatori) }}"
+                   target="_blank"
+                   class="btn btn-azione">
+                    Apri PDF
+                </a>
+
+            @else
+                -
+            @endif
+
+        </td>
+    </tr>
+
+    <tr>
+        <td>Contratto vendita</td>
+
+        <td>
+
+            @if($ordine->pdf_contratto_vendita)
+
+                <a href="{{ asset('storage/' . $ordine->pdf_contratto_vendita) }}"
+                   target="_blank"
+                   class="btn btn-azione">
+                    Apri PDF
+                </a>
+
+            @else
+                -
+            @endif
+
+        </td>
+    </tr>
+
+</table>
+
+<br>
     <h2>Prodotti e servizi</h2>
 
     <table class="tabella-lista">
