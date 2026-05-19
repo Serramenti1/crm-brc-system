@@ -587,12 +587,6 @@
 
     @if($ordine->stato == 'preparazione_contratto')
 
-    <form method="POST"
-          action="/righe-ordine/{{ $riga->id }}/aggiorna"
-          enctype="multipart/form-data">
-
-        @csrf
-
     
 
     @if($riga->pdf_path)
@@ -625,27 +619,43 @@
 
         </a>
 
-        <button type="submit" class="btn btn-azione">
-            Salva PDF
-        </button>
+        <form method="POST"
+              action="/righe-ordine/{{ $riga->id }}/elimina-pdf"
+              style="display:inline; margin:0;">
+
+            @csrf
+
+            <button type="submit"
+                    class="btn btn-elimina"
+                    onclick="return confirm('Eliminare questo PDF?')">
+                🗑️
+            </button>
+
+        </form>
 
     </div>
 
 @else
 
-    <button type="submit" class="btn btn-azione" style="margin-bottom:15px;">
-        Salva PDF
-    </button>
+    <form method="POST"
+          action="/righe-ordine/{{ $riga->id }}/aggiorna"
+          enctype="multipart/form-data">
 
-@endif
+        @csrf
 
         <input type="file"
                name="pdf"
                accept="application/pdf">
 
-        
+        <br><br>
+
+        <button type="submit" class="btn btn-azione">
+            Aggiungi PDF
+        </button>
 
     </form>
+
+@endif
 
 @elseif($ordine->stato == 'in_lavorazione')
 
@@ -952,101 +962,117 @@
 
         <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
 
-            <form method="POST"
-                  action="/ordini/{{ $ordine->id }}/documenti"
-                  enctype="multipart/form-data">
+            <table class="tabella-dettaglio">
 
-                @csrf
+    <tr>
+        <th>Documento</th>
+        <th>PDF</th>
+        <th>Azione</th>
+    </tr>
 
-                <table class="tabella-dettaglio">
+    @php
+        $documentiOrdine = [
+            'pdf_foglio_smaltimento' => 'Foglio smaltimento',
+            'pdf_contratto_posatori' => 'Contratto copia posatori',
+            'pdf_contratto_vendita' => 'Contratto vendita',
+        ];
+    @endphp
 
-                    <tr>
-                        <th>Documento</th>
-                        <th>PDF attuale</th>
-                        <th>Carica nuovo PDF</th>
-                    </tr>
+    @foreach($documentiOrdine as $campo => $label)
 
-                    <tr>
-                        <td>Foglio smaltimento</td>
+        <tr>
 
-                        <td>
-                            @if($ordine->pdf_foglio_smaltimento)
+            <td>
+                {{ $label }}
+            </td>
 
-                                <a href="{{ asset('storage/' . $ordine->pdf_foglio_smaltimento) }}"
-                                   target="_blank"
-                                   class="btn btn-azione">
-                                    Apri PDF
-                                </a>
+            @if($ordine->$campo)
 
-                            @else
-                                -
-                            @endif
-                        </td>
+                <td>
 
-                        <td>
-                            <input type="file"
-                                   name="pdf_foglio_smaltimento"
-                                   accept="application/pdf">
-                        </td>
-                    </tr>
+                    <a href="{{ asset('storage/' . $ordine->$campo) }}"
+                       target="_blank"
+                       style="text-decoration:none; text-align:center; display:inline-block;">
 
-                    <tr>
-                        <td>Contratto copia posatori</td>
+                        <div style="
+                            width:70px;
+                            height:80px;
+                            border:1px solid #ccc;
+                            border-radius:6px;
+                            background:#f8f8f8;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                            align-items:center;
+                            font-size:14px;
+                            font-weight:bold;
+                            color:red;
+                        ">
+                            📄
 
-                        <td>
-                            @if($ordine->pdf_contratto_posatori)
+                            <span style="font-size:11px; margin-top:5px;">
+                                PDF
+                            </span>
 
-                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_posatori) }}"
-                                   target="_blank"
-                                   class="btn btn-azione">
-                                    Apri PDF
-                                </a>
+                        </div>
 
-                            @else
-                                -
-                            @endif
-                        </td>
+                    </a>
 
-                        <td>
-                            <input type="file"
-                                   name="pdf_contratto_posatori"
-                                   accept="application/pdf">
-                        </td>
-                    </tr>
+                </td>
 
-                    <tr>
-                        <td>Contratto vendita</td>
+                <td>
 
-                        <td>
-                            @if($ordine->pdf_contratto_vendita)
+                    <form method="POST"
+                          action="/ordini/{{ $ordine->id }}/documenti/elimina/{{ $campo }}">
 
-                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_vendita) }}"
-                                   target="_blank"
-                                   class="btn btn-azione">
-                                    Apri PDF
-                                </a>
+                        @csrf
 
-                            @else
-                                -
-                            @endif
-                        </td>
+                        <button type="submit"
+                                class="btn btn-elimina"
+                                onclick="return confirm('Eliminare questo documento?')">
+                            🗑️
+                        </button>
 
-                        <td>
-                            <input type="file"
-                                   name="pdf_contratto_vendita"
-                                   accept="application/pdf">
-                        </td>
-                    </tr>
+                    </form>
 
-                </table>
+                </td>
 
-                <br>
+            @else
 
-                <button type="submit" class="btn btn-azione">
-                    Salva documenti ordine
-                </button>
+                <td>
+                    -
+                </td>
 
-            </form>
+                <td>
+
+                    <form method="POST"
+                          action="/ordini/{{ $ordine->id }}/documenti"
+                          enctype="multipart/form-data">
+
+                        @csrf
+
+                        <input type="file"
+                               name="{{ $campo }}"
+                               accept="application/pdf">
+
+                        <br><br>
+
+                        <button type="submit"
+                                class="btn btn-azione">
+                            Aggiungi PDF
+                        </button>
+
+                    </form>
+
+                </td>
+
+            @endif
+
+        </tr>
+
+    @endforeach
+
+</table>
 
         </div>
 

@@ -43,8 +43,10 @@ Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);
 
 Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPreventivo']);
 Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);
+Route::post('/righe-ordine/{id}/elimina-pdf', [OrdineController::class, 'eliminaPdfRiga']);
 
 Route::post('/ordini/{id}/documenti', [OrdineController::class, 'aggiornaDocumenti']);
+Route::post('/ordini/{id}/documenti/elimina/{campo}', [OrdineController::class, 'eliminaDocumentoOrdine']);
 
 Route::post('/preventivi/{id}/aggiungi-riga-prodotto', [PreventivoController::class, 'aggiungiRigaProdotto']);
 

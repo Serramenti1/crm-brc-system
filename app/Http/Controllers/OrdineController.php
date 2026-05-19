@@ -567,6 +567,45 @@ foreach ($riga->servizi as $servizio) {
     return redirect('/ordini/' . $ordine->id)
         ->with('success', 'Documenti ordine aggiornati correttamente.');
 }
+public function eliminaDocumentoOrdine($id, $campo)
+{
+    $ordine = Ordine::findOrFail($id);
+
+    $campiConsentiti = [
+        'pdf_foglio_smaltimento',
+        'pdf_contratto_posatori',
+        'pdf_contratto_vendita',
+    ];
+
+    if (!in_array($campo, $campiConsentiti)) {
+        abort(404);
+    }
+
+    if ($ordine->$campo && Storage::disk('public')->exists($ordine->$campo)) {
+        Storage::disk('public')->delete($ordine->$campo);
+    }
+
+    $ordine->$campo = null;
+    $ordine->save();
+
+    return redirect('/ordini/' . $ordine->id)
+        ->with('success', 'Documento eliminato correttamente.');
+}
+
+public function eliminaPdfRiga($id)
+{
+    $riga = RigaOrdine::findOrFail($id);
+
+    if ($riga->pdf_path && Storage::disk('public')->exists($riga->pdf_path)) {
+        Storage::disk('public')->delete($riga->pdf_path);
+    }
+
+    $riga->pdf_path = null;
+    $riga->save();
+
+    return redirect('/ordini/' . $riga->ordine_id)
+        ->with('success', 'PDF eliminato correttamente.');
+}
 
     public function destroy($id)
     {
