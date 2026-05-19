@@ -301,7 +301,15 @@
            <th>Servizi</th>
     @endif
 
+    @if($ordine->stato == 'preparazione_contratto')
+
+    <th>C.O. fornitore</th>
+
+@else
+
     <th>Stati / PDF</th>
+
+@endif
 </tr>
 
         @foreach($ordine->righe as $riga)
@@ -376,7 +384,7 @@
                 @if($ordine->stato == 'preparazione_contratto')
 
 
-                <td>
+                <td style="padding-right:60px;">
 
 @if($ordine->stato == 'preparazione_contratto')
 
@@ -579,7 +587,65 @@
 
     @if($ordine->stato == 'preparazione_contratto')
 
-    In attesa contratto
+    <form method="POST"
+          action="/righe-ordine/{{ $riga->id }}/aggiorna"
+          enctype="multipart/form-data">
+
+        @csrf
+
+    
+
+    @if($riga->pdf_path)
+
+    <div style="display:flex; gap:12px; align-items:center; margin-bottom:15px;">
+
+        <a href="{{ asset('storage/' . $riga->pdf_path) }}"
+           target="_blank"
+           style="text-decoration:none; text-align:center;">
+
+            <div style="
+                width:70px;
+                height:80px;
+                border:1px solid #ccc;
+                border-radius:6px;
+                background:#f8f8f8;
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                align-items:center;
+                font-size:14px;
+                font-weight:bold;
+                color:red;
+            ">
+                📄
+                <span style="font-size:11px; margin-top:5px;">
+                    PDF
+                </span>
+            </div>
+
+        </a>
+
+        <button type="submit" class="btn btn-azione">
+            Salva PDF
+        </button>
+
+    </div>
+
+@else
+
+    <button type="submit" class="btn btn-azione" style="margin-bottom:15px;">
+        Salva PDF
+    </button>
+
+@endif
+
+        <input type="file"
+               name="pdf"
+               accept="application/pdf">
+
+        
+
+    </form>
 
 @elseif($ordine->stato == 'in_lavorazione')
 
@@ -643,11 +709,19 @@
         @if($riga->pdf_path)
 
             <a href="{{ asset('storage/' . $riga->pdf_path) }}"
-               target="_blank"
-               class="btn btn-azione">
-                Apri PDF
-            </a>
+   target="_blank">
 
+    <iframe src="{{ asset('storage/' . $riga->pdf_path) }}"
+            style="
+                width:120px;
+                height:90px;
+                border:1px solid #ccc;
+                border-radius:5px;
+                background:white;
+            ">
+    </iframe>
+
+</a>
             <br><br>
 
         @endif
@@ -862,117 +936,7 @@
 
     </table>
 
-    @if($ordine->stato == 'preparazione_contratto')
-
-    <details style="margin-bottom:20px;">
-
-        <summary>
-            <strong>+ Documenti ordine</strong>
-        </summary>
-
-        <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
-
-            <form method="POST"
-                  action="/ordini/{{ $ordine->id }}/documenti"
-                  enctype="multipart/form-data">
-
-                @csrf
-
-                <table class="tabella-dettaglio">
-
-                    <tr>
-                        <th>Documento</th>
-                        <th>PDF attuale</th>
-                        <th>Carica nuovo PDF</th>
-                    </tr>
-
-                    <tr>
-                        <td>Foglio smaltimento</td>
-
-                        <td>
-                            @if($ordine->pdf_foglio_smaltimento)
-
-                                <a href="{{ asset('storage/' . $ordine->pdf_foglio_smaltimento) }}"
-                                   target="_blank"
-                                   class="btn btn-azione">
-                                    Apri PDF
-                                </a>
-
-                            @else
-                                -
-                            @endif
-                        </td>
-
-                        <td>
-                            <input type="file"
-                                   name="pdf_foglio_smaltimento"
-                                   accept="application/pdf">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Contratto copia posatori</td>
-
-                        <td>
-                            @if($ordine->pdf_contratto_posatori)
-
-                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_posatori) }}"
-                                   target="_blank"
-                                   class="btn btn-azione">
-                                    Apri PDF
-                                </a>
-
-                            @else
-                                -
-                            @endif
-                        </td>
-
-                        <td>
-                            <input type="file"
-                                   name="pdf_contratto_posatori"
-                                   accept="application/pdf">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Contratto vendita</td>
-
-                        <td>
-                            @if($ordine->pdf_contratto_vendita)
-
-                                <a href="{{ asset('storage/' . $ordine->pdf_contratto_vendita) }}"
-                                   target="_blank"
-                                   class="btn btn-azione">
-                                    Apri PDF
-                                </a>
-
-                            @else
-                                -
-                            @endif
-                        </td>
-
-                        <td>
-                            <input type="file"
-                                   name="pdf_contratto_vendita"
-                                   accept="application/pdf">
-                        </td>
-                    </tr>
-
-                </table>
-
-                <br>
-
-                <button type="submit" class="btn btn-azione">
-                    Salva documenti ordine
-                </button>
-
-            </form>
-
-        </div>
-
-    </details>
-
-@endif
+   
 
 @if($ordine->stato == 'preparazione_contratto')
 
