@@ -301,8 +301,19 @@
            <th>Servizi</th>
     @endif
 
-    @if($ordine->stato == 'preparazione_contratto')
+    {{-- ===================================================== --}}
+{{-- INIZIO INTESTAZIONI VARIABILI TABELLA --}}
+{{-- ===================================================== --}}
 
+@if($ordine->stato == 'preparazione_contratto')
+
+    <th>C.O. fornitore</th>
+
+@elseif($ordine->stato == 'in_lavorazione')
+
+    <th>Stati</th>
+
+    {{-- COLONNA PDF FORNITORE --}}
     <th>C.O. fornitore</th>
 
 @else
@@ -310,6 +321,10 @@
     <th>Stati / PDF</th>
 
 @endif
+
+{{-- ===================================================== --}}
+{{-- FINE INTESTAZIONI VARIABILI TABELLA --}}
+{{-- ===================================================== --}}
 </tr>
 
         @foreach($ordine->righe as $riga)
@@ -710,43 +725,86 @@
 
 <td>
 
-    <form method="POST"
-          action="/righe-ordine/{{ $riga->id }}/aggiorna"
-          enctype="multipart/form-data">
+    
 
-        @csrf
+    {{-- ===================================================== --}}
+    {{-- INIZIO BLOCCO PDF RIGA - IN LAVORAZIONE --}}
+    {{-- ===================================================== --}}
 
-        @if($riga->pdf_path)
+    @if($riga->pdf_path)
+
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:15px;">
 
             <a href="{{ asset('storage/' . $riga->pdf_path) }}"
-   target="_blank">
+               target="_blank"
+               style="text-decoration:none; text-align:center;">
 
-    <iframe src="{{ asset('storage/' . $riga->pdf_path) }}"
-            style="
-                width:120px;
-                height:90px;
-                border:1px solid #ccc;
-                border-radius:5px;
-                background:white;
-            ">
-    </iframe>
+                <div style="
+                    width:70px;
+                    height:80px;
+                    border:1px solid #ccc;
+                    border-radius:6px;
+                    background:#f8f8f8;
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    align-items:center;
+                    font-size:14px;
+                    font-weight:bold;
+                    color:red;
+                ">
+                    📄
+                    <span style="font-size:11px; margin-top:5px;">
+                        PDF
+                    </span>
+                </div>
 
-</a>
+            </a>
+
+            <form method="POST"
+                  action="/righe-ordine/{{ $riga->id }}/elimina-pdf"
+                  style="display:inline; margin:0;">
+
+                @csrf
+
+                <button type="submit"
+                        class="btn btn-elimina"
+                        onclick="return confirm('Eliminare questo PDF?')">
+                    🗑️
+                </button>
+
+            </form>
+
+        </div>
+
+    @else
+
+        <form method="POST"
+              action="/righe-ordine/{{ $riga->id }}/aggiorna"
+              enctype="multipart/form-data">
+
+            @csrf
+
+            <input type="file"
+                   name="pdf"
+                   accept="application/pdf">
+
             <br><br>
 
-        @endif
+            <button type="submit"
+                    class="btn btn-azione">
+                Aggiungi PDF
+            </button>
 
-        <input type="file"
-               name="pdf"
-               accept="application/pdf">
+        </form>
 
-        <br><br>
+    @endif
 
-        <button type="submit" class="btn btn-azione">
-            Salva PDF
-        </button>
+    {{-- ===================================================== --}}
+    {{-- FINE BLOCCO PDF RIGA - IN LAVORAZIONE --}}
+    {{-- ===================================================== --}}
 
-    </form>
+</td>
 
 @elseif($ordine->stato == 'completo_attesa_merce')
 

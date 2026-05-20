@@ -33,11 +33,27 @@
             <th>Cliente</th>
             <th>Commessa</th>
             <th>Tipo intervento</th>
-             @if($statoCorrente == 'programmare_posa')
-            <th>Autoscala</th>
-             @else
-            <th>Totale Cliente Ivato</th>
-             @endif
+
+             {{-- ===================================================== --}}
+             {{-- INIZIO COLONNA VARIABILE LISTA ORDINI --}}
+             {{-- ===================================================== --}}
+
+@if($statoCorrente == 'programmare_posa')
+
+    <th>Autoscala</th>
+
+@elseif($statoCorrente == 'in_lavorazione')
+
+@else
+
+    <th>Totale Cliente Ivato</th>
+
+@endif
+
+            {{-- ===================================================== --}}
+            {{-- FINE COLONNA VARIABILE LISTA ORDINI --}}
+            {{-- ===================================================== --}}
+
             <th>Stato</th>
             <th>Azioni</th>
         </tr>
@@ -78,23 +94,33 @@
                     {{ $ordine->commessa?->tipoIntervento?->nome }}
                 </td>
 
-                @if($statoCorrente == 'programmare_posa')
+               {{-- ===================================================== --}}
+{{-- INIZIO CELLA VARIABILE LISTA ORDINI --}}
+{{-- ===================================================== --}}
+
+@if($statoCorrente == 'programmare_posa')
 
     <td>
+
         @if($ordine->commessa && $ordine->commessa->autoscala)
 
-    <span style="color:red; font-weight:bold;">
-        SI
-    </span>
+            <span style="color:red; font-weight:bold;">
+                SI
+            </span>
 
-@else
+        @else
 
-    <span style="color:green; font-weight:bold;">
-        NO
-    </span>
+            <span style="color:green; font-weight:bold;">
+                NO
+            </span>
 
-@endif
+        @endif
+
     </td>
+
+@elseif($statoCorrente == 'in_lavorazione')
+
+    
 
 @else
 
@@ -103,6 +129,10 @@
     </td>
 
 @endif
+
+{{-- ===================================================== --}}
+{{-- FINE CELLA VARIABILE LISTA ORDINI --}}
+{{-- ===================================================== --}}
 
                 <td>
                     @if($ordine->stato == 'preparazione_contratto')
