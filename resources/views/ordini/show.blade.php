@@ -301,9 +301,7 @@
            <th>Servizi</th>
     @endif
 
-    {{-- ===================================================== --}}
-{{-- INIZIO INTESTAZIONI VARIABILI TABELLA --}}
-{{-- ===================================================== --}}
+
 
 {{-- ===================================================== --}}
 {{-- INIZIO INTESTAZIONI VARIABILI TABELLA --}}
@@ -313,14 +311,30 @@
 
     <th>C.O. fornitore</th>
 
+{{-- ===================================================== --}}
+{{-- INTESTAZIONI IN LAVORAZIONE --}}
+{{-- ===================================================== --}}
+
 @elseif($ordine->stato == 'in_lavorazione')
 
     <th>Stati</th>
     <th>C.O. fornitore</th>
 
+{{-- ===================================================== --}}
+{{-- INTESTAZIONI ATTESA MERCE --}}
+{{-- ===================================================== --}}
+
 @elseif($ordine->stato == 'completo_attesa_merce')
 
     <th>Stati</th>
+    <th>C.O. fornitore</th>
+
+{{-- ===================================================== --}}
+{{-- INTESTAZIONI SALDO MERCE --}}
+{{-- ===================================================== --}}
+
+@elseif($ordine->stato == 'attesa_saldo_merce')
+
     <th>C.O. fornitore</th>
 
 @else
@@ -329,9 +343,6 @@
 
 @endif
 
-{{-- ===================================================== --}}
-{{-- FINE INTESTAZIONI VARIABILI TABELLA --}}
-{{-- ===================================================== --}}
 {{-- ===================================================== --}}
 {{-- FINE INTESTAZIONI VARIABILI TABELLA --}}
 {{-- ===================================================== --}}
@@ -743,6 +754,9 @@
 
     @if($riga->pdf_path)
 
+    {{-- PDF PRESENTE PER CONTROLLO PASSAGGIO AD ATTESA MERCE --}}
+        <span class="pdf-riga-presente" style="display:none;"></span>
+
         <div style="display:flex; gap:12px; align-items:center; margin-bottom:15px;">
 
             <a href="{{ asset('storage/' . $riga->pdf_path) }}"
@@ -777,6 +791,7 @@
 
                 @csrf
 
+
                 <button type="submit"
                         class="btn btn-elimina"
                         onclick="return confirm('Eliminare questo PDF?')">
@@ -794,6 +809,22 @@
               enctype="multipart/form-data">
 
             @csrf
+ {{-- ===================================================== --}}
+    {{-- MANTIENE FLAG STATI DURANTE UPLOAD PDF --}}
+    {{-- ===================================================== --}}
+
+    @if($riga->inviato)
+        <input type="hidden" name="inviato" value="1">
+    @endif
+
+    @if($riga->co_ricevuta)
+        <input type="hidden" name="co_ricevuta" value="1">
+    @endif
+
+    @if($riga->in_produzione)
+        <input type="hidden" name="in_produzione" value="1">
+    @endif
+
 
             <input type="file"
                    name="pdf"
@@ -900,6 +931,51 @@
 
 
 </td>
+@elseif($ordine->stato == 'attesa_saldo_merce')
+
+    {{-- ===================================================== --}}
+    {{-- INIZIO PDF RIGA - SALDO MERCE PRONTA SOLO VISUALIZZAZIONE --}}
+    {{-- ===================================================== --}}
+
+    @if($riga->pdf_path)
+
+        <a href="{{ asset('storage/' . $riga->pdf_path) }}"
+           target="_blank"
+           style="text-decoration:none; text-align:center; display:inline-block;">
+
+            <div style="
+                width:70px;
+                height:80px;
+                border:1px solid #ccc;
+                border-radius:6px;
+                background:#f8f8f8;
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                align-items:center;
+                font-size:14px;
+                font-weight:bold;
+                color:red;
+            ">
+                📄
+
+                <span style="font-size:11px; margin-top:5px;">
+                    PDF
+                </span>
+            </div>
+
+        </a>
+
+    @else
+
+        -
+
+    @endif
+
+    {{-- ===================================================== --}}
+    {{-- FINE PDF RIGA - SALDO MERCE PRONTA SOLO VISUALIZZAZIONE --}}
+    {{-- ===================================================== --}}
+
 @else
 
     @if($riga->pdf_path)
@@ -1477,10 +1553,22 @@ function confermaAvanzamentoRiga(form) {
         let tutteProduzione = tutteSpuntate('.chk-produzione');
 
         if (tutteInviato && tutteCo && tutteProduzione) {
-            return confirm(
-                'Tutte le righe risultano complete.\n\nL ordine verrà spostato in: Completo - attesa merce.\n\nConfermi?'
-            );
-        }
+
+    let righeProdotto = document.querySelectorAll('.chk-produzione');
+    let pdfPresenti = document.querySelectorAll('.pdf-riga-presente');
+
+    if (pdfPresenti.length < righeProdotto.length) {
+        alert(
+            'Prima di passare in Attesa merce devi allegare un PDF C.O. fornitore per ogni riga prodotto.'
+        );
+
+        return false;
+    }
+
+    return confirm(
+        'Tutte le righe risultano complete e ogni riga ha il PDF C.O. fornitore.\n\nL ordine verrà spostato in: Completo - attesa merce.\n\nConfermi?'
+    );
+}
     }
 
     if (statoOrdine === 'completo_attesa_merce') {
