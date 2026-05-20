@@ -42,7 +42,11 @@
 
     <th>Autoscala</th>
 
-@elseif($statoCorrente == 'in_lavorazione')
+{{-- NASCONDI TOTALE IVATO --}}
+    @elseif(
+    $statoCorrente == 'in_lavorazione' ||
+    $statoCorrente == 'completo_attesa_merce'
+    )
 
 @else
 
@@ -118,7 +122,11 @@
 
     </td>
 
-@elseif($statoCorrente == 'in_lavorazione')
+{{-- NASCONDI TOTALE IVATO --}}
+@elseif(
+    $statoCorrente == 'in_lavorazione' ||
+    $statoCorrente == 'completo_attesa_merce'
+)
 
     
 

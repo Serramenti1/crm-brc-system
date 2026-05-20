@@ -305,6 +305,10 @@
 {{-- INIZIO INTESTAZIONI VARIABILI TABELLA --}}
 {{-- ===================================================== --}}
 
+{{-- ===================================================== --}}
+{{-- INIZIO INTESTAZIONI VARIABILI TABELLA --}}
+{{-- ===================================================== --}}
+
 @if($ordine->stato == 'preparazione_contratto')
 
     <th>C.O. fornitore</th>
@@ -312,8 +316,11 @@
 @elseif($ordine->stato == 'in_lavorazione')
 
     <th>Stati</th>
+    <th>C.O. fornitore</th>
 
-    {{-- COLONNA PDF FORNITORE --}}
+@elseif($ordine->stato == 'completo_attesa_merce')
+
+    <th>Stati</th>
     <th>C.O. fornitore</th>
 
 @else
@@ -322,6 +329,9 @@
 
 @endif
 
+{{-- ===================================================== --}}
+{{-- FINE INTESTAZIONI VARIABILI TABELLA --}}
+{{-- ===================================================== --}}
 {{-- ===================================================== --}}
 {{-- FINE INTESTAZIONI VARIABILI TABELLA --}}
 {{-- ===================================================== --}}
@@ -808,57 +818,99 @@
 
 @elseif($ordine->stato == 'completo_attesa_merce')
 
-        <form id="form_riga_{{ $riga->id }}"
-              method="POST"
-              action="/righe-ordine/{{ $riga->id }}/aggiorna"
-              enctype="multipart/form-data"
-              onsubmit="return confermaAvanzamentoRiga(this)">
+    {{-- ===================================================== --}}
+    {{-- INIZIO COLONNA STATI - ATTESA MERCE --}}
+    {{-- ===================================================== --}}
 
-            @csrf
+    <form id="form_riga_{{ $riga->id }}"
+          method="POST"
+          action="/righe-ordine/{{ $riga->id }}/aggiorna"
+          onsubmit="return confermaAvanzamentoRiga(this)">
 
-            <label>
-                <input type="checkbox"
-                       class="chk-merce"
-                       name="merce_arrivata"
-                       value="1"
-                       {{ $riga->merce_arrivata ? 'checked' : '' }}>
-                Merce arrivata
-            </label>
+        @csrf
 
-            <br><br>
+        <label>
+            <input type="checkbox"
+                   class="chk-merce"
+                   name="merce_arrivata"
+                   value="1"
+                   {{ $riga->merce_arrivata ? 'checked' : '' }}>
 
-            @if($riga->pdf_path)
-                <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
-                    Apri PDF
-                </a>
-                <br>
-            @endif
+            Merce arrivata
+        </label>
 
-            <input type="file"
-                   name="pdf"
-                   accept="application/pdf">
+        <br><br>
 
-            <br><br>
+        <button type="submit" class="btn btn-azione">
+            Salva stato
+        </button>
 
-            <button type="submit" class="btn btn-azione">
-                Salva
-            </button>
+    </form>
 
-        </form>
+    {{-- ===================================================== --}}
+    {{-- FINE COLONNA STATI - ATTESA MERCE --}}
+    {{-- ===================================================== --}}
+
+</td>
+
+<td>
+
+    {{-- ===================================================== --}}
+    {{-- INIZIO COLONNA PDF - ATTESA MERCE SOLO VISUALIZZAZIONE --}}
+    {{-- ===================================================== --}}
+
+    @if($riga->pdf_path)
+
+        <a href="{{ asset('storage/' . $riga->pdf_path) }}"
+           target="_blank"
+           style="text-decoration:none; text-align:center; display:inline-block;">
+
+            <div style="
+                width:70px;
+                height:80px;
+                border:1px solid #ccc;
+                border-radius:6px;
+                background:#f8f8f8;
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                align-items:center;
+                font-size:14px;
+                font-weight:bold;
+                color:red;
+            ">
+                📄
+
+                <span style="font-size:11px; margin-top:5px;">
+                    PDF
+                </span>
+            </div>
+
+        </a>
 
     @else
 
-        @if($riga->pdf_path)
-            <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
-                Apri PDF
-            </a>
-        @else
-            -
-        @endif
+        -
 
     @endif
 
+    {{-- ===================================================== --}}
+    {{-- FINE COLONNA PDF - ATTESA MERCE SOLO VISUALIZZAZIONE --}}
+    {{-- ===================================================== --}}
+
+
 </td>
+@else
+
+    @if($riga->pdf_path)
+        <a href="{{ asset('storage/' . $riga->pdf_path) }}" target="_blank">
+            Apri PDF
+        </a>
+    @else
+        -
+    @endif
+
+@endif
 
             </tr>
             
