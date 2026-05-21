@@ -333,13 +333,26 @@
 {{-- INTESTAZIONI SALDO MERCE --}}
 {{-- ===================================================== --}}
 
-@elseif($ordine->stato == 'attesa_saldo_merce')
+{{-- ===================================================== --}}
+{{-- INTESTAZIONI SALDO MERCE / PROGRAMMARE POSA --}}
+{{-- ===================================================== --}}
+
+{{-- ===================================================== --}}
+{{-- INTESTAZIONI SALDO MERCE / PROGRAMMARE POSA / CONCLUSI --}}
+{{-- ===================================================== --}}
+
+@elseif(
+    $ordine->stato == 'attesa_saldo_merce' ||
+    $ordine->stato == 'programmare_posa' ||
+    $ordine->stato == 'concluso' ||
+    $ordine->stato == 'archiviato'
+)
 
     <th>C.O. fornitore</th>
 
 @else
 
-    <th>Stati / PDF</th>
+    <th>C.O. fornitore</th>
 
 @endif
 
@@ -975,6 +988,105 @@
     {{-- ===================================================== --}}
     {{-- FINE PDF RIGA - SALDO MERCE PRONTA SOLO VISUALIZZAZIONE --}}
     {{-- ===================================================== --}}
+
+    {{-- ===================================================== --}}
+{{-- PDF RIGA - PROGRAMMARE POSA SOLO VISUALIZZAZIONE --}}
+{{-- ===================================================== --}}
+
+@elseif($ordine->stato == 'programmare_posa')
+
+    @if($riga->pdf_path)
+
+        <a href="{{ asset('storage/' . $riga->pdf_path) }}"
+           target="_blank"
+           style="text-decoration:none; text-align:center; display:inline-block;">
+
+            <div style="
+                width:70px;
+                height:80px;
+                border:1px solid #ccc;
+                border-radius:6px;
+                background:#f8f8f8;
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                align-items:center;
+                font-size:14px;
+                font-weight:bold;
+                color:red;
+            ">
+                📄
+
+                <span style="font-size:11px; margin-top:5px;">
+                    PDF
+                </span>
+
+            </div>
+
+        </a>
+
+    @else
+
+        -
+
+    @endif
+
+{{-- ===================================================== --}}
+{{-- FINE PDF RIGA - PROGRAMMARE POSA --}}
+{{-- ===================================================== --}}
+
+{{-- ===================================================== --}}
+{{-- PDF RIGA - POSA IN CORSO SOLO VISUALIZZAZIONE --}}
+{{-- ===================================================== --}}
+
+{{-- ===================================================== --}}
+{{-- PDF RIGA - POSA IN CORSO / CONCLUSI SOLO VISUALIZZAZIONE --}}
+{{-- ===================================================== --}}
+
+@elseif(
+    $ordine->stato == 'concluso' ||
+    $ordine->stato == 'archiviato'
+)
+
+    @if($riga->pdf_path)
+
+        <a href="{{ asset('storage/' . $riga->pdf_path) }}"
+           target="_blank"
+           style="text-decoration:none; text-align:center; display:inline-block;">
+
+            <div style="
+                width:70px;
+                height:80px;
+                border:1px solid #ccc;
+                border-radius:6px;
+                background:#f8f8f8;
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                align-items:center;
+                font-size:14px;
+                font-weight:bold;
+                color:red;
+            ">
+                📄
+
+                <span style="font-size:11px; margin-top:5px;">
+                    PDF
+                </span>
+
+            </div>
+
+        </a>
+
+    @else
+
+        -
+
+    @endif
+
+{{-- ===================================================== --}}
+{{-- FINE PDF RIGA - POSA IN CORSO --}}
+{{-- ===================================================== --}}
 
 @else
 

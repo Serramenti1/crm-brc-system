@@ -233,8 +233,63 @@ foreach ($riga->servizi as $servizio) {
                 Storage::disk('public')->delete($riga->pdf_path);
             }
 
-            $path = $request->file('pdf')->store('ordini_pdf', 'public');
-            $riga->pdf_path = $path;
+            // =====================================================//
+            // INIZIO GENERAZIONE NOME PDF C.O. FORNITORE
+           // =====================================================
+
+$cliente = strtolower(
+    str_replace(
+        ' ',
+        '-',
+        $ordine->commessa->cliente->nome . '-' .
+        $ordine->commessa->cliente->cognome
+    )
+);
+
+$commessa = strtolower(
+    str_replace(
+        ' ',
+        '-',
+        $ordine->commessa->titolo
+    )
+);
+
+$fornitore = strtolower(
+    str_replace(
+        ' ',
+        '-',
+        $riga->fornitore->ragione_sociale
+    )
+);
+
+$nomeBase =
+    $ordine->numero . '-' .
+    $cliente . '-' .
+    $commessa . '-' .
+    $fornitore . '-co';
+
+$nomeFile = $nomeBase . '.pdf';
+
+$contatore = 1;
+
+while (
+    \Storage::disk('public')->exists('ordini_pdf/' . $nomeFile)
+) {
+
+    $nomeFile =
+        $nomeBase . '-' .
+        $contatore . '.pdf';
+
+    $contatore++;
+}
+
+$path = $request->file('pdf')->storeAs(
+    'ordini_pdf',
+    $nomeFile,
+    'public'
+);
+
+$riga->pdf_path = $path;
         }
 
         $riga->save();
@@ -556,9 +611,89 @@ foreach ($riga->servizi as $servizio) {
                 Storage::disk('public')->delete($ordine->$campo);
             }
 
-            $ordine->$campo = $request
-                ->file($campo)
-                ->store('ordini_documenti', 'public');
+            // =====================================================
+// INIZIO GENERAZIONE NOME DOCUMENTO ORDINE
+// =====================================================
+
+$cliente = strtolower(
+    str_replace(
+        ' ',
+        '-',
+        $ordine->commessa->cliente->nome . '-' .
+        $ordine->commessa->cliente->cognome
+    )
+);
+
+$commessa = strtolower(
+    str_replace(
+        ' ',
+        '-',
+        $ordine->commessa->titolo
+    )
+);
+
+// =====================================================
+// DEFINIZIONE TIPO DOCUMENTO
+// =====================================================
+
+$tipoDocumento = 'documento';
+
+if ($campo == 'pdf_foglio_smaltimento') {
+    $tipoDocumento = 'foglio-smaltimento';
+}
+
+if ($campo == 'pdf_contratto_posatori') {
+    $tipoDocumento = 'contratto-posatori';
+}
+
+if ($campo == 'pdf_contratto_vendita') {
+    $tipoDocumento = 'contratto-vendita';
+}
+
+// =====================================================
+// GENERAZIONE NOME FILE
+// =====================================================
+
+$nomeBase =
+    $ordine->numero . '-' .
+    $cliente . '-' .
+    $commessa . '-' .
+    $tipoDocumento;
+
+$nomeFile = $nomeBase . '.pdf';
+
+$contatore = 1;
+
+while (
+    Storage::disk('public')->exists(
+        'ordini_documenti/' . $nomeFile
+    )
+) {
+
+    $nomeFile =
+        $nomeBase . '-' .
+        $contatore . '.pdf';
+
+    $contatore++;
+}
+
+// =====================================================
+// SALVATAGGIO FILE
+// =====================================================
+
+$path = $request
+    ->file($campo)
+    ->storeAs(
+        'ordini_documenti',
+        $nomeFile,
+        'public'
+    );
+
+$ordine->$campo = $path;
+
+// =====================================================
+// FINE GENERAZIONE NOME DOCUMENTO ORDINE
+// =====================================================
         }
     }
 
