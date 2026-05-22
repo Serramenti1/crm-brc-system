@@ -155,7 +155,11 @@ return view('preventivi.show', compact(
     public function aggiungiRigaProdotto(Request $request, $id)
     {
         $request->validate([
-            'fornitore_id' => 'nullable|exists:fornitori,id',
+            // =====================================================
+            // FORNITORE OBBLIGATORIO
+            // =====================================================
+
+            'fornitore_id' => 'required|exists:fornitori,id',
             'descrizione' => 'required|string|max:255',
             'modalita_calcolo' => 'required|in:da_listino,da_costo_netto',
             'quantita' => 'nullable|numeric|min:0',

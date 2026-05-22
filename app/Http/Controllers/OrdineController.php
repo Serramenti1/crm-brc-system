@@ -254,6 +254,25 @@ $commessa = strtolower(
     )
 );
 
+// =====================================================
+// CONTROLLO FORNITORE OBBLIGATORIO
+// =====================================================
+
+if (!$riga->fornitore) {
+
+    return redirect('/ordini/' . $ordine->id)
+        ->with(
+            'error',
+            'Impossibile caricare il PDF. La riga "' .
+            $riga->descrizione .
+            '" non ha un fornitore assegnato.'
+        );
+}
+
+// =====================================================
+// GENERAZIONE NOME FORNITORE
+// =====================================================
+
 $fornitore = strtolower(
     str_replace(
         ' ',

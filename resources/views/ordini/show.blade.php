@@ -110,16 +110,22 @@
             <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
 
                 <form method="POST"
-                      action="/ordini/{{ $ordine->id }}/righe-prodotti">
+                 action="/ordini/{{ $ordine->id }}/righe-prodotti"
+                 onsubmit="return controllaFornitoreOrdine()">
 
                     @csrf
 
                     <p>
                         Fornitore<br>
 
+                        {{-- ===================================================== --}}
+                        {{-- FORNITORE OBBLIGATORIO ORDINE --}}
+                        {{-- ===================================================== --}}
+
                         <select name="fornitore_id"
-                                id="fornitore_select_nuovo"
-                                onchange="caricaProdottiNuovo()">
+                        id="fornitore_select_nuovo"
+                        onchange="caricaProdottiNuovo()"
+                        required>
 
                             <option value="">
                                 -- Seleziona --
@@ -1717,6 +1723,21 @@ function confermaAvanzamentoAvanzato(form) {
         }
     }
 
+    // =====================================================
+// CONFERMA PASSAGGIO DA SALDO MERCE PRONTA A PROGRAMMARE POSA
+// =====================================================
+
+if (statoOrdine === 'attesa_saldo_merce') {
+
+    let saldoMerce = document.getElementById('saldo_merce_ricevuto');
+
+    if (saldoMerce && saldoMerce.checked) {
+        return confirm(
+            'Saldo merce ricevuto.\n\nL ordine verrà spostato in: Programmare posa.\n\nConfermi?'
+        );
+    }
+}
+
     if (statoOrdine === 'programmare_posa') {
 
         let posa = document.getElementById('posa_effettuata');
@@ -1762,6 +1783,22 @@ function compilaServizioExtraOrdine(rigaId){
 
     document.getElementById('ricarico_servizio_ordine_' + rigaId).value =
         option.dataset.ricarico;
+}
+
+// =====================================================
+// CONTROLLO FORNITORE OBBLIGATORIO ORDINE
+// =====================================================
+
+function controllaFornitoreOrdine() {
+
+    let fornitore = document.getElementById('fornitore_select_nuovo');
+
+    if (!fornitore || fornitore.value === '') {
+        alert('Seleziona un fornitore prima di salvare il prodotto.');
+        return false;
+    }
+
+    return true;
 }
 
 

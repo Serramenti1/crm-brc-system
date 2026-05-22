@@ -29,13 +29,21 @@
             <strong>+ Aggiungi prodotto</strong>
         </summary>
 
-        <form method="POST" action="/preventivi/{{ $preventivo->id }}/aggiungi-riga-prodotto">
+        <form method="POST"
+      action="/preventivi/{{ $preventivo->id }}/aggiungi-riga-prodotto"
+      onsubmit="return controllaFornitorePreventivo()">
             @csrf
 
             <p>
                 Fornitore<br>
 
-                <select id="fornitore_select" onchange="filtraProdottiPerFornitore()">
+                {{-- ===================================================== --}}
+{{-- FORNITORE OBBLIGATORIO --}}
+{{-- ===================================================== --}}
+
+<select id="fornitore_select"
+        onchange="filtraProdottiPerFornitore()"
+        required>
                     <option value="">-- Seleziona fornitore --</option>
 
                     @foreach($fornitori as $fornitore)
@@ -584,4 +592,20 @@ function compilaServizioExtra(rigaId){
     document.getElementById('ricarico_servizio_' + rigaId).value =
         option.dataset.ricarico;
 }
+// =====================================================
+// CONTROLLO FORNITORE OBBLIGATORIO PREVENTIVO
+// =====================================================
+
+function controllaFornitorePreventivo() {
+
+    let fornitore = document.getElementById('fornitore_id');
+
+    if (!fornitore || fornitore.value === '') {
+        alert('Seleziona un fornitore prima di salvare il prodotto.');
+        return false;
+    }
+
+    return true;
+}
+
 </script>
