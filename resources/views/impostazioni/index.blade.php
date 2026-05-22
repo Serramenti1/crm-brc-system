@@ -35,6 +35,12 @@
        <p>Crea un backup completo di database, PDF e configurazione</p>
     </a>
 
+    <a href="/impostazioni/importa-clienti"
+      style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
+    <h3>Importa clienti Excel</h3>
+    <p>Carica un file Excel e collega le colonne ai campi cliente</p>
+    </a>
+
 
     <a href="/fornitori"
        style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">

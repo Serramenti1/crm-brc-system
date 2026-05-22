@@ -14,6 +14,7 @@ use App\Models\Ordine;
 use App\Http\Controllers\RigaOrdineController;
 use App\Http\Controllers\RigaOrdineServizioController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\ImportaClientiController;
 
 Route::get('/', function () {
     $conteggiOrdini = [
@@ -56,6 +57,13 @@ Route::post('/ordini/{id}/aggiorna-stato-avanzato', [OrdineController::class, 'a
 
 Route::put('/servizi-riga/{id}', [RigaPreventivoServizioController::class, 'update']);
 Route::delete('/servizi-riga/{id}', [RigaPreventivoServizioController::class, 'destroy']);
+
+// =====================================================
+// IMPORTAZIONE CLIENTI DA EXCEL
+// =====================================================
+Route::get('/impostazioni/importa-clienti', [ImportaClientiController::class, 'index']);
+Route::post('/impostazioni/importa-clienti/anteprima', [ImportaClientiController::class, 'anteprima']);
+Route::post('/impostazioni/importa-clienti/importa', [ImportaClientiController::class, 'importa']);
 
 Route::get('/impostazioni', [ImpostazioneController::class, 'index']);
 Route::get('/impostazioni/iva', [ImpostazioneController::class, 'iva']);
