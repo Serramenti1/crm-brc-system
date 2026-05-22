@@ -1256,9 +1256,25 @@
 
     <br>
 
+    {{-- ===================================================== --}}
+{{-- DATI DOCUMENTI ORDINE PER CONTROLLO AVANZAMENTO --}}
+{{-- ===================================================== --}}
+
+<input type="hidden"
+       id="pdf_foglio_smaltimento_presente"
+       value="{{ $ordine->pdf_foglio_smaltimento ? 1 : 0 }}">
+
+<input type="hidden"
+       id="pdf_contratto_posatori_presente"
+       value="{{ $ordine->pdf_contratto_posatori ? 1 : 0 }}">
+
+<input type="hidden"
+       id="pdf_contratto_vendita_presente"
+       value="{{ $ordine->pdf_contratto_vendita ? 1 : 0 }}">
+
     <h2>Documenti ordine</h2>
 
-    <details style="margin-bottom:20px;">
+    <details id="documenti_ordine_box" style="margin-bottom:20px;">
 
         <summary>
             <strong>+ Gestisci documenti</strong>
@@ -1717,26 +1733,54 @@ function confermaAvanzamentoAvanzato(form) {
             contratto.checked &&
             acconto.checked
         ) {
-            return confirm(
-                'Rilievo effettuato, contratto firmato e acconto versato.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
-            );
+            let foglioSmaltimento = document.getElementById('pdf_foglio_smaltimento_presente');
+let contrattoPosatori = document.getElementById('pdf_contratto_posatori_presente');
+let contrattoVendita = document.getElementById('pdf_contratto_vendita_presente');
+
+if (
+    !foglioSmaltimento ||
+    !contrattoPosatori ||
+    !contrattoVendita ||
+    foglioSmaltimento.value != 1 ||
+    contrattoPosatori.value != 1 ||
+    contrattoVendita.value != 1
+) {
+    alert(
+        'Per passare a In lavorazione devi caricare tutti i documenti ordine:\n\n' +
+        '- Foglio smaltimento\n' +
+        '- Contratto copia posatori\n' +
+        '- Contratto vendita'
+    );
+
+    let boxDocumenti = document.getElementById('documenti_ordine_box');
+
+    if (boxDocumenti) {
+        boxDocumenti.open = true;
+        boxDocumenti.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+    return false;
+}
+
+return confirm(
+    'Rilievo effettuato, contratto firmato, acconto versato e documenti caricati.\n\nL ordine verrà spostato in: In lavorazione.\n\nConfermi?'
+);
         }
     }
 
-    // =====================================================
-// CONFERMA PASSAGGIO DA SALDO MERCE PRONTA A PROGRAMMARE POSA
-// =====================================================
+    if (statoOrdine === 'attesa_saldo_merce') {
 
-if (statoOrdine === 'attesa_saldo_merce') {
+        let saldoMerce = document.getElementById('saldo_merce_ricevuto');
 
-    let saldoMerce = document.getElementById('saldo_merce_ricevuto');
-
-    if (saldoMerce && saldoMerce.checked) {
-        return confirm(
-            'Saldo merce ricevuto.\n\nL ordine verrà spostato in: Programmare posa.\n\nConfermi?'
-        );
+        if (saldoMerce && saldoMerce.checked) {
+            return confirm(
+                'Saldo merce ricevuto.\n\nL ordine verrà spostato in: Programmare posa.\n\nConfermi?'
+            );
+        }
     }
-}
 
     if (statoOrdine === 'programmare_posa') {
 
@@ -1744,21 +1788,21 @@ if (statoOrdine === 'attesa_saldo_merce') {
 
         if (posa && posa.checked) {
             return confirm(
-                'Posa programmata.\n\nL ordine verrà spostato in: posa in corso.\n\nConfermi?'
+                'Posa programmata.\n\nL ordine verrà spostato in: Posa in corso.\n\nConfermi?'
             );
         }
     }
 
     if (statoOrdine === 'concluso') {
 
-    let chiusuraCantiere = document.getElementById('saldo_finale_ricevuto');
+        let chiusuraCantiere = document.getElementById('saldo_finale_ricevuto');
 
-    if (chiusuraCantiere && chiusuraCantiere.checked) {
-        return confirm(
-            'Chiusura cantiere eseguita.\n\nL ordine verrà spostato in: Conclusi / Archiviati.\n\nConfermi?'
-        );
+        if (chiusuraCantiere && chiusuraCantiere.checked) {
+            return confirm(
+                'Chiusura cantiere eseguita.\n\nL ordine verrà spostato in: Conclusi / Archiviati.\n\nConfermi?'
+            );
+        }
     }
-}
 
     return true;
 }
