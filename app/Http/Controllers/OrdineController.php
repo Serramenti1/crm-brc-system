@@ -192,7 +192,7 @@ foreach ($riga->servizi as $servizio) {
 }
         }
 
-        return redirect('/ordini/' . $ordine->id)
+        return redirect('/ordini/' . $ordine->id . '#top-ordine')
             ->with('success', 'Ordine creato correttamente. Stato: Preparazione contratto.');
     }
 
@@ -406,7 +406,7 @@ $riga->pdf_path = $path;
                 ->with('success', $messaggioCambioStato);
         }
 
-        return redirect('/ordini/' . $ordine->id)
+        return redirect('/ordini/' . $ordine->id . '#top-ordine')
             ->with('success', 'Stato ordine aggiornato correttamente.');
     }
 
