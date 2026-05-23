@@ -7,7 +7,7 @@
         'completo_attesa_merce' => 'Ordini in attesa merce',
         'attesa_saldo_merce' => 'Ordini in attesa saldo merce',
         'programmare_posa' => 'Ordini da programmare posa',
-        'concluso' => 'Ordini conclusi',
+        'concluso' => 'Posa in corso',
         'archiviato' => 'Ordini archiviati',
     ];
 
