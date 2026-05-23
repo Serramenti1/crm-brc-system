@@ -144,3 +144,40 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<script>
+
+// =====================================================
+// DISATTIVA AUTOCOMPILAZIONE CRM
+// =====================================================
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    let forms = document.querySelectorAll('form');
+
+    forms.forEach(function(form) {
+
+        form.setAttribute('autocomplete', 'off');
+
+        let inputs = form.querySelectorAll('input, textarea, select');
+
+        inputs.forEach(function(input) {
+
+            input.setAttribute('autocomplete', 'off');
+
+            // Chrome / Edge workaround
+            if (
+                input.type === 'text' ||
+                input.type === 'email' ||
+                input.type === 'tel'
+            ) {
+                input.setAttribute(
+                    'autocomplete',
+                    'new-password'
+                );
+            }
+        });
+    });
+});
+
+</script>
