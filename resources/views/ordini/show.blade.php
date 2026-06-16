@@ -693,22 +693,23 @@
 @else
 
     <form method="POST"
-          action="/righe-ordine/{{ $riga->id }}/aggiorna"
-          enctype="multipart/form-data">
+      action="/righe-ordine/{{ $riga->id }}/aggiorna"
+      enctype="multipart/form-data"
+      onsubmit="return controllaPdfSelezionato(this)">
 
-        @csrf
+    @csrf
 
-        <input type="file"
-               name="pdf"
-               accept="application/pdf">
+    <input type="file"
+           name="pdf"
+           accept="application/pdf">
 
-        <br><br>
+    <br><br>
 
-        <button type="submit" class="btn btn-azione">
-            Aggiungi PDF
-        </button>
+    <button type="submit" class="btn btn-azione">
+        Aggiungi PDF
+    </button>
 
-    </form>
+</form>
 
 @endif
 
@@ -824,13 +825,12 @@
     @else
 
         <form method="POST"
-              action="/righe-ordine/{{ $riga->id }}/aggiorna"
-              enctype="multipart/form-data">
+      action="/righe-ordine/{{ $riga->id }}/aggiorna"
+      enctype="multipart/form-data"
+      onsubmit="return controllaPdfSelezionato(this)">
 
-            @csrf
- {{-- ===================================================== --}}
+    @csrf
     {{-- MANTIENE FLAG STATI DURANTE UPLOAD PDF --}}
-    {{-- ===================================================== --}}
 
     @if($riga->inviato)
         <input type="hidden" name="inviato" value="1">
@@ -1366,21 +1366,24 @@
                 <td>
 
                     <form method="POST"
-                          action="/ordini/{{ $ordine->id }}/documenti"
-                          enctype="multipart/form-data">
+      action="/ordini/{{ $ordine->id }}/documenti"
+      enctype="multipart/form-data"
+      onsubmit="return controllaPdfSelezionato(this)">
 
-                        @csrf
+    @csrf
 
-                        <input type="file"
-                               name="{{ $campo }}"
-                               accept="application/pdf">
+    <input type="file"
+           name="{{ $campo }}"
+           accept="application/pdf">
 
-                        <br><br>
+    <br><br>
 
-                        <button type="submit"
-                                class="btn btn-azione">
-                            Aggiungi PDF
-                        </button>
+    <button type="submit"
+            class="btn btn-azione">
+        Aggiungi PDF
+    </button>
+
+</form>
 
                     </form>
 
@@ -1842,6 +1845,21 @@ function controllaFornitoreOrdine() {
         return false;
     }
 
+    return true;
+}
+
+// =====================================================
+// CONTROLLO PDF SELEZIONATO PRIMA DELL'UPLOAD
+// =====================================================
+function controllaPdfSelezionato(form) {
+    let input = form.querySelector('input[type="file"]');
+    if (!input || !input.files || input.files.length === 0) {
+        alert('Seleziona un file PDF prima di procedere.');
+        if (input) {
+            input.focus();
+        }
+        return false;
+    }
     return true;
 }
 
