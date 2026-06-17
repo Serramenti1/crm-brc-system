@@ -33,9 +33,11 @@ class Preventivo extends Model
     }
 
     public function righeProdotti()
-    {
-        return $this->hasMany(RigaPreventivoProdotto::class);
-    }
+{
+    return $this->hasMany(RigaPreventivoProdotto::class)
+                ->orderBy('ordine_visualizzazione')
+                ->orderBy('id');
+}
 
     public function ordine()
     {
