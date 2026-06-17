@@ -190,9 +190,9 @@
             <th>Servizi</th>
         </tr>
 
-        @foreach($preventivo->righeProdotti as $riga)
+        @foreach($preventivo->righeProdotti->sortBy('ordine_visualizzazione') as $riga)
 
-            <tr>
+    <tr>
 
                 <td>
                     <strong>{{ $riga->descrizione }}</strong><br>
@@ -218,34 +218,55 @@
                 </td>
 
                 <td class="azioni">
-                    <div class="azioni-bottoni">
+    <div class="azioni-bottoni">
 
-                        <a
-                            href="/righe-preventivo-prodotti/{{ $riga->id }}/edit"
-                            class="btn btn-azione"
-                        >
-                            Modifica
-                        </a>
+        <a
+            href="/righe-preventivo-prodotti/{{ $riga->id }}/edit"
+            class="btn btn-azione"
+        >
+            Modifica
+        </a>
 
-                        <form
-                            action="/righe-preventivo-prodotti/{{ $riga->id }}"
-                            method="POST"
-                            class="form-elimina"
-                        >
-                            @csrf
-                            @method('DELETE')
+        <form
+            action="/righe-preventivo-prodotti/{{ $riga->id }}"
+            method="POST"
+            class="form-elimina"
+        >
+            @csrf
+            @method('DELETE')
 
-                            <button
-                                type="submit"
-                                class="btn btn-elimina"
-                                onclick="return confirm('Eliminare questa riga prodotto?')"
-                            >
-                                🗑️
-                            </button>
-                        </form>
+            <button
+                type="submit"
+                class="btn btn-elimina"
+                onclick="return confirm('Eliminare questa riga prodotto?')"
+            >
+                🗑️
+            </button>
+        </form>
 
-                    </div>
-                </td>
+        {{-- FRECCE RIORDINO RIGHE --}}
+        @if(!$loop->first)
+            <form method="POST"
+                  action="/righe-preventivo-prodotti/{{ $riga->id }}/sposta"
+                  style="display:inline;">
+                @csrf
+                <input type="hidden" name="direzione" value="su">
+                <button type="submit" class="btn btn-azione" title="Sposta su">↑</button>
+            </form>
+        @endif
+
+        @if(!$loop->last)
+            <form method="POST"
+                  action="/righe-preventivo-prodotti/{{ $riga->id }}/sposta"
+                  style="display:inline;">
+                @csrf
+                <input type="hidden" name="direzione" value="giu">
+                <button type="submit" class="btn btn-azione" title="Sposta giù">↓</button>
+            </form>
+        @endif
+
+    </div>
+</td>
 
                 <td>
 

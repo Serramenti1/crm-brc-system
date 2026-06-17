@@ -140,6 +140,49 @@ class RigaPreventivoProdottoController extends Controller
         return redirect('/preventivi/' . $preventivoId);
     }
 
+    public function sposta($id, Request $request)
+{
+    $riga = RigaPreventivoProdotto::findOrFail($id);
+    $direzione = $request->input('direzione'); // 'su' o 'giu'
+
+    // Prendo tutte le righe dello stesso preventivo ordinate
+    $righe = RigaPreventivoProdotto::where('preventivo_id', $riga->preventivo_id)
+        ->orderBy('ordine_visualizzazione')
+        ->orderBy('id')
+        ->get();
+
+    // Normalizzo i valori ordine_visualizzazione (0,1,2,3...)
+    foreach ($righe as $i => $r) {
+        $r->ordine_visualizzazione = $i;
+        $r->save();
+    }
+
+    // Ricarico dopo normalizzazione
+    $righe = RigaPreventivoProdotto::where('preventivo_id', $riga->preventivo_id)
+        ->orderBy('ordine_visualizzazione')
+        ->get();
+
+    $posizione = $righe->search(fn($r) => $r->id === $riga->id);
+
+    if ($direzione === 'su' && $posizione > 0) {
+        $rigaAdiacente = $righe[$posizione - 1];
+        $rigaAdiacente->ordine_visualizzazione = $posizione;
+        $rigaAdiacente->save();
+        $riga->ordine_visualizzazione = $posizione - 1;
+        $riga->save();
+    }
+
+    if ($direzione === 'giu' && $posizione < $righe->count() - 1) {
+        $rigaAdiacente = $righe[$posizione + 1];
+        $rigaAdiacente->ordine_visualizzazione = $posizione;
+        $rigaAdiacente->save();
+        $riga->ordine_visualizzazione = $posizione + 1;
+        $riga->save();
+    }
+
+    return redirect('/preventivi/' . $riga->preventivo_id);
+}
+
     private function calcolaRiga(Request $request)
     {
         $modalita = $request->modalita_calcolo ?? 'da_listino';

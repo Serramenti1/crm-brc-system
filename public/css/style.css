@@ -68,12 +68,18 @@ a.btn-azione:hover {
 /* BOTTONE ELIMINA */
 .btn-elimina {
     background: #60a5fa;
+
     width: 38px;
-    height: 36px;
+    height: 34px;
+
     padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
     font-size: 16px;
-    line-height: 36px;
-    text-align: center;
 }
 
 .btn-elimina:hover {
@@ -481,4 +487,75 @@ label input[type="checkbox"] {
     justify-content: center !important;
     width: auto !important;
     margin: 0 !important;
+}
+
+/* ===================================================== */
+/* ALLINEAMENTO PULSANTI AZIONI PREVENTIVI */
+/* ===================================================== */
+
+.azioni-bottoni{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.azioni-bottoni form{
+    margin:0;
+    display:flex;
+    align-items:center;
+}
+
+.azioni-bottoni .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:34px;
+    line-height:1;
+    vertical-align:middle;
+}
+/* ===================================================== */
+/* ALLINEAMENTO DEFINITIVO BOTTONI AZIONI */
+/* ===================================================== */
+
+.azioni-bottoni {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.azioni-bottoni form {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.azioni-bottoni .btn,
+.azioni-bottoni button {
+    height: 34px !important;
+    min-height: 34px !important;
+    margin: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+}
+
+/* bottone Modifica */
+.azioni-bottoni .btn-azione {
+    min-width: 78px;
+    padding: 0 12px !important;
+}
+
+/* bottoni icona: cestino, su, giù */
+.azioni-bottoni .btn-elimina,
+.azioni-bottoni button[title="Sposta su"],
+.azioni-bottoni button[title="Sposta giù"] {
+    width: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
 }
