@@ -201,6 +201,13 @@ return view('preventivi.show', compact(
             $scontoClientePercentuale = (($prezzoListino - $prezzoClienteUnitario) / $prezzoListino) * 100;
         }
 
+        $ultimaPosizione = RigaPreventivoProdotto::where(
+    'preventivo_id',
+    $preventivo->id
+)->max('ordine_visualizzazione');
+
+$nuovaPosizione = ($ultimaPosizione ?? 0) + 1;
+
         RigaPreventivoProdotto::create([
             'preventivo_id' => $preventivo->id,
             'fornitore_id' => $request->fornitore_id,
@@ -219,7 +226,7 @@ return view('preventivi.show', compact(
             'totale_listino' => $prezzoListino * $quantita,
             'totale_costo' => $costoNetto * $quantita,
             'totale_cliente' => $prezzoClienteUnitario * $quantita,
-            'ordine_visualizzazione' => 0,
+            'ordine_visualizzazione' => $nuovaPosizione,
             'note' => $request->note,
         ]);
 
