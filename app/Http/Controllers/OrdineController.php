@@ -790,4 +790,121 @@ public function eliminaPdfRiga($id)
 
     return view('ordini.visualizza', compact('ordine'));
 }
+
+public function confronto($id)
+{
+    $ordine = Ordine::with(
+        'commessa.cliente',
+        'righe.fornitore',
+        'righe.servizi'
+    )->findOrFail($id);
+
+    $preventivo = Preventivo::with(
+        'righeProdotti.servizi'
+    )->findOrFail($ordine->preventivo_id);
+
+    $righePreventivoPerId = $preventivo->righeProdotti->keyBy('id');
+
+    $idRigheUsate = [];
+    $confronto = [];
+
+    $totalePreventivo = 0;
+    $totaleOrdine = 0;
+
+    foreach ($ordine->righe as $rigaOrdine) {
+
+        $totaleRigaOrdine = $this->calcolaTotaleRigaConfronto($rigaOrdine);
+        $totaleOrdine += $totaleRigaOrdine;
+
+        $rigaPreventivo = null;
+
+        if ($rigaOrdine->riga_preventivo_prodotto_id) {
+            $rigaPreventivo = $righePreventivoPerId->get($rigaOrdine->riga_preventivo_prodotto_id);
+        }
+
+        if ($rigaPreventivo) {
+
+            $idRigheUsate[] = $rigaPreventivo->id;
+
+            $totaleRigaPreventivo = $this->calcolaTotaleRigaConfronto($rigaPreventivo);
+            $totalePreventivo += $totaleRigaPreventivo;
+
+            $confronto[] = [
+                'tipo' => 'confrontata',
+                'descrizione' => $rigaOrdine->descrizione,
+                'fornitore' => $rigaOrdine->fornitore ? $rigaOrdine->fornitore->ragione_sociale : '-',
+                'totale_preventivo' => $totaleRigaPreventivo,
+                'totale_ordine' => $totaleRigaOrdine,
+                'differenza' => $totaleRigaOrdine - $totaleRigaPreventivo,
+            ];
+
+        } else {
+
+            $confronto[] = [
+                'tipo' => 'aggiunta',
+                'descrizione' => $rigaOrdine->descrizione,
+                'fornitore' => $rigaOrdine->fornitore ? $rigaOrdine->fornitore->ragione_sociale : '-',
+                'totale_preventivo' => null,
+                'totale_ordine' => $totaleRigaOrdine,
+                'differenza' => $totaleRigaOrdine,
+            ];
+        }
+    }
+
+    foreach ($preventivo->righeProdotti as $rigaPreventivo) {
+
+        if (in_array($rigaPreventivo->id, $idRigheUsate)) {
+            continue;
+        }
+
+        $totaleRigaPreventivo = $this->calcolaTotaleRigaConfronto($rigaPreventivo);
+        $totalePreventivo += $totaleRigaPreventivo;
+
+        $confronto[] = [
+            'tipo' => 'rimossa',
+            'descrizione' => $rigaPreventivo->descrizione,
+            'fornitore' => $rigaPreventivo->fornitore ? $rigaPreventivo->fornitore->ragione_sociale : '-',
+            'totale_preventivo' => $totaleRigaPreventivo,
+            'totale_ordine' => null,
+            'differenza' => -$totaleRigaPreventivo,
+        ];
+    }
+
+    $differenzaTotale = $totaleOrdine - $totalePreventivo;
+
+    return view('ordini.confronto', compact(
+        'ordine',
+        'preventivo',
+        'confronto',
+        'totalePreventivo',
+        'totaleOrdine',
+        'differenzaTotale'
+    ));
+}
+
+/**
+ * Calcola il totale "prodotto + servizi" di una riga (preventivo o ordine)
+ * per la pagina di confronto, in modo robusto anche se il campo quantita
+ * fosse salvato come 0 per errore su righe storiche.
+ */
+private function calcolaTotaleRigaConfronto($riga)
+{
+    $quantita = (float) ($riga->quantita ?? 0);
+    $quantitaEffettiva = $quantita > 0 ? $quantita : 1;
+
+    $totaleProdotto = (float) ($riga->totale_cliente ?? 0);
+
+    if ($totaleProdotto == 0 && (float) ($riga->prezzo_cliente_unitario ?? 0) > 0) {
+        $totaleProdotto = (float) $riga->prezzo_cliente_unitario * $quantitaEffettiva;
+    }
+
+    $totaleServizi = 0;
+
+    foreach ($riga->servizi as $servizio) {
+        $totaleServizi += (float) $servizio->prezzo_cliente * $quantitaEffettiva;
+    }
+
+    return $totaleProdotto + $totaleServizi;
+}
+
 }

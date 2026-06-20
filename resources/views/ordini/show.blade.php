@@ -15,15 +15,21 @@
 <div class="container" id="top-ordine">
 
     <div style="margin-bottom:20px;">
-        <a href="/ordini/stato/{{ $ordine->stato }}" class="btn btn-azione">
-            ← Torna alla lista ordini
-        </a>
+    <a href="/ordini/stato/{{ $ordine->stato }}" class="btn btn-azione">
+        ← Torna alla lista ordini
+    </a>
 
-        <a href="/ordini/{{ $ordine->id }}/visualizza" class="btn btn-azione">
-            Visualizza
-        </a>
+    <a href="/ordini/{{ $ordine->id }}/visualizza" class="btn btn-azione">
+        Visualizza
+    </a>
 
-    </div>
+    @if($ordine->stato == 'preparazione_contratto')
+        <a href="/ordini/{{ $ordine->id }}/confronto-preventivo" class="btn btn-azione">
+            Confronto Preventivo/Ordine
+        </a>
+    @endif
+
+</div>
 
     <h1>Ordine {{ $ordine->numero }}</h1>
 
