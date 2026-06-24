@@ -67,8 +67,9 @@ class RigaOrdineController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'modalita_calcolo' => 'required|in:da_listino,da_costo_netto',
-            'quantita' => 'nullable|numeric|min:0',
+    'descrizione' => 'nullable|string|max:255',
+    'modalita_calcolo' => 'required|in:da_listino,da_costo_netto',
+    'quantita' => 'nullable|numeric|min:0',
             'prezzo_listino' => 'nullable|numeric|min:0',
             'costo_netto' => 'nullable|numeric|min:0',
             'sconto_fornitore_1' => 'nullable|numeric|min:0|max:100',
@@ -90,8 +91,9 @@ class RigaOrdineController extends Controller
         $dati = $this->calcolaRiga($request);
 
         $riga->update([
-            'modalita_calcolo' => $dati['modalita'],
-            'quantita' => $dati['quantita'],
+    'descrizione' => $request->descrizione ?? $riga->descrizione,
+    'modalita_calcolo' => $dati['modalita'],
+    'quantita' => $dati['quantita'],
             'prezzo_listino' => $dati['prezzoListino'],
             'costo_netto' => $dati['costoNetto'],
             'sconto_fornitore_1' => $dati['s1'],

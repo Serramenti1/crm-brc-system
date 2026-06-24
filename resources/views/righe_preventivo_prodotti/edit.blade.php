@@ -17,7 +17,6 @@
     <form method="POST" action="/righe-preventivo-prodotti/{{ $riga->id }}">
         @csrf
         @method('PUT')
-        <input type="hidden" name="descrizione" value="{{ $riga->descrizione }}">
         <input type="hidden" name="fornitore_id" value="{{ $riga->fornitore_id }}">
 
         <table class="tabella-dettaglio">
@@ -29,7 +28,18 @@
             </tr>
 
             <tr>
-                <td><strong>Quantità</strong></td>
+    <td><strong>Descrizione</strong></td>
+    <td>
+        <input type="text"
+               name="descrizione"
+               value="{{ $riga->descrizione }}"
+               required
+               style="width:100%;">
+    </td>
+</tr>
+
+<tr>
+    <td><strong>Quantità</strong></td>
                 <td>
                     <input type="number"
                            name="quantita"

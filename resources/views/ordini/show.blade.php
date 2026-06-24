@@ -1130,6 +1130,15 @@
                     @method('PUT')
 
                     <p>
+                        Descrizione<br>
+                        <input type="text"
+                               name="descrizione"
+                               value="{{ $riga->descrizione }}"
+                               required
+                               style="width:100%;">
+                    </p>
+
+                    <p>
                         Quantità<br>
                         <input type="number"
                                name="quantita"
