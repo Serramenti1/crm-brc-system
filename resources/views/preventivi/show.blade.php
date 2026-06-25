@@ -192,7 +192,7 @@
 
         @foreach($preventivo->righeProdotti->sortBy('ordine_visualizzazione') as $riga)
 
-    <tr>
+    <tr style="{{ (float)($riga->quantita ?? 0) == 0 ? 'background:#f8d7da;' : '' }}">
 
                 <td>
                     <strong>{{ $riga->descrizione }}</strong><br>

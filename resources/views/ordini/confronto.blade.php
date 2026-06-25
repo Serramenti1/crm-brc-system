@@ -34,50 +34,120 @@
         <tr>
             <th>Fornitore</th>
             <th>Descrizione</th>
-            <th>Totale preventivo</th>
-            <th>Totale ordine</th>
-            <th>Differenza</th>
+            <th>Prodotto prev.</th>
+            <th>Servizi prev.</th>
+            <th>Prodotto ord.</th>
+            <th>Servizi ord.</th>
+            <th>Δ Prodotto</th>
+            <th>Δ Servizi</th>
+            <th>Δ Totale</th>
             <th>Note</th>
         </tr>
 
         @foreach($confronto as $riga)
 
-            <tr style="
-                @if($riga['tipo'] == 'aggiunta') background:#fff3cd; @endif
-                @if($riga['tipo'] == 'rimossa') background:#f8d7da; @endif
-            ">
+            @php
+                $quantitaZero = isset($riga['quantita_preventivo']) &&
+                                $riga['quantita_preventivo'] !== null &&
+                                $riga['quantita_preventivo'] == 0;
+
+                $sfondo = '';
+                if ($quantitaZero) {
+                    $sfondo = 'background:#f8d7da;'; // rosso - variante a quantità 0
+                } elseif ($riga['tipo'] == 'aggiunta') {
+                    $sfondo = 'background:#fff3cd;'; // giallo - aggiunta in ordine
+                } elseif ($riga['tipo'] == 'rimossa') {
+                    $sfondo = 'background:#f8d7da;'; // rosso - rimossa dall'ordine
+                }
+            @endphp
+
+            <tr style="{{ $sfondo }}">
 
                 <td>{{ $riga['fornitore'] }}</td>
-                <td>{{ $riga['descrizione'] }}</td>
 
                 <td>
-                    @if($riga['totale_preventivo'] !== null)
-                        {{ number_format($riga['totale_preventivo'], 2, ',', '.') }} €
+                    {{ $riga['descrizione'] }}
+                    @if($quantitaZero)
+                        <br><small style="color:red;">(variante a preventivo - quantità 0)</small>
+                    @endif
+                </td>
+
+                {{-- PRODOTTO PREVENTIVO --}}
+                <td>
+                    @if($riga['prodotto_preventivo'] !== null)
+                        {{ number_format($riga['prodotto_preventivo'], 2, ',', '.') }} €
                     @else
                         -
                     @endif
                 </td>
 
+                {{-- SERVIZI PREVENTIVO --}}
                 <td>
-                    @if($riga['totale_ordine'] !== null)
-                        {{ number_format($riga['totale_ordine'], 2, ',', '.') }} €
+                    @if($riga['servizi_preventivo'] !== null)
+                        {{ number_format($riga['servizi_preventivo'], 2, ',', '.') }} €
                     @else
                         -
                     @endif
                 </td>
 
+                {{-- PRODOTTO ORDINE --}}
+                <td>
+                    @if($riga['prodotto_ordine'] !== null)
+                        {{ number_format($riga['prodotto_ordine'], 2, ',', '.') }} €
+                    @else
+                        -
+                    @endif
+                </td>
+
+                {{-- SERVIZI ORDINE --}}
+                <td>
+                    @if($riga['servizi_ordine'] !== null)
+                        {{ number_format($riga['servizi_ordine'], 2, ',', '.') }} €
+                    @else
+                        -
+                    @endif
+                </td>
+
+                {{-- DIFFERENZA PRODOTTO --}}
                 <td style="
-                    color: {{ $riga['differenza'] > 0 ? 'green' : ($riga['differenza'] < 0 ? 'red' : 'black') }};
                     font-weight:bold;
+                    color: {{ $riga['diff_prodotto'] > 0 ? 'green' : ($riga['diff_prodotto'] < 0 ? 'red' : 'black') }};
+                ">
+                    @if($riga['diff_prodotto'] != 0)
+                        {{ $riga['diff_prodotto'] > 0 ? '+' : '' }}{{ number_format($riga['diff_prodotto'], 2, ',', '.') }} €
+                    @else
+                        0,00 €
+                    @endif
+                </td>
+
+                {{-- DIFFERENZA SERVIZI --}}
+                <td style="
+                    font-weight:bold;
+                    color: {{ $riga['diff_servizi'] > 0 ? 'green' : ($riga['diff_servizi'] < 0 ? 'red' : 'black') }};
+                ">
+                    @if($riga['diff_servizi'] != 0)
+                        {{ $riga['diff_servizi'] > 0 ? '+' : '' }}{{ number_format($riga['diff_servizi'], 2, ',', '.') }} €
+                    @else
+                        0,00 €
+                    @endif
+                </td>
+
+                {{-- DIFFERENZA TOTALE --}}
+                <td style="
+                    font-weight:bold;
+                    color: {{ $riga['differenza'] > 0 ? 'green' : ($riga['differenza'] < 0 ? 'red' : 'black') }};
                 ">
                     {{ $riga['differenza'] > 0 ? '+' : '' }}{{ number_format($riga['differenza'], 2, ',', '.') }} €
                 </td>
 
+                {{-- NOTE --}}
                 <td>
                     @if($riga['tipo'] == 'aggiunta')
                         Aggiunta in ordine
                     @elseif($riga['tipo'] == 'rimossa')
                         Rimossa rispetto al preventivo
+                    @elseif($quantitaZero)
+                        Variante a preventivo (quantità 0)
                     @else
                         -
                     @endif
@@ -106,8 +176,8 @@
         <tr>
             <td><strong>Differenza totale</strong></td>
             <td style="
-                color: {{ $differenzaTotale > 0 ? 'green' : ($differenzaTotale < 0 ? 'red' : 'black') }};
                 font-weight:bold;
+                color: {{ $differenzaTotale > 0 ? 'green' : ($differenzaTotale < 0 ? 'red' : 'black') }};
             ">
                 {{ $differenzaTotale > 0 ? '+' : '' }}{{ number_format($differenzaTotale, 2, ',', '.') }} €
             </td>

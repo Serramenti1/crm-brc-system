@@ -375,7 +375,7 @@
 
         @foreach($ordine->righe as $riga)
 
-            <tr>
+            <tr style="{{ (float)($riga->quantita ?? 0) == 0 ? 'background:#f8d7da;' : '' }}">
 
                 <td>
 

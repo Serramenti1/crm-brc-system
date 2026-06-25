@@ -800,7 +800,8 @@ public function confronto($id)
     )->findOrFail($id);
 
     $preventivo = Preventivo::with(
-        'righeProdotti.servizi'
+        'righeProdotti.servizi',
+        'righeProdotti.fornitore'
     )->findOrFail($ordine->preventivo_id);
 
     $righePreventivoPerId = $preventivo->righeProdotti->keyBy('id');
@@ -813,8 +814,8 @@ public function confronto($id)
 
     foreach ($ordine->righe as $rigaOrdine) {
 
-        $totaleRigaOrdine = $this->calcolaTotaleRigaConfronto($rigaOrdine);
-        $totaleOrdine += $totaleRigaOrdine;
+        $totaliOrdine = $this->calcolaTotaliRigaConfronto($rigaOrdine);
+        $totaleOrdine += $totaliOrdine['totale'];
 
         $rigaPreventivo = null;
 
@@ -826,27 +827,41 @@ public function confronto($id)
 
             $idRigheUsate[] = $rigaPreventivo->id;
 
-            $totaleRigaPreventivo = $this->calcolaTotaleRigaConfronto($rigaPreventivo);
-            $totalePreventivo += $totaleRigaPreventivo;
+            $totaliPreventivo = $this->calcolaTotaliRigaConfronto($rigaPreventivo);
+            $totalePreventivo += $totaliPreventivo['totale'];
 
             $confronto[] = [
-                'tipo' => 'confrontata',
-                'descrizione' => $rigaOrdine->descrizione,
-                'fornitore' => $rigaOrdine->fornitore ? $rigaOrdine->fornitore->ragione_sociale : '-',
-                'totale_preventivo' => $totaleRigaPreventivo,
-                'totale_ordine' => $totaleRigaOrdine,
-                'differenza' => $totaleRigaOrdine - $totaleRigaPreventivo,
+                'tipo'                  => 'confrontata',
+                'descrizione'           => $rigaOrdine->descrizione,
+                'fornitore'             => $rigaOrdine->fornitore ? $rigaOrdine->fornitore->ragione_sociale : '-',
+                'quantita_preventivo'   => (float) ($rigaPreventivo->quantita ?? 0),
+                'prodotto_preventivo'   => $totaliPreventivo['prodotto'],
+                'servizi_preventivo'    => $totaliPreventivo['servizi'],
+                'totale_preventivo'     => $totaliPreventivo['totale'],
+                'prodotto_ordine'       => $totaliOrdine['prodotto'],
+                'servizi_ordine'        => $totaliOrdine['servizi'],
+                'totale_ordine'         => $totaliOrdine['totale'],
+                'diff_prodotto'         => $totaliOrdine['prodotto'] - $totaliPreventivo['prodotto'],
+                'diff_servizi'          => $totaliOrdine['servizi'] - $totaliPreventivo['servizi'],
+                'differenza'            => $totaliOrdine['totale'] - $totaliPreventivo['totale'],
             ];
 
         } else {
 
             $confronto[] = [
-                'tipo' => 'aggiunta',
-                'descrizione' => $rigaOrdine->descrizione,
-                'fornitore' => $rigaOrdine->fornitore ? $rigaOrdine->fornitore->ragione_sociale : '-',
-                'totale_preventivo' => null,
-                'totale_ordine' => $totaleRigaOrdine,
-                'differenza' => $totaleRigaOrdine,
+                'tipo'                  => 'aggiunta',
+                'descrizione'           => $rigaOrdine->descrizione,
+                'fornitore'             => $rigaOrdine->fornitore ? $rigaOrdine->fornitore->ragione_sociale : '-',
+                'quantita_preventivo'   => null,
+                'prodotto_preventivo'   => null,
+                'servizi_preventivo'    => null,
+                'totale_preventivo'     => null,
+                'prodotto_ordine'       => $totaliOrdine['prodotto'],
+                'servizi_ordine'        => $totaliOrdine['servizi'],
+                'totale_ordine'         => $totaliOrdine['totale'],
+                'diff_prodotto'         => $totaliOrdine['prodotto'],
+                'diff_servizi'          => $totaliOrdine['servizi'],
+                'differenza'            => $totaliOrdine['totale'],
             ];
         }
     }
@@ -857,16 +872,23 @@ public function confronto($id)
             continue;
         }
 
-        $totaleRigaPreventivo = $this->calcolaTotaleRigaConfronto($rigaPreventivo);
-        $totalePreventivo += $totaleRigaPreventivo;
+        $totaliPreventivo = $this->calcolaTotaliRigaConfronto($rigaPreventivo);
+        $totalePreventivo += $totaliPreventivo['totale'];
 
         $confronto[] = [
-            'tipo' => 'rimossa',
-            'descrizione' => $rigaPreventivo->descrizione,
-            'fornitore' => $rigaPreventivo->fornitore ? $rigaPreventivo->fornitore->ragione_sociale : '-',
-            'totale_preventivo' => $totaleRigaPreventivo,
-            'totale_ordine' => null,
-            'differenza' => -$totaleRigaPreventivo,
+            'tipo'                  => 'rimossa',
+            'descrizione'           => $rigaPreventivo->descrizione,
+            'fornitore'             => $rigaPreventivo->fornitore ? $rigaPreventivo->fornitore->ragione_sociale : '-',
+            'quantita_preventivo'   => (float) ($rigaPreventivo->quantita ?? 0),
+            'prodotto_preventivo'   => $totaliPreventivo['prodotto'],
+            'servizi_preventivo'    => $totaliPreventivo['servizi'],
+            'totale_preventivo'     => $totaliPreventivo['totale'],
+            'prodotto_ordine'       => null,
+            'servizi_ordine'        => null,
+            'totale_ordine'         => null,
+            'diff_prodotto'         => -$totaliPreventivo['prodotto'],
+            'diff_servizi'          => -$totaliPreventivo['servizi'],
+            'differenza'            => -$totaliPreventivo['totale'],
         ];
     }
 
@@ -882,29 +904,33 @@ public function confronto($id)
     ));
 }
 
-/**
- * Calcola il totale "prodotto + servizi" di una riga (preventivo o ordine)
- * per la pagina di confronto, in modo robusto anche se il campo quantita
- * fosse salvato come 0 per errore su righe storiche.
- */
-private function calcolaTotaleRigaConfronto($riga)
+private function calcolaTotaliRigaConfronto($riga)
 {
     $quantita = (float) ($riga->quantita ?? 0);
-    $quantitaEffettiva = $quantita > 0 ? $quantita : 1;
+
+    // Se quantità è 0 la riga è una variante disattivata:
+    // prodotto e servizi valgono entrambi 0
+    if ($quantita == 0) {
+        return [
+            'prodotto' => 0,
+            'servizi'  => 0,
+            'totale'   => 0,
+        ];
+    }
 
     $totaleProdotto = (float) ($riga->totale_cliente ?? 0);
-
-    if ($totaleProdotto == 0 && (float) ($riga->prezzo_cliente_unitario ?? 0) > 0) {
-        $totaleProdotto = (float) $riga->prezzo_cliente_unitario * $quantitaEffettiva;
-    }
 
     $totaleServizi = 0;
 
     foreach ($riga->servizi as $servizio) {
-        $totaleServizi += (float) $servizio->prezzo_cliente * $quantitaEffettiva;
+        $totaleServizi += (float) $servizio->prezzo_cliente * $quantita;
     }
 
-    return $totaleProdotto + $totaleServizi;
+    return [
+        'prodotto' => $totaleProdotto,
+        'servizi'  => $totaleServizi,
+        'totale'   => $totaleProdotto + $totaleServizi,
+    ];
 }
 
 }
