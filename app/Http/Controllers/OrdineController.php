@@ -719,7 +719,8 @@ $ordine->$campo = $path;
     $ordine->save();
 
     return redirect('/ordini/' . $ordine->id)
-        ->with('success', 'Documenti ordine aggiornati correttamente.');
+        ->with('success', 'Documenti ordine aggiornati correttamente.')
+        ->with('apri_documenti', true);
 }
 public function eliminaDocumentoOrdine($id, $campo)
 {
@@ -743,7 +744,8 @@ public function eliminaDocumentoOrdine($id, $campo)
     $ordine->save();
 
     return redirect('/ordini/' . $ordine->id)
-        ->with('success', 'Documento eliminato correttamente.');
+        ->with('success', 'Documento eliminato correttamente.')
+        ->with('apri_documenti', true);
 }
 
 public function eliminaPdfRiga($id)

@@ -1289,11 +1289,27 @@
 
     <h2>Documenti ordine</h2>
 
-    <details id="documenti_ordine_box" style="margin-bottom:20px;">
+    @php
+    $documentiCompleti =
+        $ordine->pdf_foglio_smaltimento &&
+        $ordine->pdf_contratto_posatori &&
+        $ordine->pdf_contratto_vendita;
+@endphp
 
-        <summary>
-            <strong>+ Gestisci documenti</strong>
-        </summary>
+<details id="documenti_ordine_box" style="margin-bottom:20px;"
+    {{ session('apri_documenti') ? 'open' : '' }}>
+
+    <summary style="
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        background: {{ $documentiCompleti ? '#28a745' : '#dc3545' }};
+    ">
+        {{ $documentiCompleti ? '✓ Documenti completi' : '⚠ Gestisci documenti' }}
+    </summary>
 
         <div style="margin-top:15px; border:1px solid #ccc; padding:15px; background:#fff;">
 
