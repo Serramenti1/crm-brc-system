@@ -96,7 +96,7 @@
     </div>
 @endif
 
-<form method="POST" action="/commesse">
+<form method="POST" action="/commesse" onsubmit="return controllaTitoloCommessa()">
 @csrf
 
 <div class="form-section">
@@ -118,9 +118,9 @@
         </div>
 
         <div class="form-field">
-            <label>Titolo commessa</label><br>
-            <input type="text" name="titolo">
-        </div>
+    <label>Titolo commessa *</label><br>
+    <input type="text" name="titolo" id="titolo">
+</div>
     </div>
 </div>
 
@@ -430,4 +430,15 @@ window.onclick = function(event) {
         chiudiModaleClienti();
     }
 }
+
+function controllaTitoloCommessa() {
+    let titolo = document.getElementById('titolo');
+    if (!titolo || titolo.value.trim() === '') {
+        alert('Inserire il titolo della commessa prima di procedere.');
+        titolo.focus();
+        return false;
+    }
+    return true;
+}
+
 </script>
