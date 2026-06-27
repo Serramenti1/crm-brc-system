@@ -4,7 +4,43 @@
     CRM BRC SYSTEM
 </div>
 
-<div class="navbar">
+{{-- ===================================================== --}}
+{{-- SCHEDE SEZIONI --}}
+{{-- ===================================================== --}}
+
+@php
+    $sezioneAttiva = 'anagrafiche';
+
+    if (
+        request()->is('ordini*') ||
+        (isset($ordine))
+    ) {
+        $sezioneAttiva = 'ordini';
+    }
+
+    if (request()->is('interventi*')) {
+        $sezioneAttiva = 'assistenza';
+    }
+@endphp
+
+<div class="navbar-schede">
+    <a href="{{ url('/') }}" class="scheda {{ $sezioneAttiva == 'anagrafiche' ? 'active' : '' }}">
+        Anagrafiche
+    </a>
+    <a href="/ordini/stato/preparazione_contratto" class="scheda {{ $sezioneAttiva == 'ordini' ? 'active' : '' }}">
+        Ordini
+    </a>
+    <a href="/interventi" class="scheda {{ $sezioneAttiva == 'assistenza' ? 'active' : '' }}">
+        Assistenza
+    </a>
+</div>
+
+{{-- ===================================================== --}}
+{{-- VOCI SEZIONE ANAGRAFICHE --}}
+{{-- ===================================================== --}}
+
+@if($sezioneAttiva == 'anagrafiche')
+<div class="navbar-voci">
 
     <a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">
         Home
@@ -22,6 +58,16 @@
         Preventivi
     </a>
 
+</div>
+@endif
+
+{{-- ===================================================== --}}
+{{-- VOCI SEZIONE ORDINI --}}
+{{-- ===================================================== --}}
+
+@if($sezioneAttiva == 'ordini')
+<div class="navbar-voci">
+
     <a href="/ordini/stato/preparazione_contratto"
        class="btn {{
             request()->is('ordini/stato/preparazione_contratto') ||
@@ -29,7 +75,6 @@
             ? 'active' : ''
        }}">
         Preparazione contratto
-
         @if(($conteggiOrdini['preparazione_contratto'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
                 {{ $conteggiOrdini['preparazione_contratto'] }}
@@ -44,7 +89,6 @@
             ? 'active' : ''
        }}">
         In lavorazione
-
         @if(($conteggiOrdini['in_lavorazione'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
                 {{ $conteggiOrdini['in_lavorazione'] }}
@@ -59,7 +103,6 @@
             ? 'active' : ''
        }}">
         Attesa merce
-
         @if(($conteggiOrdini['completo_attesa_merce'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
                 {{ $conteggiOrdini['completo_attesa_merce'] }}
@@ -74,7 +117,6 @@
             ? 'active' : ''
        }}">
         Saldo a merce pronta
-
         @if(($conteggiOrdini['attesa_saldo_merce'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
                 {{ $conteggiOrdini['attesa_saldo_merce'] }}
@@ -89,7 +131,6 @@
             ? 'active' : ''
        }}">
         Programmare posa
-
         @if(($conteggiOrdini['programmare_posa'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
                 {{ $conteggiOrdini['programmare_posa'] }}
@@ -104,7 +145,6 @@
             ? 'active' : ''
        }}">
         Posa in corso
-
         @if(($conteggiOrdini['concluso'] ?? 0) > 0)
             <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
                 {{ $conteggiOrdini['concluso'] }}
@@ -113,86 +153,73 @@
     </a>
 
     <a href="/ordini/stato/archiviato"
-   class="btn {{
-        request()->is('ordini/stato/archiviato') ||
-        (isset($ordine) && $ordine->stato == 'archiviato' && !$ordine->archivio_saldo_ricevuto)
-        ? 'active' : ''
-   }}">
-    Conclusi attesa saldo
+       class="btn {{
+            request()->is('ordini/stato/archiviato') ||
+            (isset($ordine) && $ordine->stato == 'archiviato' && !$ordine->archivio_saldo_ricevuto)
+            ? 'active' : ''
+       }}">
+        Conclusi attesa saldo
+        @if(($conteggiOrdini['archiviato'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['archiviato'] }}
+            </span>
+        @endif
+    </a>
 
-    @if(($conteggiOrdini['archiviato'] ?? 0) > 0)
-        <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
-            {{ $conteggiOrdini['archiviato'] }}
-        </span>
-    @endif
-</a>
-
-<a href="/ordini/archiviati"
-   class="btn {{
-        request()->is('ordini/archiviati') ||
-        (isset($ordine) && $ordine->stato == 'archiviato' && $ordine->archivio_saldo_ricevuto)
-        ? 'active' : ''
-   }}">
-    Archiviati
-
-    @if(($conteggiOrdini['archiviati_enea'] ?? 0) > 0)
-        <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
-            {{ $conteggiOrdini['archiviati_enea'] }}
-        </span>
-    @endif
-</a>
+    <a href="/ordini/archiviati"
+       class="btn {{
+            request()->is('ordini/archiviati') ||
+            (isset($ordine) && $ordine->stato == 'archiviato' && $ordine->archivio_saldo_ricevuto)
+            ? 'active' : ''
+       }}">
+        Archiviati
+        @if(($conteggiOrdini['archiviati_enea'] ?? 0) > 0)
+            <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+                {{ $conteggiOrdini['archiviati_enea'] }}
+            </span>
+        @endif
+    </a>
 
 </div>
+@endif
+
+{{-- ===================================================== --}}
+{{-- VOCI SEZIONE ASSISTENZA --}}
+{{-- ===================================================== --}}
+
+@if($sezioneAttiva == 'assistenza')
+<div class="navbar-voci">
+
+    <a href="/interventi" class="btn {{ request()->is('interventi*') ? 'active' : '' }}">
+        Interventi
+    </a>
+
+</div>
+@endif
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('focusin', function (e) {
         let campo = e.target;
-
-        if (
-            campo.matches('input[type="text"], input[type="number"], input[type="email"]')
-        ) {
-            setTimeout(function () {
-                campo.select();
-            }, 0);
+        if (campo.matches('input[type="text"], input[type="number"], input[type="email"]')) {
+            setTimeout(function () { campo.select(); }, 0);
         }
     });
 });
 </script>
 
 <script>
-
-// =====================================================
-// DISATTIVA AUTOCOMPILAZIONE CRM
-// =====================================================
-
 document.addEventListener('DOMContentLoaded', function () {
-
     let forms = document.querySelectorAll('form');
-
     forms.forEach(function(form) {
-
         form.setAttribute('autocomplete', 'off');
-
         let inputs = form.querySelectorAll('input, textarea, select');
-
         inputs.forEach(function(input) {
-
             input.setAttribute('autocomplete', 'off');
-
-            // Chrome / Edge workaround
-            if (
-                input.type === 'text' ||
-                input.type === 'email' ||
-                input.type === 'tel'
-            ) {
-                input.setAttribute(
-                    'autocomplete',
-                    'new-password'
-                );
+            if (input.type === 'text' || input.type === 'email' || input.type === 'tel') {
+                input.setAttribute('autocomplete', 'new-password');
             }
         });
     });
 });
-
 </script>

@@ -559,3 +559,58 @@ label input[type="checkbox"] {
     min-width: 38px !important;
     padding: 0 !important;
 }
+/* ===================================================== */
+/* SCHEDE SEZIONI MENU */
+/* ===================================================== */
+
+.navbar-schede {
+    background: #1f2937;
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 20px 0;
+    gap: 4px;
+}
+
+.navbar-schede .scheda {
+    padding: 8px 20px;
+    background: #374151;
+    color: #9ca3af;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    text-decoration: none;
+    font-weight: normal;
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: 0.2s;
+}
+
+.navbar-schede .scheda:hover {
+    background: #4b5563;
+    color: white;
+}
+
+.navbar-schede .scheda.active {
+    background: #e5e7eb;
+    color: #111827;
+    font-weight: bold;
+    border-color: #d1d5db;
+}
+
+.navbar-voci {
+    background: #e5e7eb;
+    border-bottom: 2px solid #d1d5db;
+    padding: 8px 20px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.navbar-voci .btn {
+    background: #374151;
+}
+
+.navbar-voci .btn:hover,
+.navbar-voci .btn.active {
+    background: #2563eb;
+}

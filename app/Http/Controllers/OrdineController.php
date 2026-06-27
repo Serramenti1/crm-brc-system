@@ -946,16 +946,37 @@ private function calcolaTotaliRigaConfronto($riga)
     ];
 }
 
-public function archiviati()
+public function archiviati(Request $request)
 {
-    $ordini = Ordine::with('commessa.cliente', 'commessa.tipoIntervento', 'righe')
+    $query = Ordine::with('commessa.cliente', 'commessa.tipoIntervento', 'righe')
         ->where('stato', 'archiviato')
-        ->where('archivio_saldo_ricevuto', 1)
-        ->get();
+        ->where('archivio_saldo_ricevuto', 1);
 
+    if ($request->filled('q')) {
+        $parole = explode(' ', trim($request->q));
+
+        $query->where(function ($q) use ($parole) {
+            foreach ($parole as $parola) {
+                $q->where(function ($sub) use ($parola) {
+                    $sub->where('numero', 'like', '%' . $parola . '%')
+                        ->orWhereHas('commessa', function ($c) use ($parola) {
+                            $c->where('titolo', 'like', '%' . $parola . '%')
+                              ->orWhere('indirizzo_lavoro', 'like', '%' . $parola . '%')
+                              ->orWhere('citta_lavoro', 'like', '%' . $parola . '%');
+                        })
+                        ->orWhereHas('commessa.cliente', function ($c) use ($parola) {
+                            $c->where('nome', 'like', '%' . $parola . '%')
+                              ->orWhere('cognome', 'like', '%' . $parola . '%');
+                        });
+                });
+            }
+        });
+    }
+
+    $ordini = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
     $stato = 'archiviato';
 
-    return view('ordini.index', compact('ordini', 'stato'));
+    return view('ordini.archiviati', compact('ordini', 'stato'));
 }
 
 }
