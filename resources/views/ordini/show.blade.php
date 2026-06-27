@@ -15,9 +15,13 @@
 <div class="container" id="top-ordine">
 
     <div style="margin-bottom:20px;">
-    <a href="/ordini/stato/{{ $ordine->stato }}" class="btn btn-azione">
-        ← Torna alla lista ordini
-    </a>
+    <a href="{{
+    $ordine->stato == 'archiviato' && $ordine->archivio_saldo_ricevuto
+        ? '/ordini/archiviati'
+        : '/ordini/stato/' . $ordine->stato
+}}" class="btn btn-azione">
+    ← Torna alla lista ordini
+</a>
 
     <a href="/ordini/{{ $ordine->id }}/visualizza" class="btn btn-azione">
         Visualizza
@@ -1559,7 +1563,7 @@
         </label>
     </p>
 
-    @if($ordine->commessa && $ordine->commessa->pratica_enea)
+    @if($ordine->archivio_saldo_ricevuto && $ordine->commessa && $ordine->commessa->pratica_enea)
 
         <p>
             <label>
@@ -1833,7 +1837,18 @@ return confirm(
 
         if (chiusuraCantiere && chiusuraCantiere.checked) {
             return confirm(
-                'Chiusura cantiere eseguita.\n\nL ordine verrà spostato in: Conclusi / Archiviati.\n\nConfermi?'
+                'Chiusura cantiere eseguita.\n\nL ordine verrà spostato in: Conclusi attesa saldo.\n\nConfermi?'
+            );
+        }
+    }
+
+    if (statoOrdine === 'archiviato') {
+
+        let saldoRicevuto = document.getElementById('archivio_saldo_ricevuto');
+
+        if (saldoRicevuto && saldoRicevuto.checked) {
+            return confirm(
+                'Saldo ricevuto.\n\nL ordine verrà spostato in: Archiviati.\n\nConfermi?'
             );
         }
     }

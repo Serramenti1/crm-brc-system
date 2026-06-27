@@ -38,6 +38,7 @@ Route::resource('fornitori', FornitoreController::class);
 
 Route::get('/ordini', [OrdineController::class, 'index']);
 Route::get('/ordini-completi', [OrdineController::class, 'completi']);
+Route::get('/ordini/archiviati', [OrdineController::class, 'archiviati']);
 Route::get('/ordini/stato/{stato}', [OrdineController::class, 'perStato'])->name('ordini.perStato');
 Route::get('/ordini/{id}/visualizza', [OrdineController::class, 'visualizza']);
 Route::get('/ordini/{id}/confronto-preventivo', [OrdineController::class, 'confronto']);

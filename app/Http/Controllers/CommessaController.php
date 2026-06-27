@@ -73,7 +73,7 @@ class CommessaController extends Controller
     {
         $request->validate([
             'cliente_id' => 'required|exists:clienti,id',
-            'titolo' => 'nullable|string|max:255',
+            'titolo' => 'required|string|max:255',
 
             'indirizzo_lavoro' => 'nullable|string|max:255',
             'citta_lavoro' => 'nullable|string|max:255',

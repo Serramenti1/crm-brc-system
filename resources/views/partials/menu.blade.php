@@ -115,16 +115,31 @@
     <a href="/ordini/stato/archiviato"
    class="btn {{
         request()->is('ordini/stato/archiviato') ||
-        (isset($ordine) && $ordine->stato == 'archiviato')
+        (isset($ordine) && $ordine->stato == 'archiviato' && !$ordine->archivio_saldo_ricevuto)
         ? 'active' : ''
    }}">
-    Conclusi / Archiviati
+    Conclusi attesa saldo
 
-@if(($conteggiOrdini['archiviato'] ?? 0) > 0)
-    <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
-        {{ $conteggiOrdini['archiviato'] }}
-    </span>
-@endif
+    @if(($conteggiOrdini['archiviato'] ?? 0) > 0)
+        <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+            {{ $conteggiOrdini['archiviato'] }}
+        </span>
+    @endif
+</a>
+
+<a href="/ordini/archiviati"
+   class="btn {{
+        request()->is('ordini/archiviati') ||
+        (isset($ordine) && $ordine->stato == 'archiviato' && $ordine->archivio_saldo_ricevuto)
+        ? 'active' : ''
+   }}">
+    Archiviati
+
+    @if(($conteggiOrdini['archiviati_enea'] ?? 0) > 0)
+        <span style="background:red; color:white; padding:2px 6px; border-radius:10px; font-size:12px; margin-left:5px;">
+            {{ $conteggiOrdini['archiviati_enea'] }}
+        </span>
+    @endif
 </a>
 
 </div>

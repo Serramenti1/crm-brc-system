@@ -49,9 +49,14 @@ class OrdineController extends Controller
             abort(404);
         }
 
-        $ordini = Ordine::with('commessa.cliente','commessa.tipoIntervento', 'righe')
-            ->where('stato', $stato)
-            ->get();
+        $query = Ordine::with('commessa.cliente','commessa.tipoIntervento', 'righe')
+            ->where('stato', $stato);
+
+if ($stato === 'archiviato') {
+    $query->where('archivio_saldo_ricevuto', 0);
+}
+
+$ordini = $query->get();
 
         return view('ordini.index', compact('ordini', 'stato'));
     }
@@ -584,12 +589,18 @@ $riga->pdf_path = $path;
 
         } elseif ($ordine->stato == 'archiviato') {
 
-    $ordine->saldo_finale_ricevuto = 0;
-    $ordine->invio_enea_effettuato = 0;
-
-    $ordine->stato = 'concluso';
-
-    $messaggio = 'Ordine riportato in posa in corso. Rimossa la spunta chiusura cantiere.';
+    if ($ordine->archivio_saldo_ricevuto) {
+        // Era in "Archiviati" → torna a "Conclusi attesa saldo"
+        $ordine->archivio_saldo_ricevuto = 0;
+        $ordine->archivio_pratica_enea_inviata = 0;
+        $messaggio = 'Ordine riportato in Conclusi attesa saldo.';
+    } else {
+        // Era in "Conclusi attesa saldo" → torna a "Posa in corso"
+        $ordine->saldo_finale_ricevuto = 0;
+        $ordine->invio_enea_effettuato = 0;
+        $ordine->stato = 'concluso';
+        $messaggio = 'Ordine riportato in Posa in corso.';
+    }
     } else {
             return redirect('/ordini/' . $ordine->id)
                 ->with('error', 'Questo ordine non può tornare a uno stato precedente.');
@@ -933,6 +944,18 @@ private function calcolaTotaliRigaConfronto($riga)
         'servizi'  => $totaleServizi,
         'totale'   => $totaleProdotto + $totaleServizi,
     ];
+}
+
+public function archiviati()
+{
+    $ordini = Ordine::with('commessa.cliente', 'commessa.tipoIntervento', 'righe')
+        ->where('stato', 'archiviato')
+        ->where('archivio_saldo_ricevuto', 1)
+        ->get();
+
+    $stato = 'archiviato';
+
+    return view('ordini.index', compact('ordini', 'stato'));
 }
 
 }

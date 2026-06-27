@@ -31,14 +31,14 @@ class AppServiceProvider extends ServiceProvider
             'programmare_posa' => Ordine::where('stato', 'programmare_posa')->count(),
             'concluso' => Ordine::where('stato', 'concluso')->count(),
             'archiviato' => Ordine::where('stato', 'archiviato')
-    ->where(function ($query) {
-        $query->where('archivio_saldo_ricevuto', 0)
-              ->orWhere(function ($q) {
-                  $q->where('archivio_pratica_enea_inviata', 0)
-                    ->whereHas('commessa', function ($c) {
-                        $c->where('pratica_enea', 1);
-                    });
-              });
+    ->where('archivio_saldo_ricevuto', 0)
+    ->count(),
+
+'archiviati_enea' => Ordine::where('stato', 'archiviato')
+    ->where('archivio_saldo_ricevuto', 1)
+    ->where('archivio_pratica_enea_inviata', 0)
+    ->whereHas('commessa', function ($c) {
+        $c->where('pratica_enea', 1);
     })
     ->count(),
         ];
