@@ -1,15 +1,23 @@
-<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=999">
+<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1002">
 
 <div class="topbar">
     CRM BRC SYSTEM
 </div>
 
 {{-- ===================================================== --}}
-{{-- SCHEDE SEZIONI --}}
+{{-- RILEVAMENTO SEZIONE ATTIVA --}}
 {{-- ===================================================== --}}
 
 @php
     $sezioneAttiva = 'anagrafiche';
+
+    if (request()->path() == '/') {
+        $sezioneAttiva = 'home';
+    }
+
+    if (request()->is('preventivi*') || request()->is('righe-preventivo*')) {
+        $sezioneAttiva = 'preventivi';
+    }
 
     if (
         request()->is('ordini*') ||
@@ -21,11 +29,25 @@
     if (request()->is('interventi*')) {
         $sezioneAttiva = 'assistenza';
     }
+
+    if (request()->is('impostazioni*') || request()->is('fornitori*') || request()->is('prodotti-fornitore*')) {
+        $sezioneAttiva = 'impostazioni';
+    }
 @endphp
 
+{{-- ===================================================== --}}
+{{-- SCHEDE SEZIONI --}}
+{{-- ===================================================== --}}
+
 <div class="navbar-schede">
-    <a href="{{ url('/') }}" class="scheda {{ $sezioneAttiva == 'anagrafiche' ? 'active' : '' }}">
+    <a href="{{ url('/') }}" class="scheda {{ $sezioneAttiva == 'home' ? 'active' : '' }}">
+        Home
+    </a>
+    <a href="/clienti" class="scheda {{ $sezioneAttiva == 'anagrafiche' ? 'active' : '' }}">
         Anagrafiche
+    </a>
+    <a href="/preventivi" class="scheda {{ $sezioneAttiva == 'preventivi' ? 'active' : '' }}">
+        Preventivi
     </a>
     <a href="/ordini/stato/preparazione_contratto" class="scheda {{ $sezioneAttiva == 'ordini' ? 'active' : '' }}">
         Ordini
@@ -33,7 +55,22 @@
     <a href="/interventi" class="scheda {{ $sezioneAttiva == 'assistenza' ? 'active' : '' }}">
         Assistenza
     </a>
+    <a href="/impostazioni" class="scheda {{ $sezioneAttiva == 'impostazioni' ? 'active' : '' }}" title="Impostazioni">
+        ⚙
+    </a>
 </div>
+
+{{-- ===================================================== --}}
+{{-- VOCI SEZIONE HOME --}}
+{{-- ===================================================== --}}
+
+@if($sezioneAttiva == 'home')
+<div class="navbar-voci">
+    <a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">
+        Dashboard
+    </a>
+</div>
+@endif
 
 {{-- ===================================================== --}}
 {{-- VOCI SEZIONE ANAGRAFICHE --}}
@@ -41,23 +78,24 @@
 
 @if($sezioneAttiva == 'anagrafiche')
 <div class="navbar-voci">
-
-    <a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">
-        Home
-    </a>
-
     <a href="/clienti" class="btn {{ request()->is('clienti*') ? 'active' : '' }}">
         Clienti
     </a>
-
     <a href="/commesse" class="btn {{ request()->is('commesse*') ? 'active' : '' }}">
         Commesse
     </a>
+</div>
+@endif
 
+{{-- ===================================================== --}}
+{{-- VOCI SEZIONE PREVENTIVI --}}
+{{-- ===================================================== --}}
+
+@if($sezioneAttiva == 'preventivi')
+<div class="navbar-voci">
     <a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">
         Preventivi
     </a>
-
 </div>
 @endif
 
@@ -189,11 +227,30 @@
 
 @if($sezioneAttiva == 'assistenza')
 <div class="navbar-voci">
-
     <a href="/interventi" class="btn {{ request()->is('interventi*') ? 'active' : '' }}">
         Interventi
     </a>
+</div>
+@endif
 
+{{-- ===================================================== --}}
+{{-- VOCI SEZIONE IMPOSTAZIONI --}}
+{{-- ===================================================== --}}
+
+@if($sezioneAttiva == 'impostazioni')
+<div class="navbar-voci">
+    <a href="/impostazioni" class="btn {{ request()->is('impostazioni') ? 'active' : '' }}">
+        Impostazioni
+    </a>
+    <a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">
+        Fornitori
+    </a>
+    <a href="/prodotti-fornitore" class="btn {{ request()->is('prodotti-fornitore*') ? 'active' : '' }}">
+        Prodotti fornitore
+    </a>
+    <a href="/impostazioni/backup" class="btn {{ request()->is('impostazioni/backup*') ? 'active' : '' }}">
+        Backup
+    </a>
 </div>
 @endif
 
