@@ -129,27 +129,37 @@
 
     <div class="form-grid">
         <div class="form-field">
-            <label>Indirizzo intervento</label><br>
-            <input type="text" name="indirizzo_lavoro">
-        </div>
+    <label>Indirizzo intervento</label><br>
+    <input type="text" name="indirizzo_lavoro" id="indirizzo_lavoro">
+</div>
 
-        <div class="form-field">
-            <label>Città intervento</label><br>
-            <input type="text" name="citta_lavoro">
-        </div>
+<div class="form-field">
+    <label>Città intervento</label><br>
+    <input type="text" name="citta_lavoro" id="citta_lavoro">
+</div>
 
-        <div class="form-field">
-            <label>Provincia intervento</label><br>
-            <input type="text" name="provincia_lavoro">
-        </div>
+<div class="form-field">
+    <label>Provincia intervento</label><br>
+    <input type="text" name="provincia_lavoro" id="provincia_lavoro">
+</div>
 
-        <div class="form-field">
-            <label>CAP intervento</label><br>
-            <input type="text" name="cap_lavoro">
-        </div>
+<div class="form-field">
+    <label>CAP intervento</label><br>
+    <input type="text" name="cap_lavoro" id="cap_lavoro">
+</div>
 
-        <div class="form-field">
-            <label>Piano di posa</label><br>
+        <div class="form-field" style="grid-column: span 3;">
+    <button type="button"
+            class="btn btn-azione"
+            onclick="copiaIndirizzoAnagrafica()"
+            id="btn_copia_indirizzo"
+            style="display:none;">
+        📋 Copia indirizzo da anagrafica cliente
+    </button>
+</div>
+
+<div class="form-field">
+    <label>Piano di posa</label><br>
             <input type="number" id="piano_posa" name="piano_posa" min="0">
         </div>
 
@@ -333,7 +343,11 @@
                                 class="btn btn-azione"
                                 onclick="selezionaCliente(
                                     '{{ $cliente->id }}',
-                                    '{{ addslashes($cliente->nome . ' ' . $cliente->cognome) }}'
+                                    '{{ addslashes($cliente->nome . ' ' . $cliente->cognome) }}',
+                                    '{{ addslashes($cliente->indirizzo ?? '') }}',
+                                    '{{ addslashes($cliente->citta ?? '') }}',
+                                    '{{ addslashes($cliente->provincia ?? '') }}',
+                                    '{{ addslashes($cliente->cap ?? '') }}'
                                 )">
                             Seleziona
                         </button>
@@ -402,10 +416,36 @@ function chiudiModaleClienti() {
     document.getElementById('modale_clienti').style.display = 'none';
 }
 
-function selezionaCliente(id, nome) {
+let clienteIndirizzo = '';
+let clienteCitta = '';
+let clienteProvincia = '';
+let clienteCap = '';
+
+function selezionaCliente(id, nome, indirizzo, citta, provincia, cap) {
     document.getElementById('cliente_id').value = id;
     document.getElementById('cliente_selezionato').innerHTML = nome;
+
+    clienteIndirizzo = indirizzo;
+    clienteCitta = citta;
+    clienteProvincia = provincia;
+    clienteCap = cap;
+
+    // Mostra il pulsante solo se il cliente ha un indirizzo
+    let btn = document.getElementById('btn_copia_indirizzo');
+    if (indirizzo && indirizzo.trim() !== '') {
+        btn.style.display = 'inline-block';
+    } else {
+        btn.style.display = 'none';
+    }
+
     chiudiModaleClienti();
+}
+
+function copiaIndirizzoAnagrafica() {
+    document.getElementById('indirizzo_lavoro').value = clienteIndirizzo;
+    document.getElementById('citta_lavoro').value = clienteCitta;
+    document.getElementById('provincia_lavoro').value = clienteProvincia;
+    document.getElementById('cap_lavoro').value = clienteCap;
 }
 
 function filtraClienti() {

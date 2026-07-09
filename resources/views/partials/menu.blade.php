@@ -1,4 +1,8 @@
-<link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1002">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1002">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+</head>
 
 <div class="topbar">
     CRM BRC SYSTEM
@@ -66,9 +70,6 @@
 
 @if($sezioneAttiva == 'home')
 <div class="navbar-voci">
-    <a href="{{ url('/') }}" class="btn {{ request()->path() == '/' ? 'active' : '' }}">
-        Dashboard
-    </a>
 </div>
 @endif
 
@@ -93,9 +94,6 @@
 
 @if($sezioneAttiva == 'preventivi')
 <div class="navbar-voci">
-    <a href="/preventivi" class="btn {{ request()->is('preventivi*') ? 'active' : '' }}">
-        Preventivi
-    </a>
 </div>
 @endif
 
@@ -242,11 +240,26 @@
     <a href="/impostazioni" class="btn {{ request()->is('impostazioni') ? 'active' : '' }}">
         Impostazioni
     </a>
+    <a href="/impostazioni/iva" class="btn {{ request()->is('impostazioni/iva*') ? 'active' : '' }}">
+        IVA
+    </a>
+    <a href="/impostazioni/detrazioni" class="btn {{ request()->is('impostazioni/detrazioni*') ? 'active' : '' }}">
+        Detrazioni
+    </a>
+    <a href="/impostazioni/servizi" class="btn {{ request()->is('impostazioni/servizi*') ? 'active' : '' }}">
+        Servizi extra
+    </a>
+    <a href="/impostazioni/tipi-intervento" class="btn {{ request()->is('impostazioni/tipi-intervento*') ? 'active' : '' }}">
+        Tipi intervento
+    </a>
     <a href="/fornitori" class="btn {{ request()->is('fornitori*') ? 'active' : '' }}">
         Fornitori
     </a>
     <a href="/prodotti-fornitore" class="btn {{ request()->is('prodotti-fornitore*') ? 'active' : '' }}">
         Prodotti fornitore
+    </a>
+    <a href="/impostazioni/importa-clienti" class="btn {{ request()->is('impostazioni/importa-clienti*') ? 'active' : '' }}">
+        Importa clienti Excel
     </a>
     <a href="/impostazioni/backup" class="btn {{ request()->is('impostazioni/backup*') ? 'active' : '' }}">
         Backup

@@ -31,6 +31,12 @@
         <a href="/ordini/{{ $ordine->id }}/confronto-preventivo" class="btn btn-azione">
             Confronto Preventivo/Ordine
         </a>
+
+        <a href="/ordini/{{ $ordine->id }}/copertina"
+           target="_blank"
+           class="btn btn-azione">
+            Stampa copertina
+        </a>
     @endif
 
 </div>

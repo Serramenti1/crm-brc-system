@@ -2,10 +2,7 @@
 
 <h1>Dashboard</h1>
 
-<a href="/impostazioni"
-   style="display:inline-block; padding:10px 20px; background:#007bff; color:white; text-decoration:none; border-radius:5px;">
-    ⚙️ Impostazioni
-</a>
+
 
 <hr>
 

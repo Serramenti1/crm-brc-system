@@ -41,6 +41,7 @@ Route::get('/ordini-completi', [OrdineController::class, 'completi']);
 Route::get('/ordini/archiviati', [OrdineController::class, 'archiviati']);
 Route::get('/ordini/stato/{stato}', [OrdineController::class, 'perStato'])->name('ordini.perStato');
 Route::get('/ordini/{id}/visualizza', [OrdineController::class, 'visualizza']);
+Route::get('/ordini/{id}/copertina', [OrdineController::class, 'copertina']);
 Route::get('/ordini/{id}/confronto-preventivo', [OrdineController::class, 'confronto']);
 Route::get('/ordini/{id}', [OrdineController::class, 'show']);
 Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);

@@ -979,4 +979,15 @@ public function archiviati(Request $request)
     return view('ordini.archiviati', compact('ordini', 'stato'));
 }
 
+public function copertina($id)
+{
+    $ordine = Ordine::with(
+        'commessa.cliente',
+        'commessa.tipoIntervento',
+        'righe.fornitore'
+    )->findOrFail($id);
+
+    return view('ordini.copertina', compact('ordine'));
+}
+
 }
