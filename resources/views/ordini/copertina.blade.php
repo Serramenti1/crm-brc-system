@@ -179,25 +179,29 @@
 <body>
 
     {{-- TESTATA --}}
-    <div class="testata">
-        <h1>ORDINE {{ $ordine->numero }}</h1>
-        <h2>
-            {{ $ordine->commessa && $ordine->commessa->cliente
-                ? strtoupper($ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome)
-                : '' }}
-            @if($ordine->commessa?->titolo)
-                — {{ $ordine->commessa->titolo }}
-            @endif
-        </h2>
-        @if($ordine->commessa?->indirizzo_lavoro)
-            <div style="font-size:11px; margin-top:4px;">
-                {{ $ordine->commessa->indirizzo_lavoro }}
-                @if($ordine->commessa?->citta_lavoro)
-                    — {{ $ordine->commessa->citta_lavoro }}
-                @endif
-            </div>
+<div class="testata">
+    <h1 style="font-size:32px; font-weight:bold; margin-bottom:4px;">
+        {{ $ordine->commessa && $ordine->commessa->cliente
+            ? strtoupper($ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome)
+            : '' }}
+    </h1>
+    <h2 style="font-size:14px; font-weight:bold; margin-bottom:4px;">
+        ORDINE {{ $ordine->numero }}
+    </h2>
+    <div style="font-size:12px; margin-bottom:2px;">
+        @if($ordine->commessa?->titolo)
+            {{ strtoupper($ordine->commessa->titolo) }}
         @endif
     </div>
+    @if($ordine->commessa?->indirizzo_lavoro)
+        <div style="font-size:11px; margin-top:2px;">
+            {{ strtoupper($ordine->commessa->indirizzo_lavoro) }}
+            @if($ordine->commessa?->citta_lavoro)
+                — {{ strtoupper($ordine->commessa->citta_lavoro) }}
+            @endif
+        </div>
+    @endif
+</div>
 
     {{-- DATE --}}
     <div class="sezione">
