@@ -420,6 +420,14 @@
 
                     Totale:
                     {{ number_format($riga->totale_cliente ?? 0, 2, ',', '.') }} €
+                    <br>
+
+                    Sconto applicato:
+                    {{ number_format(
+                        (float)($riga->prezzo_listino ?? 0) > 0
+                            ? (((float)($riga->prezzo_listino ?? 0) - (float)($riga->prezzo_cliente_unitario ?? 0)) / (float)($riga->prezzo_listino ?? 0)) * 100
+                            : 0
+                    , 2, ',', '.') }}%
 
                 </td>
 
@@ -1917,5 +1925,3 @@ function controllaPdfSelezionato(form) {
 
 
 </script>
-
-
