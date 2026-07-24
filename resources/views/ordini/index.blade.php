@@ -29,14 +29,17 @@
     <table class="tabella-lista">
 
         <tr>
-            <th>Numero</th>
-            <th>Cliente</th>
-            <th>Commessa</th>
-            <th>Tipo intervento</th>
+        <th>Numero</th>
+<th>Cliente</th>
+@if($statoCorrente == 'completo_attesa_merce')
+<th>Stampa doc.</th>
+@endif
+<th>Commessa</th>
+<th>Tipo intervento</th>
 
-             {{-- ===================================================== --}}
-             {{-- INIZIO COLONNA VARIABILE LISTA ORDINI --}}
-             {{-- ===================================================== --}}
+     {{-- ===================================================== --}}
+     {{-- INIZIO COLONNA VARIABILE LISTA ORDINI --}}
+     {{-- ===================================================== --}}
 
 @if($statoCorrente == 'programmare_posa')
 
@@ -71,13 +74,24 @@
                 </td>
 
                 <td>
-                    {{ $ordine->commessa && $ordine->commessa->cliente
-                        ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
-                        : '' }}
-                </td>
+    {{ $ordine->commessa && $ordine->commessa->cliente
+        ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
+        : '' }}
+</td>
 
-                <td>
-                    @if($ordine->commessa)
+@if($statoCorrente == 'completo_attesa_merce')
+    <td style="text-align:center;">
+        <form method="POST" action="/ordini/{{ $ordine->id }}/toggle-documenti-stampati" onsubmit="event.preventDefault(); this.submit();">
+            @csrf
+            <input type="checkbox"
+                   onchange="this.form.submit()"
+                   {{ $ordine->documenti_stampati ? 'checked' : '' }}>
+        </form>
+    </td>
+@endif
+
+<td>
+    @if($ordine->commessa)
 
                         {{ $ordine->commessa->titolo }}
 

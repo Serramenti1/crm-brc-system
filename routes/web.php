@@ -45,6 +45,7 @@ Route::get('/ordini/{id}/copertina', [OrdineController::class, 'copertina']);
 Route::get('/ordini/{id}/confronto-preventivo', [OrdineController::class, 'confronto']);
 Route::get('/ordini/{id}', [OrdineController::class, 'show']);
 Route::delete('/ordini/{id}', [OrdineController::class, 'destroy']);
+Route::post('/ordini/{id}/toggle-documenti-stampati', [OrdineController::class, 'toggleDocumentiStampati']);
 
 Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPreventivo']);
 Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);

@@ -990,4 +990,14 @@ public function copertina($id)
     return view('ordini.copertina', compact('ordine'));
 }
 
+public function toggleDocumentiStampati($id)
+{
+    $ordine = Ordine::findOrFail($id);
+    $ordine->documenti_stampati = !$ordine->documenti_stampati;
+    $ordine->save();
+
+    return redirect()->back()
+        ->with('success', 'Flag stampa documentazione aggiornato.');
+}
+
 }
