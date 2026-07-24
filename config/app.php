@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'versione_crm' => 'v1.2 - 24/07/2026',
+
 ];

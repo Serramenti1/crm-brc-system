@@ -4,8 +4,11 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 </head>
 
-<div class="topbar">
-    CRM BRC SYSTEM
+<div class="topbar" style="display:flex; justify-content:space-between; align-items:center;">
+    <span>CRM BRC SYSTEM</span>
+    <span style="font-size:12px; font-weight:normal; opacity:0.8;">
+        {{ config('app.versione_crm') }}
+    </span>
 </div>
 
 {{-- ===================================================== --}}
