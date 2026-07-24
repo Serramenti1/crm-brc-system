@@ -33,7 +33,23 @@ $password = config('database.connections.mysql.password');
 $host = config('database.connections.mysql.host');
 
 $mysqldump = 'C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqldump.exe';
+$percorsiPossibili = [
+    'C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqldump.exe',
+    'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe',
+];
 
+$mysqldump = null;
+
+foreach ($percorsiPossibili as $percorso) {
+    if (file_exists($percorso)) {
+        $mysqldump = $percorso;
+        break;
+    }
+}
+
+if (!$mysqldump) {
+    return back()->with('error', 'mysqldump.exe non trovato in nessun percorso conosciuto.');
+}
 if ($password) {
     $comando = '"' . $mysqldump . '" -h ' . $host . ' -u ' . $username . ' -p' . $password . ' ' . $database . ' > "' . $percorsoSql . '"';
 } else {
