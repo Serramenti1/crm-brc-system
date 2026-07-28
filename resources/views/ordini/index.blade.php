@@ -62,6 +62,9 @@
             {{-- ===================================================== --}}
 
             <th>Stato</th>
+            @if($statoCorrente == 'attesa_saldo_merce')
+            <th>Richiesto sal</th>
+            @endif
             <th>Azioni</th>
         </tr>
 
@@ -200,6 +203,17 @@
 
 @endif
                 </td>
+
+                @if($statoCorrente == 'attesa_saldo_merce')
+                    <td style="text-align:center;">
+                        <form method="POST" action="/ordini/{{ $ordine->id }}/toggle-richiesto-sal" onsubmit="event.preventDefault(); this.submit();">
+                            @csrf
+                            <input type="checkbox"
+                                   onchange="this.form.submit()"
+                                   {{ $ordine->richiesto_sal ? 'checked' : '' }}>
+                        </form>
+                    </td>
+                @endif
 
                 <td class="azioni">
 

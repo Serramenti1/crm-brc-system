@@ -53,7 +53,7 @@ Route::post('/righe-ordine/{id}/elimina-pdf', [OrdineController::class, 'elimina
 
 Route::post('/ordini/{id}/documenti', [OrdineController::class, 'aggiornaDocumenti']);
 Route::post('/ordini/{id}/documenti/elimina/{campo}', [OrdineController::class, 'eliminaDocumentoOrdine']);
-
+Route::post('/ordini/{id}/toggle-richiesto-sal', [OrdineController::class, 'toggleRichiestoSal']);
 Route::post('/preventivi/{id}/aggiungi-riga-prodotto', [PreventivoController::class, 'aggiungiRigaProdotto']);
 
 Route::post('/righe-prodotti/{riga_prodotto_id}/servizi', [RigaPreventivoServizioController::class, 'store']);

@@ -1000,4 +1000,14 @@ public function toggleDocumentiStampati($id)
         ->with('success', 'Flag stampa documentazione aggiornato.');
 }
 
+public function toggleRichiestoSal($id)
+{
+    $ordine = Ordine::findOrFail($id);
+    $ordine->richiesto_sal = !$ordine->richiesto_sal;
+    $ordine->save();
+
+    return redirect()->back()
+        ->with('success', 'Flag richiesto SAL aggiornato.');
+}
+
 }
