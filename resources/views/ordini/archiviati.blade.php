@@ -48,10 +48,10 @@
                 </td>
 
                 <td>
-                    {{ $ordine->commessa && $ordine->commessa->cliente
-                        ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
-                        : '' }}
-                </td>
+    {{ $ordine->commessa && $ordine->commessa->cliente
+        ? $ordine->commessa->cliente->nomeVisualizzato()
+        : '' }}
+</td>
 
                 <td>
                     @if($ordine->commessa)

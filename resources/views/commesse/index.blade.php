@@ -44,14 +44,13 @@
 
                 <td>
 
-                    @if($commessa->cliente)
+    @if($commessa->cliente)
 
-                        {{ $commessa->cliente->nome }}
-                        {{ $commessa->cliente->cognome }}
+        {{ $commessa->cliente->nomeVisualizzato() }}
 
-                    @endif
+    @endif
 
-                </td>
+</td>
 
                 <td>
 

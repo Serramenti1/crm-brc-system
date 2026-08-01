@@ -27,6 +27,9 @@ Route::get('/', function () {
     return view('dashboard', compact('conteggiOrdini'));
 });
 
+Route::get('/clienti/scegli-tipo', [ClienteController::class, 'sceglitipo'])->name('clienti.sceglitipo');
+Route::get('/clienti/create-privato', [ClienteController::class, 'createPrivato'])->name('clienti.createPrivato');
+Route::get('/clienti/create-azienda', [ClienteController::class, 'createAzienda'])->name('clienti.createAzienda');
 Route::resource('clienti', ClienteController::class);
 Route::resource('commesse', CommessaController::class);
 Route::get('/preventivi/{id}/visualizza', [PreventivoController::class, 'visualizza']);

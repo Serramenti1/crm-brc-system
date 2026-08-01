@@ -14,10 +14,10 @@ class ClienteController extends Controller
         $query = Cliente::with('commesse');
 
         $query = SearchHelper::applyMultiWordSearch(
-            $query,
-            ['nome', 'cognome'],
-            $request->q
-        );
+    $query,
+    ['nome', 'cognome', 'ragione_sociale'],
+    $request->q
+);
 
         $clienti = $query
         ->latest()
@@ -27,10 +27,20 @@ class ClienteController extends Controller
         return view('clienti.index', compact('clienti'));
     }
 
-    public function create()
-    {
-        return view('clienti.create');
-    }
+    public function sceglitipo()
+{
+    return view('clienti.scegli-tipo');
+}
+
+public function createPrivato()
+{
+    return view('clienti.create-privato');
+}
+
+public function createAzienda()
+{
+    return view('clienti.create-azienda');
+}
 
     public function store(Request $request)
 {
@@ -39,6 +49,7 @@ class ClienteController extends Controller
         [
             'email' => 'nullable|unique:clienti,email',
             'codice_fiscale' => 'nullable|unique:clienti,codice_fiscale',
+            'ragione_sociale' => $request->tipo_cliente === 'azienda' ? 'required|string|max:255' : 'nullable',
         ],
 
         [
@@ -46,6 +57,8 @@ class ClienteController extends Controller
 
             'codice_fiscale.unique' =>
                 'Esiste già un cliente con questo codice fiscale.',
+
+            'ragione_sociale.required' => 'La ragione sociale è obbligatoria per le aziende.',
         ]
 
     );

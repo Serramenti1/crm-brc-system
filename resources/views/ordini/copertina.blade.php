@@ -181,10 +181,10 @@
     {{-- TESTATA --}}
 <div class="testata">
     <h1 style="font-size:32px; font-weight:bold; margin-bottom:4px;">
-        {{ $ordine->commessa && $ordine->commessa->cliente
-            ? strtoupper($ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome)
-            : '' }}
-    </h1>
+    {{ $ordine->commessa && $ordine->commessa->cliente
+        ? strtoupper($ordine->commessa->cliente->nomeVisualizzato())
+        : '' }}
+</h1>
     <h2 style="font-size:14px; font-weight:bold; margin-bottom:4px;">
         ORDINE {{ $ordine->numero }}
     </h2>
@@ -225,10 +225,10 @@
     {{-- CHECKLIST CLIENTE --}}
     <div class="sezione">
         <div class="sezione-titolo">
-            {{ $ordine->commessa && $ordine->commessa->cliente
-                ? strtoupper($ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome)
-                : 'CLIENTE' }}
-        </div>
+    {{ $ordine->commessa && $ordine->commessa->cliente
+        ? strtoupper($ordine->commessa->cliente->nomeVisualizzato())
+        : 'CLIENTE' }}
+</div>
         <div class="sezione-corpo">
             <div class="checklist-item">
                 <span class="checkbox-stampa"></span>

@@ -16,31 +16,35 @@
         </a>
     </form>
 
-    <a href="/clienti/create" class="btn btn-azione">
-        + Nuovo Cliente
-    </a>
+    <a href="/clienti/scegli-tipo" class="btn btn-azione">
+    + Nuovo Cliente
+</a>
 
     <table class="tabella-lista">
 
         <tr>
-            <th>Nome</th>
-            <th>Cognome</th>
-            <th>Indirizzo</th>
-            <th>Contatti</th>
-            <th>Azioni</th>
-        </tr>
+    <th>Nome</th>
+    <th>Tipo</th>
+    <th>Indirizzo</th>
+    <th>Contatti</th>
+    <th>Azioni</th>
+</tr>
 
-        @foreach($clienti as $cliente)
+@foreach($clienti as $cliente)
 
-            <tr>
+    <tr>
 
-                <td>
-                    {{ $cliente->nome }}
-                </td>
+        <td>
+            {{ $cliente->nomeVisualizzato() }}
+        </td>
 
-                <td>
-                    {{ $cliente->cognome }}
-                </td>
+        <td>
+            @if($cliente->tipo_cliente == 'azienda')
+                🏢 Azienda
+            @else
+                👤 Privato
+            @endif
+        </td>
 
                 <td>
                     {{ $cliente->indirizzo }}<br>

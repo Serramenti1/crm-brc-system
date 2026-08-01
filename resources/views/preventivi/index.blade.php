@@ -47,10 +47,10 @@
                 </td>
 
                 <td>
-                    {{ $preventivo->commessa && $preventivo->commessa->cliente
-                        ? $preventivo->commessa->cliente->nome . ' ' . $preventivo->commessa->cliente->cognome
-                        : '' }}
-                </td>
+    {{ $preventivo->commessa && $preventivo->commessa->cliente
+        ? $preventivo->commessa->cliente->nomeVisualizzato()
+        : '' }}
+</td>
 
                 <td>
                     @if($preventivo->commessa)

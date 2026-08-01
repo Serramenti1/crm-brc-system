@@ -27,12 +27,11 @@
         </tr>
 
         <tr>
-            <td><strong>Cliente</strong></td>
-            <td>
-                {{ $commessa->cliente?->nome }}
-                {{ $commessa->cliente?->cognome }}
-            </td>
-        </tr>
+    <td><strong>Cliente</strong></td>
+    <td>
+        {{ $commessa->cliente?->nomeVisualizzato() }}
+    </td>
+</tr>
 
         <tr>
             <td><strong>Titolo commessa</strong></td>

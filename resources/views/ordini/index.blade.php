@@ -78,7 +78,7 @@
 
                 <td>
     {{ $ordine->commessa && $ordine->commessa->cliente
-        ? $ordine->commessa->cliente->nome . ' ' . $ordine->commessa->cliente->cognome
+        ? $ordine->commessa->cliente->nomeVisualizzato()
         : '' }}
 </td>
 

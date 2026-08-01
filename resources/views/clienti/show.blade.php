@@ -19,49 +19,71 @@
     <table class="tabella-dettaglio">
 
         <tr>
-            <th colspan="2">
-                {{ $cliente->nome }} {{ $cliente->cognome }}
-            </th>
-        </tr>
+    <th colspan="2">
+        {{ $cliente->nomeVisualizzato() }}
+        <span style="font-weight:normal; font-size:13px;">
+            ({{ $cliente->tipo_cliente == 'azienda' ? '🏢 Azienda' : '👤 Privato' }})
+        </span>
+    </th>
+</tr>
 
-        <tr>
-            <td><strong>Indirizzo</strong></td>
-            <td>{{ $cliente->indirizzo }}</td>
-        </tr>
+@if($cliente->tipo_cliente == 'azienda')
 
-        <tr>
-            <td><strong>Città</strong></td>
-            <td>
-                {{ $cliente->cap }}
-                {{ $cliente->citta }}
-                ({{ $cliente->provincia }})
-            </td>
-        </tr>
+    <tr>
+        <td><strong>Referente</strong></td>
+        <td>{{ trim($cliente->nome_referente . ' ' . $cliente->cognome_referente) }}</td>
+    </tr>
 
-        <tr>
-            <td><strong>Telefono</strong></td>
-            <td>{{ $cliente->telefono }}</td>
-        </tr>
+    <tr>
+        <td><strong>Codice SDI</strong></td>
+        <td>{{ $cliente->codice_sdi }}</td>
+    </tr>
 
-        <tr>
-            <td><strong>Email</strong></td>
-            <td>{{ $cliente->email }}</td>
-        </tr>
+    <tr>
+        <td><strong>PEC</strong></td>
+        <td>{{ $cliente->pec }}</td>
+    </tr>
 
-        <tr>
-            <td><strong>Codice fiscale</strong></td>
-            <td>{{ $cliente->codice_fiscale }}</td>
-        </tr>
+@endif
 
-        <tr>
-            <td><strong>Partita IVA</strong></td>
-            <td>{{ $cliente->partita_iva }}</td>
-        </tr>
+<tr>
+    <td><strong>Indirizzo</strong></td>
+    <td>{{ $cliente->indirizzo }}</td>
+</tr>
 
-        <tr>
-            <td><strong>Note</strong></td>
-            <td>{!! nl2br(e($cliente->note)) !!}</td>
-        </tr>
+<tr>
+    <td><strong>Città</strong></td>
+    <td>
+        {{ $cliente->cap }}
+        {{ $cliente->citta }}
+        ({{ $cliente->provincia }})
+    </td>
+</tr>
+
+<tr>
+    <td><strong>Telefono</strong></td>
+    <td>{{ $cliente->telefono }}</td>
+</tr>
+
+<tr>
+    <td><strong>Email</strong></td>
+    <td>{{ $cliente->email }}</td>
+</tr>
+
+<tr>
+    <td><strong>Codice fiscale</strong></td>
+    <td>{{ $cliente->codice_fiscale }}</td>
+</tr>
+
+<tr>
+    <td><strong>Partita IVA</strong></td>
+    <td>{{ $cliente->partita_iva }}</td>
+</tr>
+
+<tr>
+    <td><strong>Note</strong></td>
+    <td>{!! nl2br(e($cliente->note)) !!}</td>
+</tr>
 
     </table>
 

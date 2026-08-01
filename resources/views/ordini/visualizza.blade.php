@@ -30,12 +30,11 @@
         </tr>
 
         <tr>
-            <td><strong>Cliente</strong></td>
-            <td>
-                {{ optional(optional($ordine->commessa)->cliente)->nome }}
-                {{ optional(optional($ordine->commessa)->cliente)->cognome }}
-            </td>
-        </tr>
+    <td><strong>Cliente</strong></td>
+    <td>
+        {{ optional(optional($ordine->commessa)->cliente)->nomeVisualizzato() }}
+    </td>
+</tr>
 
         <tr>
             <td><strong>Commessa</strong></td>

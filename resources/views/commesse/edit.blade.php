@@ -25,13 +25,13 @@
                 <div class="form-field">
                     <label>Cliente</label>
                     <select name="cliente_id" required>
-                        <option value="">-- Seleziona cliente --</option>
-                        @foreach($clienti as $cliente)
-                            <option value="{{ $cliente->id }}" {{ old('cliente_id', $commessa->cliente_id) == $cliente->id ? 'selected' : '' }}>
-                                {{ $cliente->nome }} {{ $cliente->cognome }}
-                            </option>
-                        @endforeach
-                    </select>
+    <option value="">-- Seleziona cliente --</option>
+    @foreach($clienti as $cliente)
+        <option value="{{ $cliente->id }}" {{ old('cliente_id', $commessa->cliente_id) == $cliente->id ? 'selected' : '' }}>
+            {{ $cliente->nomeVisualizzato() }}
+        </option>
+    @endforeach
+</select>
                 </div>
 
                 <div class="form-field">

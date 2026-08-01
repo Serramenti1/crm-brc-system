@@ -320,44 +320,44 @@
 
         <table class="tabella-lista">
 
-            <tr>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Città</th>
-                <th>Telefono</th>
-                <th>Azioni</th>
-            </tr>
+    <tr>
+        <th>Nome</th>
+        <th>Tipo</th>
+        <th>Città</th>
+        <th>Telefono</th>
+        <th>Azioni</th>
+    </tr>
 
-            @foreach($clienti as $cliente)
+    @foreach($clienti as $cliente)
 
-                <tr class="riga-cliente"
-                    data-ricerca="{{ strtolower($cliente->nome . ' ' . $cliente->cognome . ' ' . $cliente->citta . ' ' . $cliente->telefono) }}">
+        <tr class="riga-cliente"
+            data-ricerca="{{ strtolower($cliente->nomeVisualizzato() . ' ' . $cliente->citta . ' ' . $cliente->telefono) }}">
 
-                    <td>{{ $cliente->nome }}</td>
-                    <td>{{ $cliente->cognome }}</td>
-                    <td>{{ $cliente->citta }}</td>
-                    <td>{{ $cliente->telefono }}</td>
+            <td>{{ $cliente->nomeVisualizzato() }}</td>
+            <td>{{ $cliente->tipo_cliente == 'azienda' ? '🏢 Azienda' : '👤 Privato' }}</td>
+            <td>{{ $cliente->citta }}</td>
+            <td>{{ $cliente->telefono }}</td>
 
-                    <td>
-                        <button type="button"
-                                class="btn btn-azione"
-                                onclick="selezionaCliente(
-                                    '{{ $cliente->id }}',
-                                    '{{ addslashes($cliente->nome . ' ' . $cliente->cognome) }}',
-                                    '{{ addslashes($cliente->indirizzo ?? '') }}',
-                                    '{{ addslashes($cliente->citta ?? '') }}',
-                                    '{{ addslashes($cliente->provincia ?? '') }}',
-                                    '{{ addslashes($cliente->cap ?? '') }}'
-                                )">
-                            Seleziona
-                        </button>
-                    </td>
+            <td>
+                <button type="button"
+                        class="btn btn-azione"
+                        onclick="selezionaCliente(
+                            '{{ $cliente->id }}',
+                            '{{ addslashes($cliente->nomeVisualizzato()) }}',
+                            '{{ addslashes($cliente->indirizzo ?? '') }}',
+                            '{{ addslashes($cliente->citta ?? '') }}',
+                            '{{ addslashes($cliente->provincia ?? '') }}',
+                            '{{ addslashes($cliente->cap ?? '') }}'
+                        )">
+                    Seleziona
+                </button>
+            </td>
 
-                </tr>
+        </tr>
 
-            @endforeach
+    @endforeach
 
-        </table>
+</table>
 
         <div style="margin-top:20px;">
             <button type="button" class="btn btn-azione" onclick="chiudiModaleClienti()">
