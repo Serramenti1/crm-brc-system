@@ -208,4 +208,52 @@ class RigaOrdineController extends Controller
         'totale_con_iva'  => $calcoloIva['totale_con_iva'],
     ]);
 }
+
+public function sposta($id, Request $request)
+{
+    $riga = RigaOrdine::with('ordine')->findOrFail($id);
+    $ordine = $riga->ordine;
+
+    if ($ordine->stato != 'preparazione_contratto') {
+        return redirect('/ordini/' . $ordine->id)
+            ->with('error', 'Puoi riordinare le righe solo in preparazione contratto.');
+    }
+
+    $direzione = $request->input('direzione');
+
+    $righe = RigaOrdine::where('ordine_id', $ordine->id)
+        ->orderBy('ordine_visualizzazione')
+        ->orderBy('id')
+        ->get();
+
+    foreach ($righe as $i => $r) {
+        $r->ordine_visualizzazione = $i;
+        $r->save();
+    }
+
+    $righe = RigaOrdine::where('ordine_id', $ordine->id)
+        ->orderBy('ordine_visualizzazione')
+        ->get();
+
+    $posizione = $righe->search(fn($r) => $r->id === $riga->id);
+
+    if ($direzione === 'su' && $posizione > 0) {
+        $rigaAdiacente = $righe[$posizione - 1];
+        $rigaAdiacente->ordine_visualizzazione = $posizione;
+        $rigaAdiacente->save();
+        $riga->ordine_visualizzazione = $posizione - 1;
+        $riga->save();
+    }
+
+    if ($direzione === 'giu' && $posizione < $righe->count() - 1) {
+        $rigaAdiacente = $righe[$posizione + 1];
+        $rigaAdiacente->ordine_visualizzazione = $posizione;
+        $rigaAdiacente->save();
+        $riga->ordine_visualizzazione = $posizione + 1;
+        $riga->save();
+    }
+
+    return redirect('/ordini/' . $ordine->id);
+}
+
 }

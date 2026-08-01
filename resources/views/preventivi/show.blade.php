@@ -204,18 +204,23 @@
                 </td>
 
                 <td>
-                    Listino:
-                    {{ number_format($riga->prezzo_listino,2,',','.') }} €<br>
+    Listino:
+    {{ number_format($riga->prezzo_listino,2,',','.') }} €<br>
 
-                    Scontato:
-                    {{ number_format($riga->costo_netto,2,',','.') }} €<br>
+    Scontato:
+    {{ number_format($riga->costo_netto,2,',','.') }} €<br>
 
-                    Cliente:
-                    {{ number_format($riga->prezzo_cliente_unitario,2,',','.') }} €<br>
+    Cliente unitario:
+    {{ number_format($riga->prezzo_cliente_unitario,2,',','.') }} €<br>
 
-                    Sconto applicato:
-                    {{ number_format($riga->sconto_cliente_percentuale,2,',','.') }}%
-                </td>
+    @if((float)($riga->quantita ?? 0) > 1)
+    Totale:
+    <strong>{{ number_format($riga->totale_cliente,2,',','.') }} €</strong><br>
+    @endif
+
+    Sconto applicato:
+    {{ number_format($riga->sconto_cliente_percentuale,2,',','.') }}%
+</td>
 
                 <td class="azioni">
     <div class="azioni-bottoni">

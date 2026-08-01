@@ -50,6 +50,7 @@ Route::post('/ordini/{id}/toggle-documenti-stampati', [OrdineController::class, 
 Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPreventivo']);
 Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);
 Route::post('/righe-ordine/{id}/elimina-pdf', [OrdineController::class, 'eliminaPdfRiga']);
+Route::post('/righe-ordine-prodotto/{id}/sposta', [RigaOrdineController::class, 'sposta']);
 
 Route::post('/ordini/{id}/documenti', [OrdineController::class, 'aggiornaDocumenti']);
 Route::post('/ordini/{id}/documenti/elimina/{campo}', [OrdineController::class, 'eliminaDocumentoOrdine']);

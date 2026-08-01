@@ -383,7 +383,7 @@
 {{-- ===================================================== --}}
 </tr>
 
-        @foreach($ordine->righe as $riga)
+        @foreach($ordine->righe->sortBy('ordine_visualizzazione') as $riga)
 
             <tr style="{{ (float)($riga->quantita ?? 0) == 0 ? 'background:#f8d7da;' : '' }}">
 
@@ -431,7 +431,7 @@
 
                 </td>
 
-        @if($ordine->stato == 'preparazione_contratto')
+      @if($ordine->stato == 'preparazione_contratto')
 
     <td>
 
@@ -455,6 +455,26 @@
             </button>
 
         </form>
+
+        @if(!$loop->first)
+            <form method="POST"
+                  action="/righe-ordine-prodotto/{{ $riga->id }}/sposta"
+                  style="display:inline;">
+                @csrf
+                <input type="hidden" name="direzione" value="su">
+                <button type="submit" class="btn btn-azione" title="Sposta su">↑</button>
+            </form>
+        @endif
+
+        @if(!$loop->last)
+            <form method="POST"
+                  action="/righe-ordine-prodotto/{{ $riga->id }}/sposta"
+                  style="display:inline;">
+                @csrf
+                <input type="hidden" name="direzione" value="giu">
+                <button type="submit" class="btn btn-azione" title="Sposta giù">↓</button>
+            </form>
+        @endif
 
     </td>
 
