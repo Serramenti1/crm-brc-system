@@ -24,17 +24,19 @@ class PreventivoController extends Controller
 );
 
         if ($request->filled('cliente')) {
-            $parole = explode(' ', trim($request->cliente));
+    $parole = explode(' ', trim($request->cliente));
 
-            $query->whereHas('commessa.cliente', function ($q) use ($parole) {
-                foreach ($parole as $parola) {
-                    $q->where(function ($sub) use ($parola) {
-                        $sub->where('nome', 'like', $parola . '%')
-                            ->orWhere('cognome', 'like', $parola . '%');
-                    });
-                }
-            });
+    $query->whereHas('commessa.cliente', function ($q) use ($parole) {
+        foreach ($parole as $parola) {
+            $q->where(function ($sub) use ($parola) {
+    $sub->where('nome', 'like', $parola . '%')
+        ->orWhere('cognome', 'like', $parola . '%')
+        ->orWhere('ragione_sociale', 'like', $parola . '%')
+        ->orWhere('cognome', 'like', '%' . $parola);
+});
         }
+    });
+}
 
         $preventivi = $query
     ->with(

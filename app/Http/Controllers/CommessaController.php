@@ -28,9 +28,11 @@ class CommessaController extends Controller
                                 $tipoQuery->where('nome', 'like', '%' . $parola . '%');
                             })
                             ->orWhereHas('cliente', function ($clienteQuery) use ($parola) {
-                                $clienteQuery->where('nome', 'like', $parola . '%')
-                                    ->orWhere('cognome', 'like', $parola . '%');
-                            });
+    $clienteQuery->where('nome', 'like', $parola . '%')
+        ->orWhere('cognome', 'like', $parola . '%')
+        ->orWhere('ragione_sociale', 'like', $parola . '%')
+        ->orWhere('cognome', 'like', '%' . $parola);
+});
                     });
                 }
             });

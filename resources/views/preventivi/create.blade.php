@@ -120,26 +120,26 @@
             @foreach($commesse as $commessa)
 
                 @php
-                    $nomeCliente = $commessa->cliente
-                        ? $commessa->cliente->nome . ' ' . $commessa->cliente->cognome
-                        : '';
+    $nomeCliente = $commessa->cliente
+        ? $commessa->cliente->nomeVisualizzato()
+        : '';
 
-                    $testoRicerca = strtolower(
-                        $nomeCliente . ' ' .
-                        $commessa->titolo . ' ' .
-                        $commessa->indirizzo_lavoro . ' ' .
-                        $commessa->citta_lavoro
-                    );
+    $testoRicerca = strtolower(
+        $nomeCliente . ' ' .
+        $commessa->titolo . ' ' .
+        $commessa->indirizzo_lavoro . ' ' .
+        $commessa->citta_lavoro
+    );
 
-                    $testoSelezionato =
-                        $nomeCliente .
-                        ' - ' .
-                        $commessa->titolo .
-                        ' - ' .
-                        $commessa->indirizzo_lavoro .
-                        ' ' .
-                        $commessa->citta_lavoro;
-                @endphp
+    $testoSelezionato =
+        $nomeCliente .
+        ' - ' .
+        $commessa->titolo .
+        ' - ' .
+        $commessa->indirizzo_lavoro .
+        ' ' .
+        $commessa->citta_lavoro;
+@endphp
 
                 <tr class="riga-commessa"
                     data-ricerca="{{ $testoRicerca }}">

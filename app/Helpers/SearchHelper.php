@@ -12,12 +12,13 @@ class SearchHelper
 
         return $query->where(function ($q) use ($parole, $campi) {
             foreach ($parole as $parola) {
-                $q->where(function ($sub) use ($parola, $campi) {
-                    foreach ($campi as $campo) {
-                        $sub->orWhere($campo, 'like', $parola . '%');
-                    }
-                });
-            }
+    $q->where(function ($sub) use ($parola, $campi) {
+        foreach ($campi as $campo) {
+            $sub->orWhere($campo, 'like', $parola . '%')
+                ->orWhere($campo, 'like', '%' . $parola);
+        }
+    });
+}
         });
     }
 }
