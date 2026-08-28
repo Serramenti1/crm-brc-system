@@ -7,6 +7,7 @@ use App\Models\ImpostazioneIva;
 use App\Models\Detrazione;
 use App\Models\ServizioExtra;
 use App\Models\TipoIntervento;
+use App\Models\Impostazione;
 
 class ImpostazioneController extends Controller
 {
@@ -216,4 +217,39 @@ class ImpostazioneController extends Controller
         return redirect('/impostazioni/tipi-intervento')
             ->with('success', 'Tipo intervento aggiornato');
     }
+
+    public function margini()
+{
+    $impostazioni = Impostazione::first();
+
+    if (!$impostazioni) {
+        $impostazioni = Impostazione::create([
+            'iva_ordini' => 22,
+            'ricarico_prodotti_default' => 50,
+            'margine_soglia_rossa' => 40,
+            'margine_soglia_verde' => 50,
+        ]);
+    }
+
+    return view('impostazioni.margini', compact('impostazioni'));
+}
+
+public function updateMargini(Request $request)
+{
+    $request->validate([
+        'ricarico_prodotti_default' => 'required|numeric|min:0|max:1000',
+        'margine_soglia_rossa' => 'required|numeric|min:0|max:1000',
+        'margine_soglia_verde' => 'required|numeric|min:0|max:1000',
+    ]);
+    $impostazioni = Impostazione::first();
+
+    $impostazioni->update([
+        'ricarico_prodotti_default' => $request->ricarico_prodotti_default,
+        'margine_soglia_rossa' => $request->margine_soglia_rossa,
+        'margine_soglia_verde' => $request->margine_soglia_verde,
+    ]);
+
+    return redirect('/impostazioni/margini')->with('success', 'Margini aggiornati');
+}
+
 }

@@ -101,3 +101,5 @@ Route::put('/impostazioni/tipi-intervento/{id}', [ImpostazioneController::class,
 
 Route::get('/impostazioni/backup', [BackupController::class, 'index']);
 Route::post('/impostazioni/backup/crea', [BackupController::class, 'creaBackupCompleto']);
+Route::get('/impostazioni/margini', [ImpostazioneController::class, 'margini']);
+Route::post('/impostazioni/margini', [ImpostazioneController::class, 'updateMargini']);

@@ -57,9 +57,12 @@
    style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
     <h3>Tipi intervento</h3>
     <p>Nuovo, manutenzione, ristrutturazione e altri tipi lavoro</p>
-
-    
 </a>
 
+<a href="/impostazioni/margini"
+   style="border:1px solid #ccc; padding:20px; text-decoration:none; width:250px; color:black; border-radius:8px;">
+    <h3>Margini</h3>
+    <p>Ricarico predefinito e soglie colore per il controllo margini</p>
+</a>
 
 </div>

@@ -9,7 +9,9 @@ class Impostazione extends Model
     protected $table = 'impostazioni';
 
     protected $fillable = [
-        'iva_ordini',
-        'ricarico_prodotti_default',
-    ];
+    'iva_ordini',
+    'ricarico_prodotti_default',
+    'margine_soglia_rossa',
+    'margine_soglia_verde',
+];
 }

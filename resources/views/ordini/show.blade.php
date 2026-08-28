@@ -271,14 +271,13 @@
                     </p>
 
                     <p>
-                        Ricarico %<br>
+    Ricarico %<br>
 
-                        <input type="number"
-                               name="ricarico_percentuale"
-                               value="{{ $impostazioni->ricarico_prodotti ?? 0 }}"
-                               step="0.01">
-                    </p>
-
+    <input type="number"
+           name="ricarico_percentuale"
+           value="{{ $impostazioni->ricarico_prodotti_default ?? 50 }}"
+           step="0.01">
+</p>
                     <p>
 
                         <label>
@@ -315,13 +314,14 @@
     <table class="tabella-lista">
 
         <tr>
-           <th>Prodotto</th>
-           <th>Prezzi</th>
+   <th>Prodotto</th>
+   <th>Prezzi</th>
 
-            @if($ordine->stato == 'preparazione_contratto')
-           <th>Azioni</th>
-           <th>Servizi</th>
-    @endif
+    @if($ordine->stato == 'preparazione_contratto')
+   <th>Ricarico</th>
+   <th>Azioni</th>
+   <th>Servizi</th>
+@endif
 
 
 
@@ -422,7 +422,7 @@
                     {{ number_format($riga->totale_cliente ?? 0, 2, ',', '.') }} €
                     <br>
 
-                    Sconto applicato:
+                                        Sconto applicato:
                     {{ number_format(
                         (float)($riga->prezzo_listino ?? 0) > 0
                             ? (((float)($riga->prezzo_listino ?? 0) - (float)($riga->prezzo_cliente_unitario ?? 0)) / (float)($riga->prezzo_listino ?? 0)) * 100
@@ -432,6 +432,31 @@
                 </td>
 
       @if($ordine->stato == 'preparazione_contratto')
+
+    @php
+        $ricarico = (float) ($riga->ricarico_percentuale ?? 0);
+        $sogliaRossa = (float) ($impostazioni->margine_soglia_rossa ?? 40);
+        $sogliaVerde = (float) ($impostazioni->margine_soglia_verde ?? 50);
+
+        if ($ricarico < $sogliaRossa) {
+            $coloreRicarico = '#dc3545';
+        } elseif ($ricarico < $sogliaVerde) {
+            $coloreRicarico = '#fd7e14';
+        } else {
+            $coloreRicarico = '#28a745';
+        }
+    @endphp
+
+    <td style="text-align:center; vertical-align:middle;">
+    <span style="
+        color:{{ $coloreRicarico }};
+        font-weight:bold;
+    ">
+        {{ number_format($ricarico, 2, ',', '.') }}%
+        <br>
+        {{ number_format(($riga->totale_costo ?? 0) * ($ricarico / 100), 2, ',', '.') }} €
+    </span>
+</td>
 
     <td>
 
