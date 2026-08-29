@@ -148,45 +148,116 @@
     <table class="tabella-lista">
 
         <tr>
-            <th>Descrizione</th>
-            <th>Quantità</th>
-            <th>Bene significativo</th>
-            <th>Imponibile noi</th>
-            <th>Imponibile cliente</th>
-            <th>Markup</th>
-            <th>Servizi</th>
+    <tr>
+    <th>Descrizione</th>
+    <th>Quantità</th>
+    <th>Bene significativo</th>
+    <th>Imponibile noi</th>
+    <th>Imponibile cliente</th>
+    <th>Ricarico</th>
+    <th>Markup</th>
+    <th>Servizi</th>
+</tr>
+
+@foreach($ordine->righe as $riga)
+
+    @php
+        $ricaricoRiga = (float) ($riga->ricarico_percentuale ?? 0);
+        $sogliaRossa = (float) ($impostazioni->margine_soglia_rossa ?? 40);
+        $sogliaVerde = (float) ($impostazioni->margine_soglia_verde ?? 50);
+
+        if ($ricaricoRiga < $sogliaRossa) {
+            $coloreRicarico = '#dc3545';
+        } elseif ($ricaricoRiga < $sogliaVerde) {
+            $coloreRicarico = '#fd7e14';
+        } else {
+            $coloreRicarico = '#28a745';
+        }
+    @endphp
+
+    <tr>
+        <td>{{ $riga->descrizione }}</td>
+
+        <td>{{ $riga->quantita }}</td>
+
+        <td>{{ $riga->bene_significativo ? 'Sì' : 'No' }}</td>
+
+                <td>
+            {{ number_format($riga->totale_costo ?? 0, 2, ',', '.') }} €
+        </td>
+
+        <td>
+            {{ number_format($riga->totale_cliente ?? $riga->imponibile, 2, ',', '.') }} €
+        </td>
+
+        <td style="color:{{ $coloreRicarico }}; font-weight:bold;">
+            {{ number_format($ricaricoRiga, 2, ',', '.') }}%
+        </td>
+
+        <td style="color:{{ $coloreRicarico }}; font-weight:bold;">
+         {{ number_format(($riga->totale_cliente ?? $riga->imponibile) - ($riga->totale_costo ?? 0), 2, ',', '.') }} €
+        </td>
+
+        <td>
+            @foreach($riga->servizi as $servizio)
+                {{ $servizio->tipo_servizio }}
+                -
+                {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }} €
+                <br>
+            @endforeach
+        </td>
+    </tr>
+@endforeach
+
+        </table>
+
+    @php
+        $totaleCostoCantiere = $ordine->righe->sum('totale_costo');
+        $totaleClienteCantiere = $ordine->righe->sum(function ($riga) {
+            return $riga->totale_cliente ?? $riga->imponibile ?? 0;
+        });
+        $markupTotaleCantiere = $totaleClienteCantiere - $totaleCostoCantiere;
+
+        $ricaricoTotaleCantiere = $totaleCostoCantiere > 0
+            ? ($markupTotaleCantiere / $totaleCostoCantiere) * 100
+            : 0;
+
+        if ($ricaricoTotaleCantiere < $sogliaRossa) {
+            $coloreRicaricoTotale = '#dc3545';
+        } elseif ($ricaricoTotaleCantiere < $sogliaVerde) {
+            $coloreRicaricoTotale = '#fd7e14';
+        } else {
+            $coloreRicaricoTotale = '#28a745';
+        }
+    @endphp
+
+    <h2>Riepilogo cantiere</h2>
+
+    <table class="tabella-dettaglio">
+
+        <tr>
+            <td><strong>Totale costo prodotti</strong></td>
+            <td>{{ number_format($totaleCostoCantiere, 2, ',', '.') }} €</td>
         </tr>
 
-        @foreach($ordine->righe as $riga)
-            <tr>
-                <td>{{ $riga->descrizione }}</td>
+        <tr>
+            <td><strong>Totale imponibile cliente prodotti</strong></td>
+            <td>{{ number_format($totaleClienteCantiere, 2, ',', '.') }} €</td>
+        </tr>
 
-                <td>{{ $riga->quantita }}</td>
+        <tr>
+            <td><strong>Ricarico totale cantiere</strong></td>
+            <td style="color:{{ $coloreRicaricoTotale }}; font-weight:bold;">
+                {{ number_format($ricaricoTotaleCantiere, 2, ',', '.') }}%
+            </td>
+        </tr>
 
-                <td>{{ $riga->bene_significativo ? 'Sì' : 'No' }}</td>
-
-                <td>
-                    {{ number_format($riga->totale_costo ?? 0, 2, ',', '.') }} €
-                </td>
-
-                <td>
-                    {{ number_format($riga->totale_cliente ?? $riga->imponibile, 2, ',', '.') }} €
-                </td>
-
-                <td>
-                    {{ number_format(($riga->totale_cliente ?? $riga->imponibile) - ($riga->totale_costo ?? 0), 2, ',', '.') }} €
-                </td>
-
-                <td>
-                    @foreach($riga->servizi as $servizio)
-                        {{ $servizio->tipo_servizio }}
-                        -
-                        {{ number_format($servizio->prezzo_cliente * $riga->quantita, 2, ',', '.') }} €
-                        <br>
-                    @endforeach
-                </td>
-            </tr>
-        @endforeach
+        <tr>
+            <td><strong>Markup totale cantiere</strong></td>
+            <td style="color:{{ $coloreRicaricoTotale }}; font-weight:bold;">
+                {{ number_format($markupTotaleCantiere, 2, ',', '.') }} €
+            </td>
+        </tr>
 
     </table>
 

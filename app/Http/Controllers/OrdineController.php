@@ -801,7 +801,9 @@ public function eliminaPdfRiga($id)
         'righe.servizi'
     )->findOrFail($id);
 
-    return view('ordini.visualizza', compact('ordine'));
+    $impostazioni = \App\Models\Impostazione::first();
+
+    return view('ordini.visualizza', compact('ordine', 'impostazioni'));
 }
 
 public function confronto($id)

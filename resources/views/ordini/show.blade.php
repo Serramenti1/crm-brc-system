@@ -447,7 +447,7 @@
         }
     @endphp
 
-    <td style="text-align:center; vertical-align:middle;">
+    <td style="text-align:center; vertical-align:top; padding-top:12px;">
     <span style="
         color:{{ $coloreRicarico }};
         font-weight:bold;
