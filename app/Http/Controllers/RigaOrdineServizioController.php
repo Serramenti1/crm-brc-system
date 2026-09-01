@@ -103,26 +103,38 @@ class RigaOrdineServizioController extends Controller
     }
 
     private function aggiornaTotaliOrdine($ordineId)
-    {
-        $ordine = Ordine::with('righe.servizi')->findOrFail($ordineId);
+{
+    $ordine = Ordine::with(
+        'righe.servizi',
+        'commessa.tipoIntervento.ivaPrincipale',
+        'commessa.tipoIntervento.ivaSecondaria'
+    )->findOrFail($ordineId);
 
-        $totaleImponibile = 0;
+    $preventivoFake = new \stdClass();
+    $preventivoFake->commessa = $ordine->commessa;
+    $preventivoFake->righeProdotti = $ordine->righe->map(function ($riga) {
+        $rigaFake = new \stdClass();
+        $rigaFake->quantita = $riga->quantita;
+        $rigaFake->totale_cliente = $riga->totale_cliente;
+        $rigaFake->totale_costo = $riga->totale_costo;
+        $rigaFake->bene_significativo = $riga->bene_significativo;
+        $rigaFake->servizi = $riga->servizi;
+        return $rigaFake;
+    });
 
-        foreach ($ordine->righe as $riga) {
-            $quantita = (float) ($riga->quantita ?? 1);
+    $calcoloIvaService = new \App\Services\CalcoloIvaService();
+    $calcoloIva = $calcoloIvaService->calcolaDaPreventivo($preventivoFake);
 
-            $totaleImponibile += (float) $riga->totale_cliente;
-
-            foreach ($riga->servizi as $servizio) {
-                $totaleImponibile += (float) $servizio->prezzo_cliente * $quantita;
-            }
-        }
-
-        $totaleIva = $ordine->totale_iva ?? 0;
-
-        $ordine->update([
-            'imponibile' => $totaleImponibile,
-            'totale_con_iva' => $totaleImponibile + $totaleIva,
-        ]);
-    }
+    $ordine->update([
+        'imponibile'      => $calcoloIva['totale_cliente'],
+        'imponibile_4'    => $calcoloIva['imponibile_4'],
+        'imponibile_10'   => $calcoloIva['imponibile_10'],
+        'imponibile_22'   => $calcoloIva['imponibile_22'],
+        'iva_4'           => $calcoloIva['iva_4'],
+        'iva_10'          => $calcoloIva['iva_10'],
+        'iva_22'          => $calcoloIva['iva_22'],
+        'totale_iva'      => $calcoloIva['totale_iva'],
+        'totale_con_iva'  => $calcoloIva['totale_con_iva'],
+    ]);
+}
 }
