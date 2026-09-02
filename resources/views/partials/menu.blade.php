@@ -296,3 +296,224 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+{{-- ===================================================== --}}
+{{-- CALCOLATRICE RAPIDA --}}
+{{-- ===================================================== --}}
+
+<button type="button"
+        onclick="apriCalcolatrice()"
+        style="
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 9998;
+        "
+        title="Calcolatrice rapida">
+    🧮
+</button>
+
+<div id="modale_calcolatrice" style="
+        display:none;
+        position:fixed;
+        z-index:9999;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,0.45);
+    ">
+
+    <div style="
+            background:white;
+            width:90%;
+            max-width:450px;
+            margin:80px auto;
+            padding:20px;
+            border-radius:8px;
+        ">
+
+        <h2 style="margin-top:0;">Calcolatrice rapida</h2>
+
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button type="button"
+                    id="tab_sconto"
+                    onclick="mostraSchedaCalc('sconto')"
+                    class="btn btn-azione">
+                Trova sconto
+            </button>
+            <button type="button"
+                    id="tab_listino"
+                    onclick="mostraSchedaCalc('listino')"
+                    class="btn btn-azione">
+                Trova listino
+            </button>
+        </div>
+
+        {{-- SCHEDA 1: TROVA SCONTO APPLICATO --}}
+        <div id="scheda_sconto">
+
+            <p>
+                Prezzo listino (€)<br>
+                <input type="number" id="calc_listino_input" step="0.01">
+            </p>
+
+            <p>
+                Costo netto (€)<br>
+                <input type="number" id="calc_netto_input" step="0.01">
+            </p>
+
+            <button type="button" class="btn btn-azione" onclick="calcolaSconto()">
+                Calcola
+            </button>
+
+            <div id="risultato_sconto" style="
+                    margin-top:15px;
+                    padding:12px;
+                    background:#f9fafb;
+                    border:1px solid #ccc;
+                    border-radius:6px;
+                    display:none;
+                ">
+            </div>
+
+        </div>
+
+        {{-- SCHEDA 2: TROVA PREZZO LISTINO DI PARTENZA --}}
+        <div id="scheda_listino" style="display:none;">
+
+            <p>
+                Costo netto desiderato (€)<br>
+                <input type="number" id="calc_netto_desiderato" step="0.01">
+            </p>
+
+            <p>
+                Sconto 1 (%)<br>
+                <input type="number" id="calc_sconto1" step="0.01" value="0">
+            </p>
+
+            <p>
+                Sconto 2 (%) — opzionale<br>
+                <input type="number" id="calc_sconto2" step="0.01" value="0">
+            </p>
+
+            <p>
+                Sconto 3 (%) — opzionale<br>
+                <input type="number" id="calc_sconto3" step="0.01" value="0">
+            </p>
+
+            <button type="button" class="btn btn-azione" onclick="calcolaListino()">
+                Calcola
+            </button>
+
+            <div id="risultato_listino" style="
+                    margin-top:15px;
+                    padding:12px;
+                    background:#f9fafb;
+                    border:1px solid #ccc;
+                    border-radius:6px;
+                    display:none;
+                ">
+            </div>
+
+        </div>
+
+        <div style="margin-top:20px;">
+            <button type="button" class="btn btn-azione" onclick="chiudiCalcolatrice()">
+                Chiudi
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function apriCalcolatrice() {
+    document.getElementById('modale_calcolatrice').style.display = 'block';
+    mostraSchedaCalc('sconto');
+}
+
+function chiudiCalcolatrice() {
+    document.getElementById('modale_calcolatrice').style.display = 'none';
+}
+
+function mostraSchedaCalc(scheda) {
+    document.getElementById('scheda_sconto').style.display = scheda === 'sconto' ? 'block' : 'none';
+    document.getElementById('scheda_listino').style.display = scheda === 'listino' ? 'block' : 'none';
+
+    document.getElementById('tab_sconto').style.background = scheda === 'sconto' ? '#2563eb' : '#60a5fa';
+    document.getElementById('tab_listino').style.background = scheda === 'listino' ? '#2563eb' : '#60a5fa';
+}
+
+function calcolaSconto() {
+    let listino = parseFloat(document.getElementById('calc_listino_input').value);
+    let netto = parseFloat(document.getElementById('calc_netto_input').value);
+
+    let box = document.getElementById('risultato_sconto');
+
+    if (isNaN(listino) || isNaN(netto) || listino <= 0) {
+        box.style.display = 'block';
+        box.innerHTML = '<strong style="color:red;">Inserisci valori validi.</strong>';
+        return;
+    }
+
+    let scontoPercentuale = ((listino - netto) / listino) * 100;
+
+    box.style.display = 'block';
+    box.innerHTML =
+        'Prezzo listino: <strong>' + listino.toFixed(2) + ' €</strong><br>' +
+        'Costo netto: <strong>' + netto.toFixed(2) + ' €</strong><br>' +
+        'Sconto applicato: <strong>' + scontoPercentuale.toFixed(2) + '%</strong>';
+}
+
+function calcolaListino() {
+    let netto = parseFloat(document.getElementById('calc_netto_desiderato').value);
+    let s1 = parseFloat(document.getElementById('calc_sconto1').value) || 0;
+    let s2 = parseFloat(document.getElementById('calc_sconto2').value) || 0;
+    let s3 = parseFloat(document.getElementById('calc_sconto3').value) || 0;
+
+    let box = document.getElementById('risultato_listino');
+
+    if (isNaN(netto) || netto <= 0) {
+        box.style.display = 'block';
+        box.innerHTML = '<strong style="color:red;">Inserisci un costo netto valido.</strong>';
+        return;
+    }
+
+    let fattoreSconto = (1 - (s1 / 100)) * (1 - (s2 / 100)) * (1 - (s3 / 100));
+
+    if (fattoreSconto <= 0) {
+        box.style.display = 'block';
+        box.innerHTML = '<strong style="color:red;">Gli sconti inseriti non sono validi (100% o oltre).</strong>';
+        return;
+    }
+
+    let listino = netto / fattoreSconto;
+
+    let scontiTesto = s1 + '%';
+    if (s2 > 0) scontiTesto += ' + ' + s2 + '%';
+    if (s3 > 0) scontiTesto += ' + ' + s3 + '%';
+
+    box.style.display = 'block';
+    box.innerHTML =
+        'Costo netto: <strong>' + netto.toFixed(2) + ' €</strong><br>' +
+        'Sconti applicati: <strong>' + scontiTesto + '</strong><br>' +
+        'Prezzo listino: <strong>' + listino.toFixed(2) + ' €</strong>';
+}
+
+window.addEventListener('click', function(event) {
+    let modale = document.getElementById('modale_calcolatrice');
+    if (event.target === modale) {
+        chiudiCalcolatrice();
+    }
+});
+</script>
