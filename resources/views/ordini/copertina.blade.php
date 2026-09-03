@@ -257,7 +257,7 @@
                     <th style="width:13%; text-align:center;">C.O. ricevuta</th>
                     <th style="width:14%; text-align:center;">In produzione</th>
                 </tr>
-                @foreach($ordine->righe as $riga)
+                @foreach($ordine->righe->sortBy('ordine_visualizzazione') as $riga)
                 <tr>
                     <td>
                         <strong>{{ $riga->descrizione }}</strong>
