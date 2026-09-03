@@ -159,7 +159,7 @@
     <th>Servizi</th>
 </tr>
 
-@foreach($ordine->righe as $riga)
+@foreach($ordine->righe->sortBy('ordine_visualizzazione') as $riga)
 
     @php
         $ricaricoRiga = (float) ($riga->ricarico_percentuale ?? 0);
