@@ -53,22 +53,29 @@
 </td>
 
                 <td>
-                    @if($preventivo->commessa)
+    @if($preventivo->commessa)
 
-                        {{ $preventivo->commessa->titolo }}
+        {{ $preventivo->commessa->titolo }}
 
-                        <br>
+        <br>
 
-                        <small>
-                            {{ $preventivo->commessa->indirizzo_lavoro }}
+        <small>
+            {{ $preventivo->commessa->indirizzo_lavoro }}
 
-                            @if($preventivo->commessa->citta_lavoro)
-                                - {{ $preventivo->commessa->citta_lavoro }}
-                            @endif
-                        </small>
+            @if($preventivo->commessa->citta_lavoro)
+                - {{ $preventivo->commessa->citta_lavoro }}
+            @endif
+        </small>
 
-                    @endif
-                </td>
+    @endif
+
+    @if($preventivo->descrizione)
+        <br>
+        <small style="color:#2563eb; font-weight:bold;">
+            {{ $preventivo->descrizione }}
+        </small>
+    @endif
+</td>
                 <td>
                      {{ $preventivo->commessa?->tipoIntervento?->nome }}
                 </td>

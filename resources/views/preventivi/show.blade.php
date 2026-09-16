@@ -17,10 +17,38 @@
     </a>
 
     <a href="/preventivi/{{ $preventivo->id }}/visualizza" class="btn btn-azione">
-        Visualizza
-    </a>
+    Visualizza
+</a>
+
+<form method="POST"
+      action="/preventivi/{{ $preventivo->id }}/clona"
+      style="display:inline;">
+    @csrf
+    <button type="submit"
+            class="btn btn-azione"
+            onclick="return confirm('Clonare questo preventivo? Verrà creata una copia con nuovo numero.')">
+        Clona preventivo
+    </button>
+</form>
 
 </div>
+
+    <form method="POST"
+          action="/preventivi/{{ $preventivo->id }}/aggiorna-descrizione"
+          style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
+        @csrf
+        <label style="font-weight:bold;">
+            Nota / variante:
+        </label>
+        <input type="text"
+               name="descrizione"
+               value="{{ $preventivo->descrizione }}"
+               placeholder="Es. Colore legno"
+               style="max-width:400px;">
+        <button type="submit" class="btn btn-azione">
+            Salva nota
+        </button>
+    </form>
 
     <h2>Prodotti</h2>
 

@@ -35,6 +35,8 @@ Route::resource('commesse', CommessaController::class);
 Route::get('/preventivi/{id}/visualizza', [PreventivoController::class, 'visualizza']);
 Route::resource('preventivi', PreventivoController::class);
 Route::resource('righe-preventivo-prodotti', RigaPreventivoProdottoController::class);
+Route::post('/preventivi/{id}/clona', [PreventivoController::class, 'clona']);
+Route::post('/preventivi/{id}/aggiorna-descrizione', [PreventivoController::class, 'aggiornaDescrizione']);
 Route::post('/righe-preventivo-prodotti/{id}/sposta', [RigaPreventivoProdottoController::class, 'sposta'])->name('righe-preventivo-prodotti.sposta');
 Route::resource('prodotti-fornitore', ProdottoFornitoreController::class);
 Route::resource('fornitori', FornitoreController::class);

@@ -12,6 +12,7 @@ use App\Models\RigaPreventivoProdotto;
 use App\Models\Ordine;
 use App\Models\ServizioExtra;
 use App\Services\CalcoloIvaService;
+use App\Models\RigaPreventivoServizio;
 
 class PreventivoController extends Controller
 {
@@ -97,6 +98,76 @@ return view('preventivi.index', compact('preventivi'));
 
         return redirect('/preventivi');
     }
+
+    public function clona($id)
+{
+    $originale = Preventivo::with('righeProdotti.servizi')->findOrFail($id);
+
+    $prossimoNumero = Preventivo::max('id') + 1;
+    $numeroAutomatico = 'PREV-' . date('Y') . '-' . str_pad($prossimoNumero, 4, '0', STR_PAD_LEFT);
+
+    $descrizioneClone = $originale->descrizione
+    ? $originale->descrizione . ' (Copia)'
+    : 'Copia di ' . $originale->numero;
+
+$nuovoPreventivo = Preventivo::create([
+    'commessa_id' => $originale->commessa_id,
+    'numero' => $numeroAutomatico,
+    'descrizione' => $descrizioneClone,
+        'stato' => 'bozza',
+        'totale_listino_prodotti' => 0,
+        'totale_netto_prodotti' => 0,
+        'totale_servizi_cliente' => 0,
+        'totale_cliente_finale' => 0,
+        'sconto_medio_cliente' => 0,
+        'totale_costo_brc' => 0,
+        'utile_totale' => 0,
+        'note' => $originale->note,
+    ]);
+
+    foreach ($originale->righeProdotti as $rigaOriginale) {
+
+        $nuovaRiga = RigaPreventivoProdotto::create([
+            'preventivo_id' => $nuovoPreventivo->id,
+            'fornitore_id' => $rigaOriginale->fornitore_id,
+            'descrizione' => $rigaOriginale->descrizione,
+            'modalita_calcolo' => $rigaOriginale->modalita_calcolo,
+            'quantita' => $rigaOriginale->quantita,
+            'prezzo_listino' => $rigaOriginale->prezzo_listino,
+            'costo_netto' => $rigaOriginale->costo_netto,
+            'sconto_fornitore_1' => $rigaOriginale->sconto_fornitore_1,
+            'sconto_fornitore_2' => $rigaOriginale->sconto_fornitore_2,
+            'sconto_fornitore_3' => $rigaOriginale->sconto_fornitore_3,
+            'ricarico_percentuale' => $rigaOriginale->ricarico_percentuale,
+            'bene_significativo' => $rigaOriginale->bene_significativo,
+            'prezzo_cliente_unitario' => $rigaOriginale->prezzo_cliente_unitario,
+            'sconto_cliente_percentuale' => $rigaOriginale->sconto_cliente_percentuale,
+            'totale_listino' => $rigaOriginale->totale_listino,
+            'totale_costo' => $rigaOriginale->totale_costo,
+            'totale_cliente' => $rigaOriginale->totale_cliente,
+            'ordine_visualizzazione' => $rigaOriginale->ordine_visualizzazione,
+            'note' => $rigaOriginale->note,
+        ]);
+
+        foreach ($rigaOriginale->servizi as $servizioOriginale) {
+
+            RigaPreventivoServizio::create([
+                'riga_prodotto_id' => $nuovaRiga->id,
+                'tipo_servizio' => $servizioOriginale->tipo_servizio,
+                'descrizione' => $servizioOriginale->descrizione,
+                'costo_brc' => $servizioOriginale->costo_brc,
+                'ricarico_percentuale' => $servizioOriginale->ricarico_percentuale,
+                'prezzo_cliente' => $servizioOriginale->prezzo_cliente,
+                'note' => $servizioOriginale->note,
+            ]);
+        }
+    }
+
+    $this->aggiornaTotaliPreventivo($nuovoPreventivo->id);
+
+    return redirect('/preventivi/' . $nuovoPreventivo->id)
+        ->with('success', 'Preventivo clonato correttamente come ' . $numeroAutomatico);
+}
 
     public function show($id)
     {
@@ -291,4 +362,20 @@ $nuovaPosizione = ($ultimaPosizione ?? 0) + 1;
 
         return view('preventivi.visualizza', compact('preventivo', 'calcoloIva'));
     }
+public function aggiornaDescrizione(Request $request, $id)
+{
+    $request->validate([
+        'descrizione' => 'nullable|string|max:255',
+    ]);
+
+    $preventivo = Preventivo::findOrFail($id);
+
+    $preventivo->update([
+        'descrizione' => $request->descrizione,
+    ]);
+
+    return redirect('/preventivi/' . $preventivo->id)
+        ->with('success', 'Descrizione aggiornata.');
+}
+
 }
