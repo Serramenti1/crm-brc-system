@@ -561,51 +561,72 @@
     @if($ordine->stato == 'preparazione_contratto')
 
         <div id="edit_servizio_ordine_{{ $servizio->id }}"
-             style="display:none; margin-top:15px; border:1px solid #ccc; padding:15px;">
+     style="display:none; margin-top:15px; border:1px solid #ccc; padding:15px;">
 
-            <form method="POST"
-                  action="/servizi-riga-ordine/{{ $servizio->id }}">
+    <form method="POST"
+          action="/servizi-riga-ordine/{{ $servizio->id }}">
 
-                @csrf
-                @method('PUT')
+        @csrf
+        @method('PUT')
+
+        <p>
+            Servizio<br>
+            <select name="tipo_servizio"
+                    id="edit_tipo_servizio_{{ $servizio->id }}"
+                    onchange="compilaModificaServizioOrdine({{ $servizio->id }})"
+                    required>
+                @foreach($serviziExtra as $servizioExtra)
+                    <option
+                        value="{{ $servizioExtra->nome }}"
+                        data-nome="{{ $servizioExtra->nome }}"
+                        data-costo="{{ $servizioExtra->costo_brc }}"
+                        data-ricarico="{{ $servizioExtra->ricarico_percentuale }}"
+                        data-categoria="{{ $servizioExtra->categoria }}"
+                        {{ $servizio->tipo_servizio == $servizioExtra->nome ? 'selected' : '' }}>
+                        {{ $servizioExtra->nome }}
+                    </option>
+                @endforeach
+            </select>
+        </p>
+
+        <input type="hidden"
+               name="categoria"
+               id="edit_categoria_servizio_{{ $servizio->id }}"
+               value="{{ $servizio->categoria }}">
+
+        <p>
+            Descrizione<br>
+            <input type="text"
+                   name="descrizione"
+                   id="edit_descrizione_servizio_{{ $servizio->id }}"
+                   value="{{ $servizio->descrizione }}">
+        </p>
 
                 <p>
-                    Tipo servizio<br>
-                    <input type="text"
-                           name="tipo_servizio"
-                           value="{{ $servizio->tipo_servizio }}">
-                </p>
+    Costo BRC<br>
+    <input type="number"
+           name="costo_brc"
+           id="edit_costo_brc_servizio_{{ $servizio->id }}"
+           value="{{ $servizio->costo_brc }}"
+           step="0.01">
+</p>
 
-                <p>
-                    Descrizione<br>
-                    <input type="text"
-                           name="descrizione"
-                           value="{{ $servizio->descrizione }}">
-                </p>
+<p>
+    Ricarico %<br>
+    <input type="number"
+           name="ricarico_percentuale"
+           id="edit_ricarico_servizio_{{ $servizio->id }}"
+           value="{{ $servizio->ricarico_percentuale }}"
+           step="0.01">
+</p>
 
-                <p>
-                    Costo BRC<br>
-                    <input type="number"
-                           name="costo_brc"
-                           value="{{ $servizio->costo_brc }}"
-                           step="0.01">
-                </p>
+<button type="submit" class="btn btn-azione">
+    Salva servizio
+</button>
 
-                <p>
-                    Ricarico %<br>
-                    <input type="number"
-                           name="ricarico_percentuale"
-                           value="{{ $servizio->ricarico_percentuale }}"
-                           step="0.01">
-                </p>
+</form>
 
-                <button type="submit" class="btn btn-azione">
-                    Salva servizio
-                </button>
-
-            </form>
-
-        </div>
+</div>
 
     @endif
 
@@ -630,44 +651,54 @@
 
             @csrf
 
-            <p>
-                Servizio da impostazioni<br>
+            @if($serviziExtra->count() > 0)
 
-                <select id="servizio_extra_ordine_{{ $riga->id }}"
-                        onchange="compilaServizioExtraOrdine({{ $riga->id }})">
+    <p>
+        Servizio<br>
 
-                    <option value="">
-                        -- Seleziona servizio extra --
-                    </option>
+        <select name="tipo_servizio"
+                id="servizio_extra_ordine_{{ $riga->id }}"
+                onchange="compilaServizioExtraOrdine({{ $riga->id }})"
+                required>
 
-                    @foreach($serviziExtra as $servizioExtra)
+            <option value="">
+                -- Seleziona servizio --
+            </option>
 
-                        <option
-                            value="{{ $servizioExtra->id }}"
-                            data-nome="{{ $servizioExtra->nome }}"
-                            data-costo="{{ $servizioExtra->costo_brc }}"
-                            data-ricarico="{{ $servizioExtra->ricarico_percentuale }}">
+            @foreach($serviziExtra as $servizioExtra)
 
-                            {{ $servizioExtra->nome }}
-                            -
-                            costo {{ number_format($servizioExtra->costo_brc,2,',','.') }} €
-                            -
-                            ricarico {{ number_format($servizioExtra->ricarico_percentuale,2,',','.') }}%
+                <option
+                    value="{{ $servizioExtra->nome }}"
+                    data-nome="{{ $servizioExtra->nome }}"
+                    data-costo="{{ $servizioExtra->costo_brc }}"
+                    data-ricarico="{{ $servizioExtra->ricarico_percentuale }}"
+                    data-categoria="{{ $servizioExtra->categoria }}">
 
-                        </option>
+                    {{ $servizioExtra->nome }}
+                    -
+                    costo {{ number_format($servizioExtra->costo_brc,2,',','.') }} €
+                    -
+                    ricarico {{ number_format($servizioExtra->ricarico_percentuale,2,',','.') }}%
 
-                    @endforeach
+                </option>
 
-                </select>
-            </p>
+            @endforeach
 
-            <p>
-                Tipo servizio<br>
-                <input type="text"
-                       name="tipo_servizio"
-                       id="tipo_servizio_ordine_{{ $riga->id }}"
-                       required>
-            </p>
+        </select>
+    </p>
+
+    <input type="hidden"
+           name="categoria"
+           id="categoria_servizio_ordine_{{ $riga->id }}"
+           value="">
+
+@else
+
+    <p style="color:#dc3545; font-weight:bold;">
+        Nessun servizio configurato in Impostazioni → Servizi extra. Aggiungine almeno uno prima di procedere.
+    </p>
+
+@endif
 
             <p>
                 Descrizione<br>
@@ -1753,6 +1784,7 @@ function cambiaPrezzoOrdine(id){
 }
 function apriModificaServizioOrdine(id){
     document.getElementById('edit_servizio_ordine_' + id).style.display = 'block';
+    compilaModificaServizioOrdine(id);
 }
 
 function confermaRitornoStato() {
@@ -1924,9 +1956,6 @@ function compilaServizioExtraOrdine(rigaId){
         return;
     }
 
-    document.getElementById('tipo_servizio_ordine_' + rigaId).value =
-        option.dataset.nome;
-
     document.getElementById('descrizione_servizio_ordine_' + rigaId).value =
         option.dataset.nome;
 
@@ -1935,7 +1964,20 @@ function compilaServizioExtraOrdine(rigaId){
 
     document.getElementById('ricarico_servizio_ordine_' + rigaId).value =
         option.dataset.ricarico;
+
+    document.getElementById('categoria_servizio_ordine_' + rigaId).value =
+        option.dataset.categoria;
 }
+
+function compilaModificaServizioOrdine(servizioId){
+
+    let select = document.getElementById('edit_tipo_servizio_' + servizioId);
+    let option = select.options[select.selectedIndex];
+
+    document.getElementById('edit_categoria_servizio_' + servizioId).value =
+        option.dataset.categoria;
+}
+
 
 // =====================================================
 // CONTROLLO FORNITORE OBBLIGATORIO ORDINE

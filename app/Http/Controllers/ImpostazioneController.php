@@ -106,56 +106,60 @@ class ImpostazioneController extends Controller
     }
 
     public function storeServizio(Request $request)
-    {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'costo_brc' => 'nullable|numeric|min:0',
-            'ricarico_percentuale' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'categoria' => 'required|in:installazione,servizi',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
 
-        $costo = (float) ($request->costo_brc ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-        $prezzoCliente = $costo * (1 + ($ricarico / 100));
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $prezzoCliente = $costo * (1 + ($ricarico / 100));
 
-        ServizioExtra::create([
-            'nome' => $request->nome,
-            'costo_brc' => $costo,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente' => $prezzoCliente,
-            'attivo' => $request->has('attivo') ? 1 : 0,
-            'note' => $request->note,
-        ]);
+    ServizioExtra::create([
+        'nome' => $request->nome,
+        'categoria' => $request->categoria,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzoCliente,
+        'attivo' => $request->has('attivo') ? 1 : 0,
+        'note' => $request->note,
+    ]);
 
-        return redirect('/impostazioni/servizi')->with('success', 'Servizio extra salvato');
-    }
+    return redirect('/impostazioni/servizi')->with('success', 'Servizio extra salvato');
+}
 
     public function updateServizio(Request $request, $id)
-    {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'costo_brc' => 'nullable|numeric|min:0',
-            'ricarico_percentuale' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'categoria' => 'required|in:installazione,servizi',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
 
-        $servizio = ServizioExtra::findOrFail($id);
+    $servizio = ServizioExtra::findOrFail($id);
 
-        $costo = (float) ($request->costo_brc ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-        $prezzoCliente = $costo * (1 + ($ricarico / 100));
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $prezzoCliente = $costo * (1 + ($ricarico / 100));
 
-        $servizio->update([
-            'nome' => $request->nome,
-            'costo_brc' => $costo,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente' => $prezzoCliente,
-            'attivo' => $request->has('attivo') ? 1 : 0,
-            'note' => $request->note,
-        ]);
+    $servizio->update([
+        'nome' => $request->nome,
+        'categoria' => $request->categoria,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzoCliente,
+        'attivo' => $request->has('attivo') ? 1 : 0,
+        'note' => $request->note,
+    ]);
 
-        return redirect('/impostazioni/servizi')->with('success', 'Servizio extra aggiornato');
-    }
+    return redirect('/impostazioni/servizi')->with('success', 'Servizio extra aggiornato');
+}
 
     public function tipiIntervento()
     {

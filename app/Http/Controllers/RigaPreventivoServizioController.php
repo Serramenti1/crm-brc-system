@@ -10,31 +10,33 @@ use App\Models\Preventivo;
 class RigaPreventivoServizioController extends Controller
 {
     public function store(Request $request, $riga_prodotto_id)
-    {
-        $request->validate([
-            'tipo_servizio' => 'required|string|max:255',
-            'descrizione' => 'nullable|string|max:255',
-            'costo_brc' => 'nullable|numeric|min:0',
-            'ricarico_percentuale' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'tipo_servizio' => 'required|string|max:255',
+        'categoria' => 'required|in:installazione,servizi',
+        'descrizione' => 'nullable|string|max:255',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
 
-        $riga = RigaPreventivoProdotto::findOrFail($riga_prodotto_id);
+    $riga = RigaPreventivoProdotto::findOrFail($riga_prodotto_id);
 
-        $costo = (float) ($request->costo_brc ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
 
-        $prezzo = $costo * (1 + ($ricarico / 100));
+    $prezzo = $costo * (1 + ($ricarico / 100));
 
-        RigaPreventivoServizio::create([
-            'riga_prodotto_id' => $riga->id,
-            'tipo_servizio' => $request->tipo_servizio,
-            'descrizione' => $request->descrizione,
-            'costo_brc' => $costo,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente' => $prezzo,
-            'note' => $request->note,
-        ]);
+    RigaPreventivoServizio::create([
+        'riga_prodotto_id' => $riga->id,
+        'tipo_servizio' => $request->tipo_servizio,
+        'categoria' => $request->categoria,
+        'descrizione' => $request->descrizione,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzo,
+        'note' => $request->note,
+    ]);
 
         $this->aggiornaTotaliPreventivo($riga->preventivo_id);
 
@@ -42,30 +44,32 @@ class RigaPreventivoServizioController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $servizio = RigaPreventivoServizio::findOrFail($id);
+{
+    $servizio = RigaPreventivoServizio::findOrFail($id);
 
-        $request->validate([
-            'tipo_servizio' => 'required|string|max:255',
-            'descrizione' => 'nullable|string|max:255',
-            'costo_brc' => 'nullable|numeric|min:0',
-            'ricarico_percentuale' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-        ]);
+    $request->validate([
+        'tipo_servizio' => 'required|string|max:255',
+        'categoria' => 'nullable|in:installazione,servizi',
+        'descrizione' => 'nullable|string|max:255',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
 
-        $costo = (float) ($request->costo_brc ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
 
-        $prezzo = $costo * (1 + ($ricarico / 100));
+    $prezzo = $costo * (1 + ($ricarico / 100));
 
-        $servizio->update([
-            'tipo_servizio' => $request->tipo_servizio,
-            'descrizione' => $request->descrizione,
-            'costo_brc' => $costo,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente' => $prezzo,
-            'note' => $request->note,
-        ]);
+    $servizio->update([
+        'tipo_servizio' => $request->tipo_servizio,
+        'categoria' => $request->categoria ?? $servizio->categoria,
+        'descrizione' => $request->descrizione,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzo,
+        'note' => $request->note,
+    ]);
 
         $this->aggiornaTotaliPreventivo($servizio->rigaProdotto->preventivo_id);
 

@@ -231,6 +231,25 @@
         }
     @endphp
 
+        @php
+        $totaleInstallazione = 0;
+        $totaleServizi = 0;
+
+        foreach ($ordine->righe as $riga) {
+            $quantita = (float) ($riga->quantita ?? 1);
+
+            foreach ($riga->servizi as $servizio) {
+                $importo = (float) $servizio->prezzo_cliente * $quantita;
+
+                if ($servizio->categoria === 'installazione') {
+                    $totaleInstallazione += $importo;
+                } else {
+                    $totaleServizi += $importo;
+                }
+            }
+        }
+    @endphp
+
     <h2>Riepilogo cantiere</h2>
 
     <table class="tabella-dettaglio">
@@ -244,6 +263,16 @@
             <td><strong>Totale imponibile cliente prodotti</strong></td>
             <td>{{ number_format($totaleClienteCantiere, 2, ',', '.') }} €</td>
         </tr>
+        <tr>
+            <td><strong>Totale installazione</strong></td>
+            <td>{{ number_format($totaleInstallazione, 2, ',', '.') }} €</td>
+        </tr>
+
+        <tr>
+            <td><strong>Totale servizi</strong></td>
+            <td>{{ number_format($totaleServizi, 2, ',', '.') }} €</td>
+        </tr>
+
 
         <tr>
             <td><strong>Ricarico totale cantiere</strong></td>
@@ -258,6 +287,7 @@
                 {{ number_format($markupTotaleCantiere, 2, ',', '.') }} €
             </td>
         </tr>
+
 
     </table>
 

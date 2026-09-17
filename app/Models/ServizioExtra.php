@@ -8,12 +8,13 @@ class ServizioExtra extends Model
 {
     protected $table = 'servizi_extra';
 
-    protected $fillable = [
-        'nome',
-        'costo_brc',
-        'ricarico_percentuale',
-        'prezzo_cliente',
-        'attivo',
-        'note',
-    ];
+   protected $fillable = [
+    'nome',
+    'categoria',
+    'costo_brc',
+    'ricarico_percentuale',
+    'prezzo_cliente',
+    'attivo',
+    'note',
+];
 }

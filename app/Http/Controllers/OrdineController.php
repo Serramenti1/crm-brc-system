@@ -71,6 +71,18 @@ $ordini = $query->get();
         'righe.servizi'
     )->findOrFail($id);
 
+    if ($ordine->stato === 'preparazione_contratto') {
+        $this->ricalcolaTotaliOrdine($ordine->id);
+
+        $ordine = Ordine::with(
+            'commessa.cliente',
+            'commessa.tipoIntervento',
+            'preventivo',
+            'righe.fornitore',
+            'righe.servizi'
+        )->findOrFail($id);
+    }
+
     $fornitori = \App\Models\Fornitore::orderBy('ragione_sociale')->get();
 
     $prodottiFornitore = \App\Models\ProdottoFornitore::with('fornitore')
@@ -90,6 +102,57 @@ $ordini = $query->get();
         'impostazioni',
         'serviziExtra'
     ));
+}
+
+private function ricalcolaTotaliOrdine($ordineId)
+{
+    $ordine = Ordine::with(
+        'righe.servizi',
+        'commessa.tipoIntervento.ivaPrincipale',
+        'commessa.tipoIntervento.ivaSecondaria'
+    )->findOrFail($ordineId);
+
+    $serviziExtraDisponibili = \App\Models\ServizioExtra::where('attivo', 1)->get();
+
+    foreach ($ordine->righe as $riga) {
+        foreach ($riga->servizi as $servizio) {
+            $servizioExtraCorrispondente = $serviziExtraDisponibili
+                ->firstWhere('nome', $servizio->tipo_servizio);
+
+            if ($servizioExtraCorrispondente && $servizio->categoria !== $servizioExtraCorrispondente->categoria) {
+                $servizio->update([
+                    'categoria' => $servizioExtraCorrispondente->categoria,
+                ]);
+            }
+        }
+    }
+
+    $preventivoFake = new \stdClass();
+    $preventivoFake->commessa = $ordine->commessa;
+    $preventivoFake->righeProdotti = $ordine->righe->map(function ($riga) {
+        $rigaFake = new \stdClass();
+        $rigaFake->quantita = $riga->quantita;
+        $rigaFake->totale_cliente = $riga->totale_cliente;
+        $rigaFake->totale_costo = $riga->totale_costo;
+        $rigaFake->bene_significativo = $riga->bene_significativo;
+        $rigaFake->servizi = $riga->servizi;
+        return $rigaFake;
+    });
+
+    $calcoloIvaService = new \App\Services\CalcoloIvaService();
+    $calcoloIva = $calcoloIvaService->calcolaDaPreventivo($preventivoFake);
+
+    $ordine->update([
+        'imponibile'      => $calcoloIva['totale_cliente'],
+        'imponibile_4'    => $calcoloIva['imponibile_4'],
+        'imponibile_10'   => $calcoloIva['imponibile_10'],
+        'imponibile_22'   => $calcoloIva['imponibile_22'],
+        'iva_4'           => $calcoloIva['iva_4'],
+        'iva_10'          => $calcoloIva['iva_10'],
+        'iva_22'          => $calcoloIva['iva_22'],
+        'totale_iva'      => $calcoloIva['totale_iva'],
+        'totale_con_iva'  => $calcoloIva['totale_con_iva'],
+    ]);
 }
 
     public function creaDaPreventivo($preventivoId)

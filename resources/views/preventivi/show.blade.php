@@ -350,51 +350,70 @@
                             </div>
 
                             <div
-                                id="edit_servizio_{{ $servizio->id }}"
-                                style="display:none; margin-top:10px; border:1px solid #ccc; padding:10px;"
-                            >
+    id="edit_servizio_{{ $servizio->id }}"
+    style="display:none; margin-top:10px; border:1px solid #ccc; padding:10px;"
+>
 
-                                <form method="POST" action="/servizi-riga/{{ $servizio->id }}">
-                                    @csrf
-                                    @method('PUT')
+    <form method="POST" action="/servizi-riga/{{ $servizio->id }}">
+        @csrf
+        @method('PUT')
+
+        <p>
+            Servizio<br>
+            <select name="tipo_servizio"
+                    id="edit_tipo_servizio_preventivo_{{ $servizio->id }}"
+                    onchange="compilaModificaServizioPreventivo({{ $servizio->id }})"
+                    required>
+                @foreach($serviziExtra as $servizioExtra)
+                    <option
+                        value="{{ $servizioExtra->nome }}"
+                        data-nome="{{ $servizioExtra->nome }}"
+                        data-costo="{{ $servizioExtra->costo_brc }}"
+                        data-ricarico="{{ $servizioExtra->ricarico_percentuale }}"
+                        data-categoria="{{ $servizioExtra->categoria }}"
+                        {{ $servizio->tipo_servizio == $servizioExtra->nome ? 'selected' : '' }}>
+                        {{ $servizioExtra->nome }}
+                    </option>
+                @endforeach
+            </select>
+        </p>
+
+        <input type="hidden"
+               name="categoria"
+               id="edit_categoria_servizio_preventivo_{{ $servizio->id }}"
+               value="{{ $servizio->categoria }}">
+
+        <p>
+            Descrizione<br>
+            <input
+                type="text"
+                name="descrizione"
+                id="edit_descrizione_servizio_preventivo_{{ $servizio->id }}"
+                value="{{ $servizio->descrizione }}"
+            >
+        </p>
 
                                     <p>
-                                        Tipo<br>
-                                        <input
-                                            type="text"
-                                            name="tipo_servizio"
-                                            value="{{ $servizio->tipo_servizio }}"
-                                        >
-                                    </p>
+    Costo<br>
+    <input
+        type="number"
+        name="costo_brc"
+        id="edit_costo_brc_servizio_preventivo_{{ $servizio->id }}"
+        value="{{ $servizio->costo_brc }}"
+        step="0.01"
+    >
+</p>
 
-                                    <p>
-                                        Descrizione<br>
-                                        <input
-                                            type="text"
-                                            name="descrizione"
-                                            value="{{ $servizio->descrizione }}"
-                                        >
-                                    </p>
-
-                                    <p>
-                                        Costo<br>
-                                        <input
-                                            type="number"
-                                            name="costo_brc"
-                                            value="{{ $servizio->costo_brc }}"
-                                            step="0.01"
-                                        >
-                                    </p>
-
-                                    <p>
-                                        Ricarico %<br>
-                                        <input
-                                            type="number"
-                                            name="ricarico_percentuale"
-                                            value="{{ $servizio->ricarico_percentuale }}"
-                                            step="0.01"
-                                        >
-                                    </p>
+<p>
+    Ricarico %<br>
+    <input
+        type="number"
+        name="ricarico_percentuale"
+        id="edit_ricarico_servizio_preventivo_{{ $servizio->id }}"
+        value="{{ $servizio->ricarico_percentuale }}"
+        step="0.01"
+    >
+</p>
 
                                     <button type="submit" class="btn btn-azione">
                                         Salva
@@ -427,52 +446,59 @@
                         >
                             @csrf
 
-                            <p>
-                                Servizio da impostazioni<br>
+                            @if($serviziExtra->count() > 0)
 
-                                <select
-                                    id="servizio_extra_{{ $riga->id }}"
-                                    onchange="compilaServizioExtra({{ $riga->id }})"
-                                >
-                                    <option value="">
-                                        -- Seleziona servizio extra --
-                                    </option>
+    <p>
+        Servizio<br>
 
-                                    @foreach($serviziExtra as $servizioExtra)
-                                        <option
-                                            value="{{ $servizioExtra->id }}"
-                                            data-nome="{{ $servizioExtra->nome }}"
-                                            data-costo="{{ $servizioExtra->costo_brc }}"
-                                            data-ricarico="{{ $servizioExtra->ricarico_percentuale }}"
-                                        >
-                                            {{ $servizioExtra->nome }}
-                                            -
-                                            costo {{ number_format($servizioExtra->costo_brc,2,',','.') }} €
-                                            -
-                                            ricarico {{ number_format($servizioExtra->ricarico_percentuale,2,',','.') }}%
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </p>
+        <select name="tipo_servizio"
+                id="servizio_extra_{{ $riga->id }}"
+                onchange="compilaServizioExtra({{ $riga->id }})"
+                required>
 
-                            <p>
-                                Tipo servizio<br>
-                                <input
-                                    type="text"
-                                    id="tipo_servizio_{{ $riga->id }}"
-                                    name="tipo_servizio"
-                                    required
-                                >
-                            </p>
+            <option value="">
+                -- Seleziona servizio --
+            </option>
 
-                            <p>
-                                Descrizione<br>
-                                <input
-                                    type="text"
-                                    id="descrizione_servizio_{{ $riga->id }}"
-                                    name="descrizione"
-                                >
-                            </p>
+            @foreach($serviziExtra as $servizioExtra)
+                <option
+                    value="{{ $servizioExtra->nome }}"
+                    data-nome="{{ $servizioExtra->nome }}"
+                    data-costo="{{ $servizioExtra->costo_brc }}"
+                    data-ricarico="{{ $servizioExtra->ricarico_percentuale }}"
+                    data-categoria="{{ $servizioExtra->categoria }}">
+                    {{ $servizioExtra->nome }}
+                    -
+                    costo {{ number_format($servizioExtra->costo_brc,2,',','.') }} €
+                    -
+                    ricarico {{ number_format($servizioExtra->ricarico_percentuale,2,',','.') }}%
+                </option>
+            @endforeach
+
+        </select>
+    </p>
+
+    <input type="hidden"
+           name="categoria"
+           id="categoria_servizio_{{ $riga->id }}"
+           value="">
+
+    <p>
+        Descrizione<br>
+        <input
+            type="text"
+            id="descrizione_servizio_{{ $riga->id }}"
+            name="descrizione"
+        >
+    </p>
+
+@else
+
+    <p style="color:#dc3545; font-weight:bold;">
+        Nessun servizio configurato in Impostazioni → Servizi extra. Aggiungine almeno uno prima di procedere.
+    </p>
+
+@endif
 
                             <p>
                                 Costo BRC<br>
@@ -619,6 +645,7 @@ function compilaProdottoFornitore(){
 
 function apriModificaServizio(id){
     document.getElementById('edit_servizio_' + id).style.display = 'block';
+    compilaModificaServizioPreventivo(id);
 }
 
 function chiudiModificaServizio(id){
@@ -634,9 +661,6 @@ function compilaServizioExtra(rigaId){
         return;
     }
 
-    document.getElementById('tipo_servizio_' + rigaId).value =
-        option.dataset.nome;
-
     document.getElementById('descrizione_servizio_' + rigaId).value =
         option.dataset.nome;
 
@@ -645,6 +669,18 @@ function compilaServizioExtra(rigaId){
 
     document.getElementById('ricarico_servizio_' + rigaId).value =
         option.dataset.ricarico;
+
+    document.getElementById('categoria_servizio_' + rigaId).value =
+        option.dataset.categoria;
+}
+
+function compilaModificaServizioPreventivo(servizioId){
+
+    let select = document.getElementById('edit_tipo_servizio_preventivo_' + servizioId);
+    let option = select.options[select.selectedIndex];
+
+    document.getElementById('edit_categoria_servizio_preventivo_' + servizioId).value =
+        option.dataset.categoria;
 }
 // =====================================================
 // CONTROLLO FORNITORE OBBLIGATORIO PREVENTIVO

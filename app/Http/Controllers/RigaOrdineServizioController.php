@@ -10,36 +10,38 @@ use App\Models\Ordine;
 class RigaOrdineServizioController extends Controller
 {
     public function store(Request $request, $rigaOrdineId)
-    {
-        $request->validate([
-            'tipo_servizio' => 'required|string|max:255',
-            'descrizione' => 'nullable|string|max:255',
-            'costo_brc' => 'nullable|numeric|min:0',
-            'ricarico_percentuale' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'tipo_servizio' => 'required|string|max:255',
+        'categoria' => 'required|in:installazione,servizi',
+        'descrizione' => 'nullable|string|max:255',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
 
-        $riga = RigaOrdine::with('ordine')->findOrFail($rigaOrdineId);
-        $ordine = $riga->ordine;
+    $riga = RigaOrdine::with('ordine')->findOrFail($rigaOrdineId);
+    $ordine = $riga->ordine;
 
-        if ($ordine->stato != 'preparazione_contratto') {
-            return redirect('/ordini/' . $ordine->id)
-                ->with('error', 'Puoi aggiungere servizi solo in preparazione contratto.');
-        }
+    if ($ordine->stato != 'preparazione_contratto') {
+        return redirect('/ordini/' . $ordine->id)
+            ->with('error', 'Puoi aggiungere servizi solo in preparazione contratto.');
+    }
 
-        $costo = (float) ($request->costo_brc ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-        $prezzoCliente = $costo * (1 + ($ricarico / 100));
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $prezzoCliente = $costo * (1 + ($ricarico / 100));
 
-        RigaOrdineServizio::create([
-            'riga_ordine_id' => $riga->id,
-            'tipo_servizio' => $request->tipo_servizio,
-            'descrizione' => $request->descrizione,
-            'costo_brc' => $costo,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente' => $prezzoCliente,
-            'note' => $request->note,
-        ]);
+    RigaOrdineServizio::create([
+        'riga_ordine_id' => $riga->id,
+        'tipo_servizio' => $request->tipo_servizio,
+        'categoria' => $request->categoria,
+        'descrizione' => $request->descrizione,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzoCliente,
+        'note' => $request->note,
+    ]);
 
         $this->aggiornaTotaliOrdine($ordine->id);
 
@@ -48,35 +50,37 @@ class RigaOrdineServizioController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'tipo_servizio' => 'required|string|max:255',
-            'descrizione' => 'nullable|string|max:255',
-            'costo_brc' => 'nullable|numeric|min:0',
-            'ricarico_percentuale' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'tipo_servizio' => 'required|string|max:255',
+        'categoria' => 'nullable|in:installazione,servizi',
+        'descrizione' => 'nullable|string|max:255',
+        'costo_brc' => 'nullable|numeric|min:0',
+        'ricarico_percentuale' => 'nullable|numeric|min:0',
+        'note' => 'nullable|string',
+    ]);
 
-        $servizio = RigaOrdineServizio::with('rigaOrdine.ordine')->findOrFail($id);
-        $ordine = $servizio->rigaOrdine->ordine;
+    $servizio = RigaOrdineServizio::with('rigaOrdine.ordine')->findOrFail($id);
+    $ordine = $servizio->rigaOrdine->ordine;
 
-        if ($ordine->stato != 'preparazione_contratto') {
-            return redirect('/ordini/' . $ordine->id)
-                ->with('error', 'Puoi modificare servizi solo in preparazione contratto.');
-        }
+    if ($ordine->stato != 'preparazione_contratto') {
+        return redirect('/ordini/' . $ordine->id)
+            ->with('error', 'Puoi modificare servizi solo in preparazione contratto.');
+    }
 
-        $costo = (float) ($request->costo_brc ?? 0);
-        $ricarico = (float) ($request->ricarico_percentuale ?? 0);
-        $prezzoCliente = $costo * (1 + ($ricarico / 100));
+    $costo = (float) ($request->costo_brc ?? 0);
+    $ricarico = (float) ($request->ricarico_percentuale ?? 0);
+    $prezzoCliente = $costo * (1 + ($ricarico / 100));
 
-        $servizio->update([
-            'tipo_servizio' => $request->tipo_servizio,
-            'descrizione' => $request->descrizione,
-            'costo_brc' => $costo,
-            'ricarico_percentuale' => $ricarico,
-            'prezzo_cliente' => $prezzoCliente,
-            'note' => $request->note,
-        ]);
+    $servizio->update([
+        'tipo_servizio' => $request->tipo_servizio,
+        'categoria' => $request->categoria ?? $servizio->categoria,
+        'descrizione' => $request->descrizione,
+        'costo_brc' => $costo,
+        'ricarico_percentuale' => $ricarico,
+        'prezzo_cliente' => $prezzoCliente,
+        'note' => $request->note,
+    ]);
 
         $this->aggiornaTotaliOrdine($ordine->id);
 
