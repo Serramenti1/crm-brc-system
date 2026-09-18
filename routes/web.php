@@ -15,6 +15,7 @@ use App\Http\Controllers\RigaOrdineController;
 use App\Http\Controllers\RigaOrdineServizioController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ImportaClientiController;
+use App\Http\Controllers\RigaDettaglioOrdineController;
 
 Route::get('/', function () {
     $conteggiOrdini = [
@@ -56,6 +57,10 @@ Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPre
 Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);
 Route::post('/righe-ordine/{id}/elimina-pdf', [OrdineController::class, 'eliminaPdfRiga']);
 Route::post('/righe-ordine-prodotto/{id}/sposta', [RigaOrdineController::class, 'sposta']);
+Route::post('/righe-ordine-prodotto/{rigaOrdineId}/dettaglio/crea', [RigaDettaglioOrdineController::class, 'creaTabella']);
+Route::put('/righe-dettaglio-ordine/{id}', [RigaDettaglioOrdineController::class, 'aggiornaRiga']);
+Route::post('/righe-ordine-prodotto/{rigaOrdineId}/dettaglio/aggiungi-riga', [RigaDettaglioOrdineController::class, 'aggiungiRiga']);
+Route::delete('/righe-dettaglio-ordine/{id}', [RigaDettaglioOrdineController::class, 'eliminaRiga']);
 
 Route::post('/ordini/{id}/documenti', [OrdineController::class, 'aggiornaDocumenti']);
 Route::post('/ordini/{id}/documenti/elimina/{campo}', [OrdineController::class, 'eliminaDocumentoOrdine']);

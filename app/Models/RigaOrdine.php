@@ -45,7 +45,12 @@ class RigaOrdine extends Model
 }
 
     public function fornitore()
-    {
-        return $this->belongsTo(Fornitore::class);
-    }
+{
+    return $this->belongsTo(Fornitore::class);
+}
+
+public function dettagli()
+{
+    return $this->hasMany(RigaDettaglioOrdine::class, 'riga_ordine_id')->orderBy('numero_progressivo');
+}
 }

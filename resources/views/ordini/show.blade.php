@@ -1,5 +1,39 @@
 @include('partials.menu')
 
+<style>
+    .modale-sfondo {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.45);
+    }
+
+    .modale-contenuto {
+    background: white;
+    width: 98%;
+    max-width: none;
+    margin: 15px auto;
+    padding: 20px;
+    border-radius: 8px;
+    max-height: 95vh;
+    overflow-y: auto;
+}
+
+.modale-contenuto input[type="number"]::-webkit-outer-spin-button,
+.modale-contenuto input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.modale-contenuto input[type="number"] {
+    -moz-appearance: textfield;
+}
+</style>
+
 @if(session('success'))
     <div style="color:green; margin-bottom:15px;">
         {{ session('success') }}
@@ -461,25 +495,78 @@
     <td>
 
         <button type="button"
-                class="btn btn-azione"
-                onclick="apriModificaRigaOrdine({{ $riga->id }})">
-            Modifica
-        </button>
+        class="btn btn-azione"
+        onclick="apriModificaRigaOrdine({{ $riga->id }})">
+    Modifica
+</button>
 
-        <form method="POST"
-              action="/righe-ordine-prodotto/{{ $riga->id }}"
-              style="display:inline;">
+@php
+    $coloreBottoneDettaglio = '#60a5fa'; // azzurro default: nessuna tabella
 
-            @csrf
-            @method('DELETE')
+    if ($riga->dettagli->isNotEmpty()) {
 
-            <button type="submit"
-                    class="btn btn-elimina"
-                    onclick="return confirm('Eliminare questo prodotto?')">
-                🗑️
-            </button>
+        $sommaProdottoBtn = 0;
+        $sommaTrasportoBtn = 0;
+        $sommaPosaBtn = 0;
 
-        </form>
+        foreach ($riga->dettagli as $d) {
+            $nettoBrcUnitBtn = (float) $d->costo_listino
+                * (1 - $d->sconto_1 / 100)
+                * (1 - $d->sconto_2 / 100)
+                * (1 - $d->sconto_3 / 100);
+
+            $nettoClienteProdottoUnitBtn = $nettoBrcUnitBtn * (1 + $d->ricarico_percentuale / 100);
+
+            $sommaProdottoBtn += $nettoClienteProdottoUnitBtn * (float) $d->pezzi;
+            $sommaTrasportoBtn += (float) $d->trasporto * (float) $d->pezzi;
+            $sommaPosaBtn += (float) $d->posa * (float) $d->pezzi;
+        }
+
+        $totaleTrasportoServizioBtn = 0;
+        $totalePosaServizioBtn = 0;
+
+        foreach ($riga->servizi as $s) {
+            $importoServizioBtn = (float) $s->prezzo_cliente * (float) $riga->quantita;
+
+            if (stripos($s->tipo_servizio, 'trasporto') !== false) {
+                $totaleTrasportoServizioBtn += $importoServizioBtn;
+            }
+
+            if (stripos($s->tipo_servizio, 'posa') !== false) {
+                $totalePosaServizioBtn += $importoServizioBtn;
+            }
+        }
+
+        $tuttoOkBtn =
+            abs($sommaProdottoBtn - (float) $riga->totale_cliente) < 0.01 &&
+            abs($sommaTrasportoBtn - $totaleTrasportoServizioBtn) < 0.01 &&
+            abs($sommaPosaBtn - $totalePosaServizioBtn) < 0.01;
+
+        $coloreBottoneDettaglio = $tuttoOkBtn ? '#28a745' : '#dc3545';
+    }
+@endphp
+
+<button type="button"
+        class="btn"
+        style="background:{{ $coloreBottoneDettaglio }}; color:white;"
+        onclick="apriModaleDettaglio({{ $riga->id }})">
+    Dettaglio
+</button>
+
+<form method="POST"
+      action="/righe-ordine-prodotto/{{ $riga->id }}"
+      style="display:inline;">
+
+    @csrf
+    @method('DELETE')
+
+    <button type="submit"
+            class="btn btn-elimina"
+            onclick="return confirm('Eliminare questo prodotto?')">
+        🗑️
+    </button>
+
+</form>
 
         @if(!$loop->first)
             <form method="POST"
@@ -1355,11 +1442,166 @@
 
 @endif
 
-     @endforeach
+          @endforeach
 
     </table>
 
-   
+@if($ordine->stato == 'preparazione_contratto')
+
+    @foreach($ordine->righe->sortBy('ordine_visualizzazione') as $riga)
+
+        <div id="modale_dettaglio_{{ $riga->id }}" class="modale-sfondo"
+     style="{{ session('apri_dettaglio_riga') == $riga->id ? 'display:block;' : '' }}">
+
+            <div class="modale-contenuto">
+
+                <h2>Dettaglio — {{ $riga->descrizione }}</h2>
+
+                @if($riga->dettagli->isEmpty())
+
+                    <form method="POST" action="/righe-ordine-prodotto/{{ $riga->id }}/dettaglio/crea">
+                        @csrf
+                        <p>
+                            Quante righe vuoi creare?<br>
+                            <input type="number" name="numero_righe" min="1" max="50" value="1" required>
+                        </p>
+                        <button type="submit" class="btn btn-azione">
+                            Crea tabella dettaglio
+                        </button>
+                    </form>
+
+                @else
+
+                    @php
+                        $sommaProdotto = 0;
+                        $sommaTrasporto = 0;
+                        $sommaPosa = 0;
+
+                        foreach ($riga->dettagli as $d) {
+                            $nettoBrcUnit = (float) $d->costo_listino
+                                * (1 - $d->sconto_1 / 100)
+                                * (1 - $d->sconto_2 / 100)
+                                * (1 - $d->sconto_3 / 100);
+
+                            $nettoClienteProdottoUnit = $nettoBrcUnit * (1 + $d->ricarico_percentuale / 100);
+
+                            $sommaProdotto += $nettoClienteProdottoUnit * (float) $d->pezzi;
+                            $sommaTrasporto += (float) $d->trasporto * (float) $d->pezzi;
+                            $sommaPosa += (float) $d->posa * (float) $d->pezzi;
+                        }
+
+                        $totaleTrasportoServizio = 0;
+                        $totalePosaServizio = 0;
+
+                        foreach ($riga->servizi as $s) {
+                            $importoServizio = (float) $s->prezzo_cliente * (float) $riga->quantita;
+
+                            if (stripos($s->tipo_servizio, 'trasporto') !== false) {
+                                $totaleTrasportoServizio += $importoServizio;
+                            }
+
+                            if (stripos($s->tipo_servizio, 'posa') !== false) {
+                                $totalePosaServizio += $importoServizio;
+                            }
+                        }
+
+                        $prodottoOk = abs($sommaProdotto - (float) $riga->totale_cliente) < 0.01;
+                        $trasportoOk = abs($sommaTrasporto - $totaleTrasportoServizio) < 0.01;
+                        $posaOk = abs($sommaPosa - $totalePosaServizio) < 0.01;
+                    @endphp
+
+                    <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc; border-radius:6px; background:#f9fafb;">
+                        <div style="color:{{ $prodottoOk ? '#28a745' : '#dc3545' }}; font-weight:bold;">
+                            Prodotto: {{ number_format($sommaProdotto,2,',','.') }} € (riga: {{ number_format($riga->totale_cliente,2,',','.') }} €)
+                            {{ $prodottoOk ? '✓' : '✗' }}
+                        </div>
+                        <div style="color:{{ $trasportoOk ? '#28a745' : '#dc3545' }}; font-weight:bold;">
+                            Trasporto: {{ number_format($sommaTrasporto,2,',','.') }} € (servizio: {{ number_format($totaleTrasportoServizio,2,',','.') }} €)
+                            {{ $trasportoOk ? '✓' : '✗' }}
+                        </div>
+                        <div style="color:{{ $posaOk ? '#28a745' : '#dc3545' }}; font-weight:bold;">
+                            Posa: {{ number_format($sommaPosa,2,',','.') }} € (servizio: {{ number_format($totalePosaServizio,2,',','.') }} €)
+                            {{ $posaOk ? '✓' : '✗' }}
+                        </div>
+                    </div>
+
+                    <div style="overflow-x:auto;">
+                    <table class="tabella-lista">
+                        <tr>
+                            <th>N</th>
+                            <th>Posizione</th>
+                            <th>Descrizione</th>
+                            <th>Pezzi</th>
+                            <th>Costo listino</th>
+                            <th>Sc1%</th>
+                            <th>Sc2%</th>
+                            <th>Sc3%</th>
+                            <th>Netto BRC</th>
+                            <th>Trasporto</th>
+                            <th>Posa</th>
+                            <th>Ricarico%</th>
+                            <th>Netto a cliente</th>
+                            <th>Sc app.%</th>
+                            <th>Azioni</th>
+                        </tr>
+
+                        @foreach($riga->dettagli as $d)
+<tr>
+    <td>{{ $d->numero_progressivo }}</td>
+    <td><input type="text" name="posizione" value="{{ $d->posizione }}" form="form_dettaglio_{{ $d->id }}" style="width:80px;"></td>
+    <td><input type="text" name="descrizione" value="{{ $d->descrizione }}" form="form_dettaglio_{{ $d->id }}" style="width:120px;"></td>
+    <td><input type="number" name="pezzi" value="{{ (float)$d->pezzi != 0 ? $d->pezzi : '' }}" step="1" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
+    <td><input type="number" name="costo_listino" value="{{ (float)$d->costo_listino != 0 ? $d->costo_listino : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:90px;"></td>
+    <td><input type="number" name="sconto_1" value="{{ (float)$d->sconto_1 != 0 ? $d->sconto_1 : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
+    <td><input type="number" name="sconto_2" value="{{ (float)$d->sconto_2 != 0 ? $d->sconto_2 : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
+    <td><input type="number" name="sconto_3" value="{{ (float)$d->sconto_3 != 0 ? $d->sconto_3 : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
+    <td>{{ number_format($d->nettoBrc(),2,',','.') }} €</td>
+    <td><input type="number" name="trasporto" value="{{ (float)$d->trasporto != 0 ? $d->trasporto : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:80px;"></td>
+    <td><input type="number" name="posa" value="{{ (float)$d->posa != 0 ? $d->posa : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:80px;"></td>
+    <td><input type="number" name="ricarico_percentuale" value="{{ (float)$d->ricarico_percentuale != 0 ? $d->ricarico_percentuale : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:70px;"></td>
+    <td>{{ number_format($d->nettoClienteTotale(),2,',','.') }} €</td>
+    <td>{{ number_format($d->scontoApplicato(),2,',','.') }}%</td>
+    <td>
+        <button type="submit" form="form_dettaglio_{{ $d->id }}" class="btn btn-azione">Salva</button>
+        <form method="POST" action="/righe-dettaglio-ordine/{{ $d->id }}" style="display:inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-elimina" onclick="return confirm('Eliminare questa riga?')">🗑️</button>
+        </form>
+    </td>
+</tr>
+@endforeach
+
+                    </table>
+                    </div>
+
+                    @foreach($riga->dettagli as $d)
+                        <form id="form_dettaglio_{{ $d->id }}" method="POST" action="/righe-dettaglio-ordine/{{ $d->id }}">
+                            @csrf
+                            @method('PUT')
+                        </form>
+                    @endforeach
+
+                    <form method="POST" action="/righe-ordine-prodotto/{{ $riga->id }}/dettaglio/aggiungi-riga" style="margin-top:10px;">
+                        @csrf
+                        <button type="submit" class="btn btn-azione">+ Aggiungi riga</button>
+                    </form>
+
+                @endif
+
+                <div style="margin-top:20px;">
+                    <button type="button" class="btn btn-azione" onclick="chiudiModaleDettaglio({{ $riga->id }})">
+                        Chiudi
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    @endforeach
+
+@endif
 
 @if($ordine->stato == 'preparazione_contratto')
 
@@ -1782,9 +2024,12 @@ function cambiaPrezzoOrdine(id){
         hidden.value = 'da_costo_netto';
     }
 }
-function apriModificaServizioOrdine(id){
-    document.getElementById('edit_servizio_ordine_' + id).style.display = 'block';
-    compilaModificaServizioOrdine(id);
+function apriModaleDettaglio(id){
+    document.getElementById('modale_dettaglio_' + id).style.display = 'block';
+}
+
+function chiudiModaleDettaglio(id){
+    document.getElementById('modale_dettaglio_' + id).style.display = 'none';
 }
 
 function confermaRitornoStato() {
