@@ -148,6 +148,12 @@
     <table class="tabella-lista">
 
         <tr>
+
+        @php
+        $sogliaRossa = (float) ($impostazioni->margine_soglia_rossa ?? 40);
+        $sogliaVerde = (float) ($impostazioni->margine_soglia_verde ?? 50);
+        @endphp
+
     <tr>
     <th>Descrizione</th>
     <th>Quantità</th>
@@ -162,11 +168,9 @@
 @foreach($ordine->righe->sortBy('ordine_visualizzazione') as $riga)
 
     @php
-        $ricaricoRiga = (float) ($riga->ricarico_percentuale ?? 0);
-        $sogliaRossa = (float) ($impostazioni->margine_soglia_rossa ?? 40);
-        $sogliaVerde = (float) ($impostazioni->margine_soglia_verde ?? 50);
+    $ricaricoRiga = (float) ($riga->ricarico_percentuale ?? 0);
 
-        if ($ricaricoRiga < $sogliaRossa) {
+    if ($ricaricoRiga < $sogliaRossa) {
             $coloreRicarico = '#dc3545';
         } elseif ($ricaricoRiga < $sogliaVerde) {
             $coloreRicarico = '#fd7e14';
