@@ -185,6 +185,12 @@
         ? strtoupper($ordine->commessa->cliente->nomeVisualizzato())
         : '' }}
 </h1>
+
+<div style="font-size:18px; margin-bottom:8px;">
+    Telefono: {{ $ordine->commessa?->cliente?->telefono ?: '-' }}
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    Email: {{ $ordine->commessa?->cliente?->email ?: '-' }}
+</div>
     <h2 style="font-size:14px; font-weight:bold; margin-bottom:4px;">
         ORDINE {{ $ordine->numero }}
     </h2>
