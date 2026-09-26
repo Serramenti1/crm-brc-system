@@ -180,10 +180,22 @@
 
     {{-- TESTATA --}}
 <div class="testata">
-    <h1 style="font-size:32px; font-weight:bold; margin-bottom:4px;">
-    {{ $ordine->commessa && $ordine->commessa->cliente
-        ? strtoupper($ordine->commessa->cliente->nomeVisualizzato())
-        : '' }}
+    @php
+    $clienteCopertina = $ordine->commessa?->cliente;
+
+    $nomeInvertito = '';
+
+    if ($clienteCopertina) {
+        if ($clienteCopertina->tipo_cliente === 'azienda') {
+            $nomeInvertito = $clienteCopertina->ragione_sociale;
+        } else {
+            $nomeInvertito = trim($clienteCopertina->cognome . ' ' . $clienteCopertina->nome);
+        }
+    }
+@endphp
+
+<h1 style="font-size:32px; font-weight:bold; margin-bottom:4px;">
+    {{ strtoupper($nomeInvertito) }}
 </h1>
 
 <div style="font-size:18px; margin-bottom:8px;">
@@ -231,9 +243,7 @@
     {{-- CHECKLIST CLIENTE --}}
     <div class="sezione">
         <div class="sezione-titolo">
-    {{ $ordine->commessa && $ordine->commessa->cliente
-        ? strtoupper($ordine->commessa->cliente->nomeVisualizzato())
-        : 'CLIENTE' }}
+    {{ $nomeInvertito ? strtoupper($nomeInvertito) : 'CLIENTE' }}
 </div>
         <div class="sezione-corpo">
             <div class="checklist-item">

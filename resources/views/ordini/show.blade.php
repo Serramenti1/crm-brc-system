@@ -2214,6 +2214,11 @@ function compilaServizioExtraOrdine(rigaId){
         option.dataset.categoria;
 }
 
+function apriModificaServizioOrdine(id){
+    document.getElementById('edit_servizio_ordine_' + id).style.display = 'block';
+    compilaModificaServizioOrdine(id);
+}
+
 function compilaModificaServizioOrdine(servizioId){
 
     let select = document.getElementById('edit_tipo_servizio_' + servizioId);
