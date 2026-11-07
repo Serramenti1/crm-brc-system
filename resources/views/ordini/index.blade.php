@@ -12,6 +12,19 @@
     ];
 
     $statoCorrente = $stato ?? 'preparazione_contratto';
+
+    // Attesa merce: in cima gli ordini con piu' righe arrivate
+    if ($statoCorrente == 'completo_attesa_merce' && $ordini instanceof \Illuminate\Support\Collection) {
+        $ordini = $ordini->sortBy(function ($o) {
+            $totali = $o->righe->count();
+
+            $percentuale = $totali > 0
+                ? $o->righe->where('merce_arrivata', 1)->count() / $totali
+                : 0;
+
+            return [-$percentuale, $o->id];
+        })->values();
+    }
 @endphp
 
 <div class="container">
@@ -29,42 +42,46 @@
     <table class="tabella-lista">
 
         <tr>
-        <th>Numero</th>
-<th>Cliente</th>
-@if($statoCorrente == 'completo_attesa_merce')
-<th>Stampa doc.</th>
-@endif
-<th>Commessa</th>
-<th>Tipo intervento</th>
+            <th>Numero</th>
+            <th>Cliente</th>
 
-     {{-- ===================================================== --}}
-     {{-- INIZIO COLONNA VARIABILE LISTA ORDINI --}}
-     {{-- ===================================================== --}}
+            @if($statoCorrente == 'completo_attesa_merce')
+                <th>Stampa doc.</th>
+            @endif
 
-@if($statoCorrente == 'programmare_posa')
+            <th>Commessa</th>
+            <th>Tipo intervento</th>
 
-    <th>Autoscala</th>
+            {{-- ===================================================== --}}
+            {{-- INIZIO COLONNA VARIABILE LISTA ORDINI --}}
+            {{-- ===================================================== --}}
 
-{{-- NASCONDI TOTALE IVATO --}}
-    @elseif(
-    $statoCorrente == 'in_lavorazione' ||
-    $statoCorrente == 'completo_attesa_merce'
-    )
+            @if($statoCorrente == 'programmare_posa')
 
-@else
+                <th>Autoscala</th>
 
-    <th>Totale Cliente Ivato</th>
+            {{-- NASCONDI TOTALE IVATO --}}
+            @elseif(
+                $statoCorrente == 'in_lavorazione' ||
+                $statoCorrente == 'completo_attesa_merce'
+            )
 
-@endif
+            @else
+
+                <th>Totale Cliente Ivato</th>
+
+            @endif
 
             {{-- ===================================================== --}}
             {{-- FINE COLONNA VARIABILE LISTA ORDINI --}}
             {{-- ===================================================== --}}
 
             <th>Stato</th>
+
             @if($statoCorrente == 'attesa_saldo_merce')
-            <th>Richiesto sal</th>
+                <th>Richiesto sal</th>
             @endif
+
             <th>Azioni</th>
         </tr>
 
@@ -77,24 +94,24 @@
                 </td>
 
                 <td>
-    {{ $ordine->commessa && $ordine->commessa->cliente
-        ? $ordine->commessa->cliente->nomeVisualizzato()
-        : '' }}
-</td>
+                    {{ $ordine->commessa && $ordine->commessa->cliente
+                        ? $ordine->commessa->cliente->nomeVisualizzato()
+                        : '' }}
+                </td>
 
-@if($statoCorrente == 'completo_attesa_merce')
-    <td style="text-align:center;">
-        <form method="POST" action="/ordini/{{ $ordine->id }}/toggle-documenti-stampati" onsubmit="event.preventDefault(); this.submit();">
-            @csrf
-            <input type="checkbox"
-                   onchange="this.form.submit()"
-                   {{ $ordine->documenti_stampati ? 'checked' : '' }}>
-        </form>
-    </td>
-@endif
+                @if($statoCorrente == 'completo_attesa_merce')
+                    <td style="text-align:center;">
+                        <form method="POST" action="/ordini/{{ $ordine->id }}/toggle-documenti-stampati" onsubmit="event.preventDefault(); this.submit();">
+                            @csrf
+                            <input type="checkbox"
+                                   onchange="this.form.submit()"
+                                   {{ $ordine->documenti_stampati ? 'checked' : '' }}>
+                        </form>
+                    </td>
+                @endif
 
-<td>
-    @if($ordine->commessa)
+                <td>
+                    @if($ordine->commessa)
 
                         {{ $ordine->commessa->titolo }}
 
@@ -115,49 +132,47 @@
                     {{ $ordine->commessa?->tipoIntervento?->nome }}
                 </td>
 
-               {{-- ===================================================== --}}
-{{-- INIZIO CELLA VARIABILE LISTA ORDINI --}}
-{{-- ===================================================== --}}
+                {{-- ===================================================== --}}
+                {{-- INIZIO CELLA VARIABILE LISTA ORDINI --}}
+                {{-- ===================================================== --}}
 
-@if($statoCorrente == 'programmare_posa')
+                @if($statoCorrente == 'programmare_posa')
 
-    <td>
+                    <td>
 
-        @if($ordine->commessa && $ordine->commessa->autoscala)
+                        @if($ordine->commessa && $ordine->commessa->autoscala)
 
-            <span style="color:red; font-weight:bold;">
-                SI
-            </span>
+                            <span style="color:red; font-weight:bold;">
+                                SI
+                            </span>
 
-        @else
+                        @else
 
-            <span style="color:green; font-weight:bold;">
-                NO
-            </span>
+                            <span style="color:green; font-weight:bold;">
+                                NO
+                            </span>
 
-        @endif
+                        @endif
 
-    </td>
+                    </td>
 
-{{-- NASCONDI TOTALE IVATO --}}
-@elseif(
-    $statoCorrente == 'in_lavorazione' ||
-    $statoCorrente == 'completo_attesa_merce'
-)
+                {{-- NASCONDI TOTALE IVATO --}}
+                @elseif(
+                    $statoCorrente == 'in_lavorazione' ||
+                    $statoCorrente == 'completo_attesa_merce'
+                )
 
-    
+                @else
 
-@else
+                    <td>
+                        {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
+                    </td>
 
-    <td>
-        {{ number_format($ordine->totale_con_iva ?? 0, 2, ',', '.') }} €
-    </td>
+                @endif
 
-@endif
-
-{{-- ===================================================== --}}
-{{-- FINE CELLA VARIABILE LISTA ORDINI --}}
-{{-- ===================================================== --}}
+                {{-- ===================================================== --}}
+                {{-- FINE CELLA VARIABILE LISTA ORDINI --}}
+                {{-- ===================================================== --}}
 
                 <td>
                     @if($ordine->stato == 'preparazione_contratto')
@@ -165,7 +180,30 @@
                     @elseif($ordine->stato == 'in_lavorazione')
                         In lavorazione
                     @elseif($ordine->stato == 'completo_attesa_merce')
+                        @php
+                            $righeTotali = $ordine->righe->count();
+                            $righeArrivate = $ordine->righe->where('merce_arrivata', 1)->count();
+
+                            $percentualeArrivate = $righeTotali > 0
+                                ? round(($righeArrivate / $righeTotali) * 100)
+                                : 0;
+
+                            if ($righeArrivate == 0) {
+                                $coloreAvanzamento = '#6b7280';
+                            } elseif ($righeArrivate < $righeTotali) {
+                                $coloreAvanzamento = '#fd7e14';
+                            } else {
+                                $coloreAvanzamento = '#28a745';
+                            }
+                        @endphp
                         Attesa merce
+                        <br>
+                        <small style="color:{{ $coloreAvanzamento }}; font-weight:bold;">
+                            Arrivate: {{ $righeArrivate }} di {{ $righeTotali }} ({{ $percentualeArrivate }}%)
+                        </small>
+                        <div style="width:130px; height:8px; background:#e5e7eb; border-radius:4px; margin-top:4px; overflow:hidden;">
+                            <div style="width:{{ $percentualeArrivate }}%; height:100%; background:{{ $coloreAvanzamento }};"></div>
+                        </div>
                     @elseif($ordine->stato == 'attesa_saldo_merce')
                         Attesa saldo merce
                     @elseif($ordine->stato == 'programmare_posa')
@@ -180,28 +218,28 @@
 
                     @if($ordine->stato == 'preparazione_contratto')
 
-    <br>
+                        <br>
 
-    <div style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
+                        <div style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
 
-        <small style="color:{{ $ordine->rilievo_effettuato ? 'green' : 'red' }}; font-weight:bold;">
-            RILIEVO EFFETTUATO:
-            {{ $ordine->rilievo_effettuato ? 'Sì' : 'No' }}
-        </small>
+                            <small style="color:{{ $ordine->rilievo_effettuato ? 'green' : 'red' }}; font-weight:bold;">
+                                RILIEVO EFFETTUATO:
+                                {{ $ordine->rilievo_effettuato ? 'Sì' : 'No' }}
+                            </small>
 
-        <small style="color:{{ $ordine->contratto_firmato ? 'green' : 'red' }}; font-weight:bold;">
-            CONTRATTO FIRMATO :
-            {{ $ordine->contratto_firmato ? 'Sì' : 'No' }}
-        </small>
+                            <small style="color:{{ $ordine->contratto_firmato ? 'green' : 'red' }}; font-weight:bold;">
+                                CONTRATTO FIRMATO :
+                                {{ $ordine->contratto_firmato ? 'Sì' : 'No' }}
+                            </small>
 
-        <small style="color:{{ $ordine->acconto_versato ? 'green' : 'red' }}; font-weight:bold;">
-            ACCONTO VERSATO:
-            {{ $ordine->acconto_versato ? 'Sì' : 'No' }}
-        </small>
+                            <small style="color:{{ $ordine->acconto_versato ? 'green' : 'red' }}; font-weight:bold;">
+                                ACCONTO VERSATO:
+                                {{ $ordine->acconto_versato ? 'Sì' : 'No' }}
+                            </small>
 
-    </div>
+                        </div>
 
-@endif
+                    @endif
                 </td>
 
                 @if($statoCorrente == 'attesa_saldo_merce')
@@ -222,9 +260,10 @@
                         <a href="/ordini/{{ $ordine->id }}" class="btn btn-azione">
                             Apri
                         </a>
+
                         <a href="/ordini/{{ $ordine->id }}/visualizza"
                            class="btn btn-azione">
-                           Visualizza
+                            Visualizza
                         </a>
 
                         <form
