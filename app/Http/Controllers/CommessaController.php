@@ -75,7 +75,7 @@ class CommessaController extends Controller
     {
         $request->validate([
             'cliente_id' => 'required|exists:clienti,id',
-            'titolo' => 'required|string|max:255',
+            'titolo' => 'nullable|string|max:255',
 
             'indirizzo_lavoro' => 'nullable|string|max:255',
             'citta_lavoro' => 'nullable|string|max:255',
@@ -115,7 +115,7 @@ class CommessaController extends Controller
 
         Commessa::create([
             'cliente_id' => $request->cliente_id,
-            'titolo' => $request->titolo,
+            'titolo' => $request->titolo ?? '',
 
             'indirizzo_lavoro' => $request->indirizzo_lavoro,
             'citta_lavoro' => $request->citta_lavoro,
@@ -214,7 +214,7 @@ class CommessaController extends Controller
 
         $commessa->update([
             'cliente_id' => $request->cliente_id,
-            'titolo' => $request->titolo,
+            'titolo' => $request->titolo ?? '',
 
             'indirizzo_lavoro' => $request->indirizzo_lavoro,
             'citta_lavoro' => $request->citta_lavoro,

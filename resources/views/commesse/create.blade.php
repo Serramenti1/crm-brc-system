@@ -96,7 +96,7 @@
     </div>
 @endif
 
-<form method="POST" action="/commesse" onsubmit="return controllaTitoloCommessa()">
+<form method="POST" action="/commesse">
 @csrf
 
 <div class="form-section">
@@ -117,10 +117,7 @@
             </button>
         </div>
 
-        <div class="form-field">
-    <label>Titolo commessa *</label><br>
-    <input type="text" name="titolo" id="titolo">
-</div>
+        
     </div>
 </div>
 
