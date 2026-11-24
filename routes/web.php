@@ -56,6 +56,7 @@ Route::post('/ordini/{id}/toggle-documenti-stampati', [OrdineController::class, 
 Route::post('/preventivi/{id}/crea-ordine', [OrdineController::class, 'creaDaPreventivo']);
 Route::post('/righe-ordine/{id}/aggiorna', [OrdineController::class, 'aggiornaRiga']);
 Route::post('/righe-ordine/{id}/elimina-pdf', [OrdineController::class, 'eliminaPdfRiga']);
+Route::post('/righe-ordine/{id}/mancanza-risolta', [OrdineController::class, 'risolviMancanza']);
 Route::post('/righe-ordine-prodotto/{id}/sposta', [RigaOrdineController::class, 'sposta']);
 Route::post('/righe-ordine-prodotto/{rigaOrdineId}/dettaglio/crea', [RigaDettaglioOrdineController::class, 'creaTabella']);
 Route::put('/righe-dettaglio-ordine/{id}', [RigaDettaglioOrdineController::class, 'aggiornaRiga']);

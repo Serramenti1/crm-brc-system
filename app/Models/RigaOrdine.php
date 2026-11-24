@@ -19,6 +19,8 @@ class RigaOrdine extends Model
         'co_ricevuta',
         'in_produzione',
         'merce_arrivata',
+        'merce_parziale',
+        'note_merce',
         'pdf_path',
         'modalita_calcolo',
         'prezzo_listino',

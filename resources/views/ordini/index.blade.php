@@ -206,6 +206,17 @@
                         </div>
                     @elseif($ordine->stato == 'attesa_saldo_merce')
                         Attesa saldo merce
+
+                        @php
+                            $righeMancanti = $ordine->righe->where('merce_parziale', 1)->count();
+                        @endphp
+
+                        @if($righeMancanti > 0)
+                            <br>
+                            <small style="color:#fd7e14; font-weight:bold;">
+                                ⚠ Manca merce ({{ $righeMancanti }} {{ $righeMancanti == 1 ? 'riga' : 'righe' }})
+                            </small>
+                        @endif
                     @elseif($ordine->stato == 'programmare_posa')
                         Programmare posa
                     @elseif($ordine->stato == 'concluso')

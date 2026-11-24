@@ -433,8 +433,32 @@
                     {{ $riga->quantita }}
                     <br>
 
-                    Bene significativo:
+                                        Bene significativo:
                     {{ $riga->bene_significativo ? 'Sì' : 'No' }}
+
+                    @if($riga->merce_parziale && $ordine->stato == 'attesa_saldo_merce')
+                        <div style="margin-top:8px; padding:8px; border:1px solid #fd7e14; border-radius:6px; background:#fff7ed;">
+
+                            <strong style="color:#fd7e14;">⚠ Manca merce</strong>
+
+                            @if($riga->note_merce)
+                                <br>
+                                {{ $riga->note_merce }}
+                            @endif
+
+                            <form method="POST"
+                                  action="/righe-ordine/{{ $riga->id }}/mancanza-risolta"
+                                  style="margin-top:6px;">
+                                @csrf
+                                <label>
+                                    <input type="checkbox"
+                                           onchange="if(confirm('Segnare questa mancanza come arrivata?')){ this.form.submit(); } else { this.checked = false; }">
+                                    Mancanza arrivata
+                                </label>
+                            </form>
+
+                        </div>
+                    @endif
 
                 </td>
 
@@ -1066,6 +1090,8 @@
 
         @csrf
 
+                <input type="hidden" name="gestione_merce" value="1">
+
         <label>
             <input type="checkbox"
                    class="chk-merce"
@@ -1075,6 +1101,29 @@
 
             Merce arrivata
         </label>
+
+        <br>
+
+                <label id="label_parziale_{{ $riga->id }}"
+               style="{{ $riga->merce_parziale ? 'color:#fd7e14; font-weight:bold;' : '' }}">
+            <input type="checkbox"
+                   name="merce_parziale"
+                   value="1"
+                   onchange="toggleNoteMerce({{ $riga->id }}, this)"
+                   {{ $riga->merce_parziale ? 'checked' : '' }}>
+
+            Parziale / mancanze
+        </label>
+
+        <div id="note_merce_box_{{ $riga->id }}"
+             style="{{ $riga->merce_parziale ? '' : 'display:none;' }} margin-top:6px;">
+            <input type="text"
+                   name="note_merce"
+                   value="{{ $riga->note_merce }}"
+                   placeholder="Es. manca la maniglia"
+                   maxlength="255"
+                   style="width:230px;">
+        </div>
 
         <br><br>
 
@@ -2217,6 +2266,23 @@ function compilaServizioExtraOrdine(rigaId){
 function apriModificaServizioOrdine(id){
     document.getElementById('edit_servizio_ordine_' + id).style.display = 'block';
     compilaModificaServizioOrdine(id);
+}
+
+function toggleNoteMerce(rigaId, checkbox){
+
+    let box = document.getElementById('note_merce_box_' + rigaId);
+    let label = document.getElementById('label_parziale_' + rigaId);
+
+    if(checkbox.checked){
+        box.style.display = 'block';
+        label.style.color = '#fd7e14';
+        label.style.fontWeight = 'bold';
+        box.querySelector('input').focus();
+    } else {
+        box.style.display = 'none';
+        label.style.color = '';
+        label.style.fontWeight = '';
+    }
 }
 
 function compilaModificaServizioOrdine(servizioId){

@@ -285,10 +285,17 @@ foreach ($riga->servizi as $servizio) {
             }
         }
 
-        if ($ordine->stato == 'completo_attesa_merce') {
+                if ($ordine->stato == 'completo_attesa_merce') {
             $primaMerceArrivata = $riga->merce_arrivata;
 
             $riga->merce_arrivata = $request->has('merce_arrivata') ? 1 : 0;
+
+            if ($request->has('gestione_merce')) {
+                $riga->merce_parziale = $request->has('merce_parziale') ? 1 : 0;
+                                $riga->note_merce = ($riga->merce_parziale && $request->filled('note_merce'))
+                    ? mb_substr(trim($request->note_merce), 0, 255)
+                    : null;
+            }
 
             if (!$primaMerceArrivata && $riga->merce_arrivata) {
                 $ultimoTipo = 'merce_arrivata';
@@ -1073,6 +1080,24 @@ public function toggleRichiestoSal($id)
 
     return redirect()->back()
         ->with('success', 'Flag richiesto SAL aggiornato.');
+}
+
+public function risolviMancanza($id)
+{
+    $riga = RigaOrdine::findOrFail($id);
+    $ordine = Ordine::findOrFail($riga->ordine_id);
+
+    if ($ordine->stato != 'attesa_saldo_merce') {
+        return redirect('/ordini/' . $ordine->id)
+            ->with('error', 'La mancanza si gestisce solo in Saldo a merce pronta.');
+    }
+
+    $riga->merce_parziale = 0;
+    $riga->note_merce = null;
+    $riga->save();
+
+    return redirect('/ordini/' . $ordine->id)
+        ->with('success', 'Mancanza segnata come arrivata.');
 }
 
 }
