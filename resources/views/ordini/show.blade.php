@@ -1489,13 +1489,10 @@
 
                     <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc; border-radius:6px; background:#f9fafb;">
                         <div style="color:{{ $ric['prodotto_ok'] ? '#28a745' : '#dc3545' }}; font-weight:bold;">
-                            Prodotto: {{ number_format($ric['somma_prodotto'],2,',','.') }} € (riga: {{ number_format($riga->totale_cliente,2,',','.') }} €)
+                            Prodotto + trasporto: {{ number_format($ric['somma_prodotto'],2,',','.') }} € (riga: {{ number_format($riga->totale_cliente,2,',','.') }} €)
                             {{ $ric['prodotto_ok'] ? '✓' : '✗' }}
                         </div>
-                        <div style="color:{{ $ric['trasporto_ok'] ? '#28a745' : '#dc3545' }}; font-weight:bold;">
-                            Trasporto: {{ number_format($ric['somma_trasporto'],2,',','.') }} € (servizio: {{ number_format($ric['servizio_trasporto'],2,',','.') }} €)
-                            {{ $ric['trasporto_ok'] ? '✓' : '✗' }}
-                        </div>
+                        
                         <div style="color:{{ $ric['posa_ok'] ? '#28a745' : '#dc3545' }}; font-weight:bold;">
                             Posa: {{ number_format($ric['somma_posa'],2,',','.') }} € (servizio: {{ number_format($ric['servizio_posa'],2,',','.') }} €)
                             {{ $ric['posa_ok'] ? '✓' : '✗' }}

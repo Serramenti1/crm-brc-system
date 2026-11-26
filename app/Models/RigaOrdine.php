@@ -60,46 +60,34 @@ public function dettagli()
 public function riconciliazioneDettaglio(): array
 {
     $sommaProdotto = 0;
-    $sommaTrasporto = 0;
     $sommaPosa = 0;
 
     foreach ($this->dettagli as $d) {
         $pezzi = (float) $d->pezzi;
 
-        $sommaProdotto += $d->nettoClienteProdottoUnitario() * $pezzi;
-        $sommaTrasporto += $d->trasportoClienteUnitario() * $pezzi;
+        // Prodotto + trasporto (con ricarico): il trasporto e' confluito nel prezzo della riga
+        $sommaProdotto += ($d->nettoClienteProdottoUnitario() + $d->trasportoClienteUnitario()) * $pezzi;
         $sommaPosa += (float) $d->posa * $pezzi;
     }
 
-    $servizioTrasporto = 0;
     $servizioPosa = 0;
 
     foreach ($this->servizi as $s) {
-        $importo = (float) $s->prezzo_cliente * (float) $this->quantita;
-
-        if (stripos($s->tipo_servizio, 'trasporto') !== false) {
-            $servizioTrasporto += $importo;
-        }
-
         if (stripos($s->tipo_servizio, 'posa') !== false) {
-            $servizioPosa += $importo;
+            $servizioPosa += (float) $s->prezzo_cliente * (float) $this->quantita;
         }
     }
 
     $prodottoOk = abs($sommaProdotto - (float) $this->totale_cliente) < 0.01;
-    $trasportoOk = abs($sommaTrasporto - $servizioTrasporto) < 0.01;
     $posaOk = abs($sommaPosa - $servizioPosa) < 0.01;
 
     return [
         'somma_prodotto' => $sommaProdotto,
-        'somma_trasporto' => $sommaTrasporto,
         'somma_posa' => $sommaPosa,
-        'servizio_trasporto' => $servizioTrasporto,
         'servizio_posa' => $servizioPosa,
         'prodotto_ok' => $prodottoOk,
-        'trasporto_ok' => $trasportoOk,
         'posa_ok' => $posaOk,
-        'tutto_ok' => $prodottoOk && $trasportoOk && $posaOk,
+        'tutto_ok' => $prodottoOk && $posaOk,
     ];
 }
 }
