@@ -14,7 +14,7 @@ class RigaDettaglioOrdine extends Model
         'posizione',
         'descrizione',
         'pezzi',
-        'costo_listino',
+        'netto_brc',
         'sconto_1',
         'sconto_2',
         'sconto_3',
@@ -28,30 +28,66 @@ class RigaDettaglioOrdine extends Model
         return $this->belongsTo(RigaOrdine::class, 'riga_ordine_id');
     }
 
-    public function nettoBrc()
+    public function fattoreSconti(): float
     {
-        $fattoreSconto = (1 - ($this->sconto_1 / 100)) * (1 - ($this->sconto_2 / 100)) * (1 - ($this->sconto_3 / 100));
-        return (float) $this->costo_listino * $fattoreSconto;
+        return (1 - $this->sconto_1 / 100)
+            * (1 - $this->sconto_2 / 100)
+            * (1 - $this->sconto_3 / 100);
     }
 
-    public function nettoClienteUnitario()
+    // Listino di partenza del prodotto (unitario), ricostruito dal netto
+    public function listinoProdotto(): float
     {
-        return $this->nettoBrc() * (1 + ($this->ricarico_percentuale / 100)) + (float) $this->trasporto + (float) $this->posa;
+        $fattore = $this->fattoreSconti();
+
+        return $fattore > 0 ? (float) $this->netto_brc / $fattore : 0;
     }
 
-    public function nettoClienteTotale()
+        // Listino di partenza del trasporto (unitario), ricostruito con gli stessi sconti del prodotto
+    public function listinoTrasporto(): float
     {
-        return $this->nettoClienteUnitario() * (float) $this->pezzi;
+        $fattore = $this->fattoreSconti();
+
+        return $fattore > 0 ? (float) $this->trasporto / $fattore : 0;
     }
 
-    public function scontoApplicato()
+    // Totale listino unitario: listino prodotto + listino trasporto
+    public function totaleListinoUnitario(): float
     {
-        if ((float) $this->costo_listino <= 0) {
+        return $this->listinoProdotto() + $this->listinoTrasporto();
+    }
+
+    public function nettoClienteProdottoUnitario(): float
+    {
+        return (float) $this->netto_brc * (1 + $this->ricarico_percentuale / 100);
+    }
+
+    public function trasportoClienteUnitario(): float
+    {
+        return (float) $this->trasporto * (1 + $this->ricarico_percentuale / 100);
+    }
+
+    // Totale riga a cliente: (prodotto + trasporto con ricarico + posa) x pezzi
+    public function nettoClienteTotale(): float
+    {
+        $unitario = $this->nettoClienteProdottoUnitario()
+            + $this->trasportoClienteUnitario()
+            + (float) $this->posa;
+
+        return $unitario * (float) $this->pezzi;
+    }
+
+    // Sconto sul totale listino (trasporto incluso), posa esclusa
+    public function scontoApplicato(): float
+    {
+        $totaleListino = $this->totaleListinoUnitario();
+
+        if ($totaleListino <= 0) {
             return 0;
         }
 
-        $nettoClienteProdotto = $this->nettoBrc() * (1 + ($this->ricarico_percentuale / 100));
+        $nettoCliente = $this->nettoClienteProdottoUnitario() + $this->trasportoClienteUnitario();
 
-        return (($this->costo_listino - $nettoClienteProdotto) / $this->costo_listino) * 100;
+        return (($totaleListino - $nettoCliente) / $totaleListino) * 100;
     }
 }

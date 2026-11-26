@@ -525,48 +525,10 @@
 </button>
 
 @php
-    $coloreBottoneDettaglio = '#60a5fa'; // azzurro default: nessuna tabella
+    $coloreBottoneDettaglio = '#60a5fa'; // azzurro: nessuna tabella
 
     if ($riga->dettagli->isNotEmpty()) {
-
-        $sommaProdottoBtn = 0;
-        $sommaTrasportoBtn = 0;
-        $sommaPosaBtn = 0;
-
-        foreach ($riga->dettagli as $d) {
-            $nettoBrcUnitBtn = (float) $d->costo_listino
-                * (1 - $d->sconto_1 / 100)
-                * (1 - $d->sconto_2 / 100)
-                * (1 - $d->sconto_3 / 100);
-
-            $nettoClienteProdottoUnitBtn = $nettoBrcUnitBtn * (1 + $d->ricarico_percentuale / 100);
-
-            $sommaProdottoBtn += $nettoClienteProdottoUnitBtn * (float) $d->pezzi;
-            $sommaTrasportoBtn += (float) $d->trasporto * (float) $d->pezzi;
-            $sommaPosaBtn += (float) $d->posa * (float) $d->pezzi;
-        }
-
-        $totaleTrasportoServizioBtn = 0;
-        $totalePosaServizioBtn = 0;
-
-        foreach ($riga->servizi as $s) {
-            $importoServizioBtn = (float) $s->prezzo_cliente * (float) $riga->quantita;
-
-            if (stripos($s->tipo_servizio, 'trasporto') !== false) {
-                $totaleTrasportoServizioBtn += $importoServizioBtn;
-            }
-
-            if (stripos($s->tipo_servizio, 'posa') !== false) {
-                $totalePosaServizioBtn += $importoServizioBtn;
-            }
-        }
-
-        $tuttoOkBtn =
-            abs($sommaProdottoBtn - (float) $riga->totale_cliente) < 0.01 &&
-            abs($sommaTrasportoBtn - $totaleTrasportoServizioBtn) < 0.01 &&
-            abs($sommaPosaBtn - $totalePosaServizioBtn) < 0.01;
-
-        $coloreBottoneDettaglio = $tuttoOkBtn ? '#28a745' : '#dc3545';
+        $coloreBottoneDettaglio = $riga->riconciliazioneDettaglio()['tutto_ok'] ? '#28a745' : '#dc3545';
     }
 @endphp
 
@@ -1521,95 +1483,62 @@
 
                 @else
 
-                    @php
-                        $sommaProdotto = 0;
-                        $sommaTrasporto = 0;
-                        $sommaPosa = 0;
-
-                        foreach ($riga->dettagli as $d) {
-                            $nettoBrcUnit = (float) $d->costo_listino
-                                * (1 - $d->sconto_1 / 100)
-                                * (1 - $d->sconto_2 / 100)
-                                * (1 - $d->sconto_3 / 100);
-
-                            $nettoClienteProdottoUnit = $nettoBrcUnit * (1 + $d->ricarico_percentuale / 100);
-
-                            $sommaProdotto += $nettoClienteProdottoUnit * (float) $d->pezzi;
-                            $sommaTrasporto += (float) $d->trasporto * (float) $d->pezzi;
-                            $sommaPosa += (float) $d->posa * (float) $d->pezzi;
-                        }
-
-                        $totaleTrasportoServizio = 0;
-                        $totalePosaServizio = 0;
-
-                        foreach ($riga->servizi as $s) {
-                            $importoServizio = (float) $s->prezzo_cliente * (float) $riga->quantita;
-
-                            if (stripos($s->tipo_servizio, 'trasporto') !== false) {
-                                $totaleTrasportoServizio += $importoServizio;
-                            }
-
-                            if (stripos($s->tipo_servizio, 'posa') !== false) {
-                                $totalePosaServizio += $importoServizio;
-                            }
-                        }
-
-                        $prodottoOk = abs($sommaProdotto - (float) $riga->totale_cliente) < 0.01;
-                        $trasportoOk = abs($sommaTrasporto - $totaleTrasportoServizio) < 0.01;
-                        $posaOk = abs($sommaPosa - $totalePosaServizio) < 0.01;
+                                        @php
+                        $ric = $riga->riconciliazioneDettaglio();
                     @endphp
 
                     <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc; border-radius:6px; background:#f9fafb;">
-                        <div style="color:{{ $prodottoOk ? '#28a745' : '#dc3545' }}; font-weight:bold;">
-                            Prodotto: {{ number_format($sommaProdotto,2,',','.') }} € (riga: {{ number_format($riga->totale_cliente,2,',','.') }} €)
-                            {{ $prodottoOk ? '✓' : '✗' }}
+                        <div style="color:{{ $ric['prodotto_ok'] ? '#28a745' : '#dc3545' }}; font-weight:bold;">
+                            Prodotto: {{ number_format($ric['somma_prodotto'],2,',','.') }} € (riga: {{ number_format($riga->totale_cliente,2,',','.') }} €)
+                            {{ $ric['prodotto_ok'] ? '✓' : '✗' }}
                         </div>
-                        <div style="color:{{ $trasportoOk ? '#28a745' : '#dc3545' }}; font-weight:bold;">
-                            Trasporto: {{ number_format($sommaTrasporto,2,',','.') }} € (servizio: {{ number_format($totaleTrasportoServizio,2,',','.') }} €)
-                            {{ $trasportoOk ? '✓' : '✗' }}
+                        <div style="color:{{ $ric['trasporto_ok'] ? '#28a745' : '#dc3545' }}; font-weight:bold;">
+                            Trasporto: {{ number_format($ric['somma_trasporto'],2,',','.') }} € (servizio: {{ number_format($ric['servizio_trasporto'],2,',','.') }} €)
+                            {{ $ric['trasporto_ok'] ? '✓' : '✗' }}
                         </div>
-                        <div style="color:{{ $posaOk ? '#28a745' : '#dc3545' }}; font-weight:bold;">
-                            Posa: {{ number_format($sommaPosa,2,',','.') }} € (servizio: {{ number_format($totalePosaServizio,2,',','.') }} €)
-                            {{ $posaOk ? '✓' : '✗' }}
+                        <div style="color:{{ $ric['posa_ok'] ? '#28a745' : '#dc3545' }}; font-weight:bold;">
+                            Posa: {{ number_format($ric['somma_posa'],2,',','.') }} € (servizio: {{ number_format($ric['servizio_posa'],2,',','.') }} €)
+                            {{ $ric['posa_ok'] ? '✓' : '✗' }}
                         </div>
                     </div>
 
                     <div style="overflow-x:auto;">
                     <table class="tabella-lista">
-                        <tr>
+                                                <tr>
                             <th>N</th>
                             <th>Posizione</th>
                             <th>Descrizione</th>
                             <th>Pezzi</th>
-                            <th>Costo listino</th>
+                            <th>Netto BRC</th>
                             <th>Sc1%</th>
                             <th>Sc2%</th>
                             <th>Sc3%</th>
-                            <th>Netto BRC</th>
+                            <th>Listino prod.</th>
                             <th>Trasporto</th>
+                            <th>Totale listino</th>
                             <th>Posa</th>
                             <th>Ricarico%</th>
                             <th>Netto a cliente</th>
                             <th>Sc app.%</th>
                             <th>Azioni</th>
                         </tr>
-
-                        @foreach($riga->dettagli as $d)
+                                                @foreach($riga->dettagli as $d)
 <tr>
     <td>{{ $d->numero_progressivo }}</td>
     <td><input type="text" name="posizione" value="{{ $d->posizione }}" form="form_dettaglio_{{ $d->id }}" style="width:80px;"></td>
     <td><input type="text" name="descrizione" value="{{ $d->descrizione }}" form="form_dettaglio_{{ $d->id }}" style="width:120px;"></td>
     <td><input type="number" name="pezzi" value="{{ (float)$d->pezzi != 0 ? $d->pezzi : '' }}" step="1" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
-    <td><input type="number" name="costo_listino" value="{{ (float)$d->costo_listino != 0 ? $d->costo_listino : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:90px;"></td>
+    <td><input type="number" name="netto_brc" value="{{ (float)$d->netto_brc != 0 ? $d->netto_brc : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:90px;"></td>
     <td><input type="number" name="sconto_1" value="{{ (float)$d->sconto_1 != 0 ? $d->sconto_1 : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
     <td><input type="number" name="sconto_2" value="{{ (float)$d->sconto_2 != 0 ? $d->sconto_2 : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
     <td><input type="number" name="sconto_3" value="{{ (float)$d->sconto_3 != 0 ? $d->sconto_3 : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:60px;"></td>
-    <td>{{ number_format($d->nettoBrc(),2,',','.') }} €</td>
+    <td>{{ number_format($d->listinoProdotto() * (float)$d->pezzi, 2, ',', '.') }} €</td>
     <td><input type="number" name="trasporto" value="{{ (float)$d->trasporto != 0 ? $d->trasporto : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:80px;"></td>
+    <td>{{ number_format($d->totaleListinoUnitario() * (float)$d->pezzi, 2, ',', '.') }} €</td>
     <td><input type="number" name="posa" value="{{ (float)$d->posa != 0 ? $d->posa : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:80px;"></td>
     <td><input type="number" name="ricarico_percentuale" value="{{ (float)$d->ricarico_percentuale != 0 ? $d->ricarico_percentuale : '' }}" step="0.01" form="form_dettaglio_{{ $d->id }}" style="width:70px;"></td>
-    <td>{{ number_format($d->nettoClienteTotale(),2,',','.') }} €</td>
-    <td>{{ number_format($d->scontoApplicato(),2,',','.') }}%</td>
+    <td>{{ number_format($d->nettoClienteTotale(), 2, ',', '.') }} €</td>
+    <td>{{ number_format($d->scontoApplicato(), 2, ',', '.') }}%</td>
     <td>
         <button type="submit" form="form_dettaglio_{{ $d->id }}" class="btn btn-azione">Salva</button>
         <form method="POST" action="/righe-dettaglio-ordine/{{ $d->id }}" style="display:inline;">
